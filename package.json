@@ -1,0 +1,15 @@
+{
+  "name": "shanyin-music-class",
+  "version": "1.0.0",
+  "private": true,
+  "description": "声入山野 · AI 乡村音乐课堂：教师备课、AI 听唱测量、课堂报告",
+  "scripts": {
+    "start": "node server/server.cjs",
+    "test": "node --test \"tests/*.test.cjs\"",
+    "build:lesson": "node scripts/build-lesson.cjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

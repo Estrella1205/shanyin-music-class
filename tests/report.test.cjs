@@ -1,0 +1,67 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path'),crypto=require('node:crypto');
+const {fixture}=require('./test-fixtures.cjs');
+const {buildReport}=require('../server/report-builder.cjs');
+const defaults={song:'茉莉花',grade:'四年级',students:28,duration:40,level:'初学者',equipment:'无钢琴'};
+const req={...defaults,query:'茉莉花 初学 节奏 模唱',summary:'初学班，使用身体律动'};
+const plan={summary:'先听后唱，以教师观察检查稳定节奏',activities:[5,7,5,10,6,5,2].map((min,i)=>({title:'活动'+i,min,teacher:'播放参考并示范',student:'轻声模唱',goal:'稳定节奏',evidence:'能连续保持8拍',tool:'reference',sourceIds:['score','practice']}))};
+const headers={'Content-Type':'application/json','X-Shengru-Client':'local-web'};
+const tick=ms=>new Promise(r=>setTimeout(r,ms));
+async function startServer(t,{agentAdapter}={}){const dir=fs.mkdtempSync(path.join(os.tmpdir(),'sr-report-'));const server=require('../server/auth-server.cjs').createApp({dataDir:dir,agentAdapter});await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(async()=>{await new Promise(r=>server.close(r));fs.rmSync(dir,{recursive:true,force:true})});return {base:'http://127.0.0.1:'+server.address().port,dir}}
+async function register(base,username,extra={}){const res=await fetch(base+'/api/register',{method:'POST',headers,body:JSON.stringify({username,password:'local-test-1234',name:'测试老师',...extra})});assert.equal(res.status,200);return res.headers.get('set-cookie').split(';')[0]}
+const withCookie=cookie=>({...headers,Cookie:cookie});
+async function getJson(url,cookie){const res=await fetch(url,{headers:cookie?{Cookie:cookie}:undefined});return {status:res.status,data:await res.json()}}
+async function waitStatus(base,cookie,id,want,ms=3000){const until=Date.now()+ms;let task;do{task=(await getJson(base+'/api/agent/tasks/'+id,cookie)).data;if(task.status===want)return task;await tick(15)}while(Date.now()<until);return task}
+// Report aggregation must count invalid takes without letting them into any average.
+test('report only averages valid takes and keeps every number traceable',()=>{const record=(valid,cents,extra={})=>({id:crypto.randomUUID(),owner:'alice',createdAt:extra.createdAt||'2026-09-12T01:00:00.000Z',source:'microphone',context:'single',sha256:'a'.repeat(64),practiceRequests:[],analysis:{valid,version:'audio-1.0.0',confidence:.8,lessonId:'molihua',lessonVersion:'1.0.0',reference:{key:'C',meter:'4/4',bpm:80},quality:{rmsDb:-20,clippingRatio:0,durationSeconds:6,seconds:6},invalidReasons:valid?[]:['环境噪声过大，无法可靠提取基频'],pitch:valid?{meanAbsoluteCents:Math.abs(cents),medianSignedCents:cents}:null,rhythm:valid?{estimatedBpm:80,direction:'接近参考',meanOnsetErrorSeconds:.05,tempoRatio:1}:null,notes:valid?[0,1,2,3,4,5,6,7,8,9,10].map(i=>({index:i+1,measure:i<8?1:2,beat:(i%4)+1,expectedMidi:64+i,measuredMidi:64+i,cents,direction:cents>35?'偏高':cents<-35?'偏低':'阈值内',confidence:.8,onsetErrorSeconds:.05,startSeconds:.3+i*.5})):[],decision:{action:valid?'slow':'rerecord',title:valid?'慢速模唱':'重新录音',reason:'测试'},...extra.analysis}});
+ const report=buildReport('alice',[record(true,-60,{createdAt:'2026-09-12T01:00:00.000Z'}),record(false,0,{createdAt:'2026-09-12T02:00:00.000Z'}),record(true,10,{createdAt:'2026-09-12T03:00:00.000Z'}),{...record(true,999),owner:'bob'}]);
+ assert.equal(report.sample.attempts,3);assert.equal(report.sample.valid,2);assert.equal(report.sample.invalid,1);
+ assert.equal(report.notes.length,11);assert.equal(report.notes[0].sampleSize,2);
+ assert.equal(report.notes[0].meanCents,-25);assert.equal(report.notes[0].meanAbsoluteCents,35);assert.equal(report.notes[0].meanMeasuredMidi,64);
+ assert.equal(report.metrics.meanAbsoluteCents,35);assert.equal(report.metrics.estimatedBpm,80);
+ assert.equal(report.attempts.length,3);assert.equal(report.attempts.filter(a=>!a.valid).length,1);
+ assert.equal(report.decisions.find(d=>d.action==='slow').count,2);assert.equal(report.decisions.find(d=>d.action==='rerecord').count,1);
+ assert.equal(report.declarations.length,4);assert.match(report.declarations[2],/有效样本 2 份/);assert.ok(report.lesson.source.url.includes('http'));
+ assert.deepEqual(buildReport('alice',[]).sample,{attempts:0,valid:0,invalid:0,contexts:[],firstAt:null,lastAt:null,withRetest:0});
+ assert.equal(buildReport('alice',[]).metrics.meanAbsoluteCents,null);
+ assert.deepEqual(buildReport('alice',[]).notes.map(n=>n.sampleSize),new Array(11).fill(0));
+});
+test('report overview exposes real measurements with sample sizes and honest declarations',async t=>{const {base}=await startServer(t);assert.equal((await getJson(base+'/api/reports/overview')).status,401);const cookie=await register(base,'report_test');const empty=(await getJson(base+'/api/reports/overview',cookie)).data;assert.equal(empty.sample.attempts,0);assert.equal(empty.kind,'real-measurement-sample');
+ const upload=async data=>{const res=await fetch(base+'/api/audio/attempts',{method:'POST',headers:withCookie(cookie),body:JSON.stringify(data)});assert.equal(res.status,201);return res.json()};
+ const first=await upload({audio:fixture({cents:-100}).toString('base64'),context:'single'});
+ assert.equal(first.analysis.valid,true,JSON.stringify(first.analysis.invalidReasons));
+ const second=await upload({audio:fixture().toString('base64'),context:'single',previousId:first.id});
+ await upload({audio:fixture({silence:true}).toString('base64'),context:'single'});
+ const {data:report}=await getJson(base+'/api/reports/overview',cookie);
+ assert.equal(report.sample.attempts,3);assert.equal(report.sample.valid,2);assert.equal(report.sample.invalid,1);
+ assert.equal(report.sample.withRetest,1);assert.deepEqual(report.sample.contexts,['single']);
+ assert.equal(report.notes[0].sampleSize,2);assert.ok(report.notes.some(n=>n.sampleSize===2));
+ assert.equal(report.improving.comparable,1);assert.equal(report.improving.improved,1);
+ assert.equal(report.attempts.find(a=>!a.valid).invalidReasons.length>=1,true);
+ assert.equal(report.attempts.find(a=>a.id===second.id).previousId,first.id);
+ assert.equal(report.attempts.every(a=>a.sha256.length===16),true);
+ assert.equal(report.lesson.title,'茉莉花');assert.equal(report.lesson.events,11);assert.equal(report.lesson.audioProvenance.length>0,true);
+ assert.equal(report.declarations.length,4);assert.match(report.declarations.join(),/不能据此推断/);
+ assert.equal((await getJson(base+'/api/reports/overview',(await register(base,'report_other')))).data.sample.attempts,0);
+});
+test('agent tasks can be cancelled mid-flight and retried as an independent task',async t=>{let release;const gate=new Promise(r=>{release=r});
+ const adapter={configured:true,model:'test-only',async generate(name){await gate;return name==='teaching_requirements'?req:plan}};
+ const {base}=await startServer(t,{agentAdapter:adapter});
+ const alice=await register(base,'agent_cancel'),bob=await register(base,'agent_bob');
+ const start=await fetch(base+'/api/agent/tasks',{method:'POST',headers:withCookie(alice),body:JSON.stringify({request:'茉莉花',defaults})});
+ assert.equal(start.status,202);const taskId=(await start.json()).id;
+ assert.equal((await getJson(base+'/api/agent/tasks/'+taskId,alice)).data.status,'running');
+ assert.equal((await fetch(base+'/api/agent/tasks/'+taskId+'/retry',{method:'POST',headers:withCookie(alice),body:'{}'})).status,429);
+ assert.equal((await fetch(base+'/api/agent/tasks/'+taskId+'/cancel',{method:'POST',headers:withCookie(bob),body:'{}'})).status,404);
+ const cancelled=await (await fetch(base+'/api/agent/tasks/'+taskId+'/cancel',{method:'POST',headers:withCookie(alice),body:'{}'})).json();
+ assert.equal(cancelled.status,'cancelled');assert.equal(cancelled.error,'AGENT_CANCELLED');assert.equal(cancelled.result,null);
+ assert.equal(cancelled.events.some(e=>e.status==='cancelled'),true);
+ release();
+ const retried=await (await fetch(base+'/api/agent/tasks/'+taskId+'/retry',{method:'POST',headers:withCookie(alice),body:'{}'})).json();
+ assert.notEqual(retried.id,taskId);assert.equal(retried.retryOf,taskId);
+ const finished=await waitStatus(base,alice,retried.id,'completed');
+ assert.equal(finished.events.length,7);assert.equal(finished.result.plan.length,7);assert.equal(finished.result.lessonId,'molihua-opening-v1');
+ await tick(60);
+ const stillCancelled=(await getJson(base+'/api/agent/tasks/'+taskId,alice)).data;
+ assert.equal(stillCancelled.status,'cancelled');assert.equal(stillCancelled.result,null);
+ assert.equal((await fetch(base+'/api/agent/tasks/'+crypto.randomUUID()+'/cancel',{method:'POST',headers:withCookie(alice),body:'{}'})).status,404);
+});

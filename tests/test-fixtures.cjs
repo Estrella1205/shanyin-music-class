@@ -1,0 +1,4 @@
+// Independent fixture: manually transcribed sequence, not the production reference generator.
+const {encodeWav}=require('../server/audio-analysis.cjs');
+function fixture({cents=0,speed=1,local=false,noise=false,silence=false}={}){const midi=[64,64,67,69,72,72,69,67,67,69,67],beats=[1,.5,.5,.5,.5,.5,.5,1,.5,.5,2],sr=16000,x=new Float32Array(Math.ceil((.3+6/speed+.3)*sr));let t=.3,seed=123;for(let k=0;k<midi.length;k++){const dur=beats[k]*.75/speed,f=440*2**((midi[k]-69)/12)*2**((local?(k===4?cents:0):cents)/1200);for(let i=0;i<dur*.90*sr;i++){const dt=i/sr,env=Math.min(1,dt/.01,(dur*.9-dt)/.01);x[Math.floor(t*sr)+i]=.25*env*(Math.sin(2*Math.PI*f*dt)+.2*Math.sin(4*Math.PI*f*dt))}t+=dur}if(noise)for(let i=0;i<x.length;i++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;x[i]=(seed/4294967296-.5)*.4}if(silence)x.fill(0);return encodeWav(x)}
+module.exports={fixture};

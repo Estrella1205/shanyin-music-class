@@ -1,0 +1,98 @@
+{
+  "lessonId": "molihua-opening-v1",
+  "version": "1.0.0",
+  "minutes": 40,
+  "students": 28,
+  "grouping": "分为4组，分组轮流模唱；录音时每次只选1人。",
+  "equipmentStrategy": "电子音参考 + 拍手计拍 + 轻声模唱",
+  "language": "结合简谱高低与半拍、两拍时值进行模唱。",
+  "objectives": [
+    {
+      "id": "pulse",
+      "text": "用四拍循环拍手，保持8拍的稳定节拍",
+      "evidence": "教师观察四拍循环是否连续，不以示例分数判定"
+    },
+    {
+      "id": "pitch",
+      "text": "辨认并模唱E4到C5的上行与返回，注意第5、6音为重复高音",
+      "evidence": "对照11个参考音符逐音检查，自动检测在后续任务实现"
+    },
+    {
+      "id": "duration",
+      "text": "唱清半拍音与最后持续两拍的G4",
+      "evidence": "教师按拍数核对长短关系"
+    }
+  ],
+  "plan": [
+    {
+      "id": "warmup",
+      "title": "01 · 声音热身",
+      "desc": "轻声模仿自然声音，做舒适音区的呼应。",
+      "min": 5,
+      "teacher": "轻声模仿自然声音，做舒适音区的呼应。",
+      "student": "听到老师提示后轻声模仿。",
+      "goal": "pulse",
+      "lessonId": "molihua-opening-v1"
+    },
+    {
+      "id": "pulse",
+      "title": "02 · 四拍律动",
+      "desc": "按1强、2弱、3次强、4弱循环示范，随后保持稳定8拍。 用拍手区分强弱循环。",
+      "min": 7,
+      "teacher": "按1强、2弱、3次强、4弱循环示范，随后保持稳定8拍。",
+      "student": "以拍手和轻拍膝盖表示四拍循环。",
+      "goal": "pulse",
+      "lessonId": "molihua-opening-v1"
+    },
+    {
+      "id": "reference",
+      "title": "03 · 聆听两小节",
+      "desc": "播放C调80 BPM电子音参考，指出两个相邻C5是两次发音。电子音参考 + 拍手计拍 + 轻声模唱。",
+      "min": 5,
+      "teacher": "播放C调80 BPM电子音参考，指出两个相邻C5是两次发音。",
+      "student": "不急着唱，用手势跟随旋律高低。",
+      "goal": "pitch",
+      "lessonId": "molihua-opening-v1"
+    },
+    {
+      "id": "imitate",
+      "title": "04 · 分句模唱",
+      "desc": "先用60 BPM逐小节模唱，再连接两小节。分为4组，分组轮流模唱；录音时每次只选1人。结合简谱高低与半拍、两拍时值进行模唱。",
+      "min": 10,
+      "teacher": "先用60 BPM逐小节模唱，再连接两小节。",
+      "student": "用啦模唱11个音，末音保持两拍。",
+      "goal": "pitch",
+      "lessonId": "molihua-opening-v1"
+    },
+    {
+      "id": "observe",
+      "title": "05 · 录音与观察",
+      "desc": "选择单人短乐句录音，回听长短与高低；本版无自动评分。",
+      "min": 6,
+      "teacher": "选择单人短乐句录音，回听长短与高低；本版无自动评分。",
+      "student": "演唱两小节，其他孩子安静聆听。",
+      "goal": "duration",
+      "lessonId": "molihua-opening-v1"
+    },
+    {
+      "id": "practice",
+      "title": "06 · 针对性练习",
+      "desc": "按实际回听选择阶梯音或四拍律动；自动决策仍为示例。",
+      "min": 5,
+      "teacher": "按实际回听选择阶梯音或四拍律动；自动决策仍为示例。",
+      "student": "先修正一个问题，再唱原短句。",
+      "goal": "pitch",
+      "lessonId": "molihua-opening-v1"
+    },
+    {
+      "id": "summary",
+      "title": "07 · 课堂小结",
+      "desc": "请孩子说出重复高音和末音两拍两个观察点。",
+      "min": 2,
+      "teacher": "请孩子说出重复高音和末音两拍两个观察点。",
+      "student": "描述今天听到的变化，不把示例分数当成学习结果。",
+      "goal": "duration",
+      "lessonId": "molihua-opening-v1"
+    }
+  ]
+}

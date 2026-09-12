@@ -1,3 +1,11 @@
 .sites-runtime/
 *.tar.gz
 node_modules/
+.local-data/
+test-results/
+research/
+.openai/
+_shots/
+.env
+.env.*
+!.env.example
