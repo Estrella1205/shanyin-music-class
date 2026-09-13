@@ -1,0 +1,68 @@
+{
+  "id": "bio-lijinhui",
+  "title": "黎锦晖 · 给孩子写歌的人",
+  "subtitle": "中国儿童歌舞剧的开创者，也是《小兔子乖乖》词曲的作者",
+  "kind": "composer",
+  "tags": ["儿童歌舞剧", "湖南湘潭", "中文儿歌"],
+  "linkedLessonIds": ["xiaotuzi"],
+  "summary": "黎锦晖是把「给孩子写的歌舞剧」当成一件正经事来做的第一代中国音乐人。他写下的《老虎叫门》，后来以《小兔子乖乖》的名字传遍课堂，成了好几代孩子的第一首歌。",
+  "sources": ["src-eol-zh-music"],
+  "verifiedBy": null,
+  "verifiedAt": null,
+  "reviewNote": "生卒、籍贯、首演年份等均需人工到《中国大百科全书》条目页逐字核对之后，才可用于对外材料。",
+  "facts": [
+    {
+      "id": "f1",
+      "text": "黎锦晖生于 1891 年，湖南湘潭人，1967 年去世。",
+      "cite": ["src-eol-zh-music"],
+      "confidence": "medium",
+      "detail": "生卒年与籍贯在几种常见资料里写法一致，但本记录尚未逐字核对权威条目。"
+    },
+    {
+      "id": "f2",
+      "text": "他创作了中国最早的一批儿童歌舞剧，其中《麻雀与小孩》1921 年首演。",
+      "cite": ["src-eol-zh-music"],
+      "confidence": "medium"
+    },
+    {
+      "id": "f3",
+      "text": "儿童歌舞剧《小小画家》由他编剧并作曲，1927 年在上海首演。",
+      "cite": ["src-eol-zh-music"],
+      "confidence": "medium"
+    },
+    {
+      "id": "f4",
+      "text": "《小兔子乖乖》的曲调出自他 1920 年写的儿童歌曲《老虎叫门》。",
+      "cite": ["src-xiaotuzi-lijinhui-1920"],
+      "confidence": "high",
+      "detail": "创作年份与曲名变体登记在 knowledge/sources/xiaotuzi-lijinhui-1920.source.json。"
+    },
+    {
+      "id": "f5",
+      "text": "这首歌的词和曲都出自他一人之手，保护期早已届满，今天可以放心在课堂上唱、也可以自由记谱。",
+      "cite": ["src-xiaotuzi-lijinhui-1920"],
+      "confidence": "high",
+      "detail": "保护期由 server/licensing.cjs 依「作者逝世年份 + 50 年」自动推导，不由来源自称。"
+    }
+  ],
+  "activities": [
+    {
+      "id": "a1",
+      "text": "先听一遍《小兔子乖乖》的参考音频，再问孩子：这首歌里是在讲谁跟谁说话？",
+      "minutes": 5,
+      "cite": ["src-xiaotuzi-lijinhui-1920"]
+    },
+    {
+      "id": "a2",
+      "text": "让孩子用拍手或拍腿跟着歌里的问答节奏对一遍，再说说哪一句是妈妈唱的、哪一句是小兔子唱的。",
+      "minutes": 6,
+      "cite": ["src-xiaotuzi-lijinhui-1920"]
+    },
+    {
+      "id": "a3",
+      "text": "告诉孩子：写这首歌的人叫黎锦晖，他专门给小朋友写歌、写歌舞剧 —— 一百年前的孩子也是唱着它长大的。",
+      "minutes": 3,
+      "cite": ["src-eol-zh-music", "src-xiaotuzi-lijinhui-1920"]
+    }
+  ]
+}

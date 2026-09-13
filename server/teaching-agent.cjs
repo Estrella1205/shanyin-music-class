@@ -1,10 +1,13 @@
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const lesson=require('../public/lessons/molihua.lesson.json');
+const coaching=require('./coaching.cjs');
+const {buildReport}=require('./report-builder.cjs');
 const str={type:'string',minLength:1,maxLength:1000};
 const obj=properties=>({type:'object',properties,required:Object.keys(properties),additionalProperties:false});
 const requirements=obj({song:{type:'string',enum:['茉莉花','不支持']},grade:str,students:{type:'integer',minimum:1,maximum:80},duration:{type:'integer',minimum:10,maximum:90},level:{type:'string',enum:['初学者','有一定基础']},equipment:{type:'string',enum:['无钢琴','有钢琴']},query:str,summary:str});
 const activity=obj({title:str,min:{type:'integer',minimum:1,maximum:90},teacher:str,student:str,goal:str,evidence:str,tool:{type:'string',enum:['reference','slow-reference','countin','metronome','teacher-observation']},sourceIds:{type:'array',items:{type:'string',enum:['score','practice']},minItems:1,maxItems:2}});
 const planSchema=obj({summary:str,activities:{type:'array',items:activity,minItems:7,maxItems:7}});
+const coachingFeedbackSchema=obj({summary:str,teacherLine:str,studentLine:str});
 function validate(schema,value,at='output'){
  if(schema.type==='object'){if(!value||typeof value!=='object'||Array.isArray(value))throw Error(at+' 对象格式错误');for(const k of schema.required)if(!Object.hasOwn(value,k))throw Error(at+'.'+k+' 缺失');for(const k of Object.keys(value)){if(!schema.properties[k])throw Error(at+' 包含未知字段');validate(schema.properties[k],value[k],at+'.'+k)}}
  else if(schema.type==='array'){if(!Array.isArray(value)||value.length<schema.minItems||value.length>schema.maxItems)throw Error(at+' 数量错误');value.forEach((v,i)=>validate(schema.items,v,at+'.'+i))}
@@ -26,7 +29,7 @@ function modelAdapter(env=process.env,fetcher=fetch){
 }
 const corpus=[{id:'score',title:'已校对的茉莉花开头两小节',kind:'谱源转录',source:lesson.source,content:{teaching:lesson.teaching,events:lesson.events,audio:lesson.audio}},{id:'practice',title:'本项目基础音乐课堂活动规则',kind:'项目教学规则，未经教师试教审定',content:{objectives:lesson.objectives,constraints:lesson.constraints,activities:lesson.activities}}];
 function retrieve(query){const terms=query.match(/茉莉花|节奏|音高|模唱|钢琴|初学|四拍|活动/g)||[];return corpus.map(d=>({...d,score:terms.reduce((n,t)=>n+(JSON.stringify(d).includes(t)?1:0),0)})).sort((a,b)=>b.score-a.score)}
-function createAgent({dataDir,adapter=modelAdapter()}={}){
+function createAgent({dataDir,adapter=modelAdapter(),store=null}={}){
  const dir=path.join(dataDir,'agent-tasks');fs.mkdirSync(dir,{recursive:true});const running=new Map(),cancelled=new Set();
  const save=t=>{t.updatedAt=new Date().toISOString();const file=path.join(dir,t.id+'.json');fs.writeFileSync(file+'.tmp',JSON.stringify(t,null,2),{mode:0o600});fs.renameSync(file+'.tmp',file)};
  for(const f of fs.readdirSync(dir).filter(f=>f.endsWith('.json'))){const t=JSON.parse(fs.readFileSync(path.join(dir,f),'utf8'));if(t.status==='running'){t.status='failed';t.error='服务重启，任务已中断，请重新生成';save(t)}}
@@ -41,9 +44,39 @@ function createAgent({dataDir,adapter=modelAdapter()}={}){
   }catch(e){if(e.message==='AGENT_CANCELLED'||cancelled.has(t.id)){if(t.status!=='cancelled'){t.status='cancelled';t.error='AGENT_CANCELLED';t.result=null;event('任务终止','agent','cancelled',{code:'AGENT_CANCELLED'})}}else{t.status='failed';t.error=/^(MODEL_|PLAN_)/.test(e.message)?e.message:'AGENT_VALIDATION_FAILED';event('任务终止','agent','failed',{code:t.error})}}
   finally{cancelled.delete(t.id);if(running.get(t.owner)===t.id)running.delete(t.owner)}
  }
+ const settle2=t=>{cancelled.delete(t.id);if(running.get(t.owner)===t.id)running.delete(t.owner)};
+ function settle(t,e,event){if(e.message==='AGENT_CANCELLED'||cancelled.has(t.id)){if(t.status!=='cancelled'){t.status='cancelled';t.error='AGENT_CANCELLED';t.result=null;event('任务终止','agent','cancelled',{code:'AGENT_CANCELLED'})}}else{const known=(/^(MODEL_|PLAN_)/.test(e.message)||['ATTEMPT_NOT_FOUND','ATTEMPT_NOT_ANALYZED','AGENT_VALIDATION_FAILED'].includes(e.message));t.status='failed';t.error=known?e.message:'AGENT_VALIDATION_FAILED';event('任务终止','agent','failed',{code:t.error,message:e.message})}cancelled.delete(t.id);if(running.get(t.owner)===t.id)running.delete(t.owner)}
+ async function runCoaching(t){
+  const event=(stage,tool,status,result)=>{t.events.push({time:new Date().toISOString(),stage,tool,status,result});save(t)};const active=()=>{if(cancelled.has(t.id))throw Error('AGENT_CANCELLED')};
+  try{
+   event('读取录音测量','analyze_singing','running',{attemptId:t.input.attemptId});
+   const attempt=store?store.get(t.input.attemptId,t.owner):null;if(!attempt)throw Error('ATTEMPT_NOT_FOUND');if(!attempt.analysis)throw Error('ATTEMPT_NOT_ANALYZED');const a=attempt.analysis;active();
+   event('读取录音测量','analyze_singing','completed',{attemptId:attempt.id,valid:a.valid,invalidReasons:a.invalidReasons||[],meanAbsoluteCents:a.pitch?a.pitch.meanAbsoluteCents:null,tempoRatio:a.rhythm?a.rhythm.tempoRatio:null,noteCount:(a.notes||[]).length});
+   const history=(store.list(t.owner)||[]).filter(x=>x.id!==attempt.id&&x.analysis).slice(0,3).map(x=>({analysis:x.analysis}));
+   const bundle=coaching.buildCoaching({analysis:a,history});active();
+   event('问题诊断','diagnose','completed',{ruleVersion:bundle.diagnosis.ruleVersion,primary:bundle.diagnosis.primary,confidence:bundle.diagnosis.confidence,basedOn:bundle.diagnosis.basedOn,problemTypes:bundle.diagnosis.problemTypes.map(p=>({id:p.id,label:p.label,evidence:p.evidence}))});
+   event('选择训练','choose_training','completed',{strategy:bundle.training.strategy.id,title:bundle.training.strategy.title,minutes:bundle.training.strategy.minutes,steps:bundle.training.strategy.steps,reason:bundle.training.reason});
+   let feedback=bundle.feedback,source='rules';
+   if(adapter.configured){try{const out=await adapter.generate('coaching_feedback',coachingFeedbackSchema,{diagnosis:bundle.diagnosis,training:bundle.training,instruction:'只复述测量结论与训练步骤；不得推断气息、心理状态或唱法原因；不得承诺效果。'});active();validate(coachingFeedbackSchema,out);feedback={...feedback,...out};source='model'}catch(e){if(e.message==='AGENT_CANCELLED')throw e;feedback={...feedback,modelSkipped:e.message}}}
+   event('生成反馈','generate_feedback','completed',{source,text:feedback});active();
+   t.result={kind:'coaching',lessonId:lesson.id,attemptId:attempt.id,ruleVersion:bundle.ruleVersion,diagnosis:bundle.diagnosis,training:bundle.training,feedback,feedbackSource:source};t.status='completed';save(t);
+  }catch(e){settle(t,e,event)}finally{settle2(t)}
+ }
+ async function runClassReport(t){
+  const event=(stage,tool,status,result)=>{t.events.push({time:new Date().toISOString(),stage,tool,status,result});save(t)};
+  try{
+   event('汇总课堂数据','generate_class_report','running',null);
+   const attempts=store?store.list(t.owner):[];const summary=coaching.summarizeClass(attempts);const report=buildReport(t.owner,attempts);
+   event('汇总课堂数据','generate_class_report','completed',{attempts:attempts.length,valid:report.sample.valid,invalid:report.sample.invalid,meanAbsoluteCents:report.metrics.meanAbsoluteCents,note:summary.note});
+   t.result={kind:'class-report',lessonId:lesson.id,summary,sample:report.sample,metrics:report.metrics};t.status='completed';save(t);
+  }catch(e){settle(t,e,event)}finally{settle2(t)}
+ }
+ const baseTask=(owner,kind,input)=>({id:crypto.randomUUID(),owner,kind,status:'running',createdAt:new Date().toISOString(),model:adapter.model,input,events:[],result:null,retryOf:null});
  return {get,list,configured:adapter.configured,
-  start(owner,input,extra={}){if(!adapter.configured)throw Error('MODEL_NOT_CONFIGURED');if(running.has(owner)||running.size>=3)throw Error('AGENT_BUSY');if(typeof input.request!=='string'||!input.request.trim()||input.request.length>2000)throw Error('INVALID_REQUEST');const d=input.defaults;if(!d||d.song!=='茉莉花'||/小雨沙沙|两只老虎/.test(input.request))throw Error('UNSUPPORTED_LESSON');validate(requirements,{...d,query:'茉莉花',summary:'课堂条件'});const t={id:crypto.randomUUID(),owner,status:'running',createdAt:new Date().toISOString(),model:adapter.model,input:{request:input.request,defaults:d},events:[],result:null,retryOf:extra.retryOf||null};running.set(owner,t.id);save(t);void run(t);return t},
-  cancel(id,owner){const t=get(id,owner);if(!t)return null;if(t.status!=='running')return t;cancelled.add(t.id);t.status='cancelled';t.error='AGENT_CANCELLED';t.result=null;t.events.push({time:new Date().toISOString(),stage:'任务取消',tool:'agent',status:'cancelled',result:{summary:'已停止推进；已发出的模型请求可能仍会返回，但其结果被忽略。'}});save(t);if(running.get(owner)===t.id)running.delete(owner);return t},
-  retry(id,owner){const t=get(id,owner);if(!t)return null;if(t.status==='running')throw Error('AGENT_BUSY');return this.start(owner,{request:t.input.request,defaults:t.input.defaults},{retryOf:t.id})}};
+  start(owner,input,extra={}){if(!adapter.configured)throw Error('MODEL_NOT_CONFIGURED');if(running.has(owner)||running.size>=3)throw Error('AGENT_BUSY');if(typeof input.request!=='string'||!input.request.trim()||input.request.length>2000)throw Error('INVALID_REQUEST');const d=input.defaults;if(!d||d.song!=='茉莉花'||/小雨沙沙|两只老虎/.test(input.request))throw Error('UNSUPPORTED_LESSON');validate(requirements,{...d,query:'茉莉花',summary:'课堂条件'});const t={...baseTask(owner,'plan',{request:input.request,defaults:d}),retryOf:extra.retryOf||null};running.set(owner,t.id);save(t);void run(t);return t},
+  startCoaching(owner,input={},extra={}){if(!store)throw Error('STORE_UNAVAILABLE');if(running.has(owner)||running.size>=3)throw Error('AGENT_BUSY');const attemptId=input.attemptId;if(typeof attemptId!=='string'||!/^[a-f0-9-]{36}$/.test(attemptId))throw Error('INVALID_REQUEST');if(!store.get(attemptId,owner))throw Error('ATTEMPT_NOT_FOUND');const t={...baseTask(owner,'coaching',{attemptId}),retryOf:extra.retryOf||null};running.set(owner,t.id);save(t);void runCoaching(t);return t},
+ startClassReport(owner,_input={},extra={}){if(!store)throw Error('STORE_UNAVAILABLE');if(running.has(owner)||running.size>=3)throw Error('AGENT_BUSY');const t={...baseTask(owner,'class-report',{}),retryOf:extra.retryOf||null};running.set(owner,t.id);save(t);void runClassReport(t);return t},
+ cancel(id,owner){const t=get(id,owner);if(!t)return null;if(t.status!=='running')return t;cancelled.add(t.id);t.status='cancelled';t.error='AGENT_CANCELLED';t.result=null;t.events.push({time:new Date().toISOString(),stage:'任务取消',tool:'agent',status:'cancelled',result:{summary:'已停止推进；已发出的模型请求可能仍会返回，但其结果被忽略。'}});save(t);if(running.get(owner)===t.id)running.delete(owner);return t},
+  retry(id,owner){const t=get(id,owner);if(!t)return null;if(t.status==='running')throw Error('AGENT_BUSY');if(t.kind==='coaching')return this.startCoaching(owner,{attemptId:t.input.attemptId},{retryOf:t.id});if(t.kind==='class-report')return this.startClassReport(owner,{},{retryOf:t.id});return this.start(owner,{request:t.input.request,defaults:t.input.defaults},{retryOf:t.id})}};
 }
 module.exports={createAgent,modelAdapter,validate,requirements,planSchema,retrieve};

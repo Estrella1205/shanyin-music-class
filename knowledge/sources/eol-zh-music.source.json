@@ -1,0 +1,30 @@
+{
+  "id": "src-eol-zh-music",
+  "kind": "biography-reference",
+  "sourceType": "encyclopedia",
+  "title": "《中国大百科全书》第三版网络版（音乐舞蹈学科）",
+  "work": {
+    "title": "《中国大百科全书》第三版网络版「黎锦晖」条目",
+    "variant": "检索入口为中国百科网（zgbk.com）；本记录只登记条目定位，不复制、不分发其正文",
+    "creators": [
+      { "role": "publisher", "name": "中国大百科全书出版社有限公司", "deathDate": null }
+    ],
+    "creatorsNote": "法人作品，保护期按「首次发表后 50 年」计。本记录按 link-only 处理、不复制原文，因此不依赖该推导。"
+  },
+  "url": "https://www.zgbk.com/",
+  "retrievedAt": "2026-09-13",
+  "sha256": null,
+  "sha256Note": "百科条目为动态页面，不做内容哈希；本记录只保留检索入口与条目定位。",
+  "locator": { "location": "在中国百科网检索「黎锦晖」，条目页链接需人工补登到本记录" },
+  "license": {
+    "type": "link-only",
+    "url": "https://www.zgbk.com/",
+    "note": "仅登记条目定位与链接，不分发原文；课件中引用时只出现条目标题与链接。"
+  },
+  "verifiedBy": null,
+  "verifiedAt": null,
+  "caveats": [
+    "条目页链接尚未补登，需人工检索后填入 url。",
+    "本记录未逐字核对条目正文，因此引用它的课件一律带「待人工核对」标记。"
+  ]
+}

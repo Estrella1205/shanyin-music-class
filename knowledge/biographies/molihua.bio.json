@@ -1,0 +1,61 @@
+{
+  "id": "bio-molihua",
+  "title": "《茉莉花》 · 一首民歌走过的路",
+  "subtitle": "它不是一个人写出来的，是几百年里被各地的人唱出来的",
+  "kind": "folk-song",
+  "tags": ["民歌", "曲牌", "鲜花调", "江苏"],
+  "linkedLessonIds": ["molihua"],
+  "summary": "《茉莉花》没有唯一的作者。它从一支叫《鲜花调》的曲牌里长出来，一路被人用各地方言唱、按各地口味改，所以才会有好几个互不相同的版本。这恰恰是民歌的样子：每唱一次，它就活一次。",
+  "sources": ["src-guoxue-molihua-qupai"],
+  "verifiedBy": null,
+  "verifiedAt": null,
+  "reviewNote": "《小慧集》《缀白裘》与西人记谱带回国这几处细节，需人工回溯原刊后逐条确认，再用于对外材料。",
+  "facts": [
+    {
+      "id": "f1",
+      "text": "《茉莉花》的前身是一支流传很久的曲牌《鲜花调》，在扬州一带的清曲舞台上常被演唱。",
+      "cite": ["src-guoxue-molihua-qupai"],
+      "confidence": "medium"
+    },
+    {
+      "id": "f2",
+      "text": "18 世纪末到 19 世纪初，这支曲调被来华的欧洲人记谱带回本国，1804 年出版的游记《中国旅行》里就收有它。",
+      "cite": ["src-guoxue-molihua-qupai"],
+      "confidence": "medium",
+      "detail": "作者译名与书名在各资料里有「巴罗／贝罗」「《中国旅行》／《中国旅行记》」两种写法，本记录不做取舍，留待人工核对原书。"
+    },
+    {
+      "id": "f3",
+      "text": "因为传唱的地方不同，《茉莉花》有江苏、河北、东北等好几个版本，旋律彼此都不一样。",
+      "cite": ["src-guoxue-molihua-qupai"],
+      "confidence": "medium"
+    },
+    {
+      "id": "f4",
+      "text": "今天课堂上常唱的那一版《茉莉花》，是后来有人专门到江苏一带采录、整理成谱的。",
+      "cite": ["src-guoxue-molihua-qupai"],
+      "confidence": "medium",
+      "detail": "采录者、年份与整理版本身份需人工核对；来源登记里对此按「同一首曲调的不同版本」分别处理。"
+    }
+  ],
+  "activities": [
+    {
+      "id": "a1",
+      "text": "先唱一遍课堂上学的那一版《茉莉花》，再问孩子：如果换个地方的人来唱，它会变成什么样？",
+      "minutes": 5,
+      "cite": ["src-guoxue-molihua-qupai"]
+    },
+    {
+      "id": "a2",
+      "text": "把同一句旋律用普通话唱一遍、再用本地方言念一遍词，让孩子听旋律和字音怎么互相迁就。",
+      "minutes": 7,
+      "cite": ["src-guoxue-molihua-qupai"]
+    },
+    {
+      "id": "a3",
+      "text": "告诉孩子：这首歌没有作者，是很多很多不知名的人一起唱出来的 —— 你们今天唱它，也就成了它的一部分。",
+      "minutes": 3,
+      "cite": ["src-guoxue-molihua-qupai"]
+    }
+  ]
+}

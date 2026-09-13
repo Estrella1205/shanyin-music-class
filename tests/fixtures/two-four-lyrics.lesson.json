@@ -1,0 +1,76 @@
+{
+  "$schema": "../../public/lessons/lesson.schema.json",
+  "id": "fixture-two-four-lyrics-v1",
+  "version": "1.0.0",
+  "title": "结构校验样本（2/4 · 带歌词）",
+  "variant": "非真实曲目",
+  "status": "structural-fixture",
+  "fixtureNote": "本文件是架构测试样本，用于校验 2/4 拍、歌词逐字对齐与一字多音的处理路径。旋律与文字均为占位内容，不指向任何真实曲目，不得作为教学素材使用。加入它的目的是：现有代码原来写死了 4/4、8 拍、11 音、2 小节，这些限制会让任何第二首歌都进不来。",
+  "source": {
+    "sourceType": "teacher-handwritten",
+    "sourceId": "src-fixture-structural",
+    "title": "声入山野结构校验样本",
+    "location": "tests/fixtures/two-four-lyrics.lesson.json",
+    "key": "C major",
+    "tonicMidi": 60,
+    "meter": [2, 4],
+    "rights": "占位样本，不含任何第三方词曲或录音。"
+  },
+  "teaching": {
+    "key": "C major",
+    "tonicMidi": 60,
+    "transposeSemitones": 0,
+    "meter": [2, 4],
+    "bpm": 88,
+    "slowBpm": 60,
+    "tuningA4Hz": 440,
+    "temperament": "12-TET",
+    "measures": 2,
+    "beats": 4,
+    "pitchRange": [60, 67],
+    "description": "2/4、两小节、共四拍。四个音节分布在八个音符上，其中四个音符为延续音节。"
+  },
+  "events": [
+    {"id":"n1","measure":1,"beat":0,"degree":1,"octave":0,"midi":60,"pitch":"C4","durationBeats":0.5,"slur":null,"lyric":{"lineId":"l1","index":0,"syllable":"山"}},
+    {"id":"n2","measure":1,"beat":0.5,"degree":2,"octave":0,"midi":62,"pitch":"D4","durationBeats":0.5,"slur":null,"lyric":{"lineId":"l1","index":0,"syllable":"山","melisma":true}},
+    {"id":"n3","measure":1,"beat":1,"degree":3,"octave":0,"midi":64,"pitch":"E4","durationBeats":0.5,"slur":null,"lyric":{"lineId":"l1","index":1,"syllable":"野"}},
+    {"id":"n4","measure":1,"beat":1.5,"degree":4,"octave":0,"midi":65,"pitch":"F4","durationBeats":0.5,"slur":null,"lyric":{"lineId":"l1","index":1,"syllable":"野","melisma":true}},
+    {"id":"n5","measure":2,"beat":2,"degree":5,"octave":0,"midi":67,"pitch":"G4","durationBeats":0.5,"slur":null,"lyric":{"lineId":"l1","index":2,"syllable":"有"}},
+    {"id":"n6","measure":2,"beat":2.5,"degree":4,"octave":0,"midi":65,"pitch":"F4","durationBeats":0.5,"slur":null,"lyric":{"lineId":"l1","index":3,"syllable":"声"}},
+    {"id":"n7","measure":2,"beat":3,"degree":3,"octave":0,"midi":64,"pitch":"E4","durationBeats":0.5,"slur":null,"lyric":{"lineId":"l1","index":3,"syllable":"声","melisma":true}},
+    {"id":"n8","measure":2,"beat":3.5,"degree":2,"octave":0,"midi":62,"pitch":"D4","durationBeats":0.5,"slur":null,"lyric":{"lineId":"l1","index":3,"syllable":"声","melisma":true}}
+  ],
+  "lyrics": {
+    "language": "zh-Hans",
+    "sourceId": "src-fixture-structural",
+    "lines": [
+      {"id":"l1","text":"山野有声","syllables":["山","野","有","声"]}
+    ]
+  },
+  "audio": {
+    "renderer": "none",
+    "sampleRate": 44100,
+    "channels": 1,
+    "bitDepth": 16,
+    "gateRatio": 0.92,
+    "tailSeconds": 0.25,
+    "reference": null,
+    "slow": null,
+    "countIn": null,
+    "provenance": "结构样本不生成音频，避免在 public/assets 中留下非真实曲目的参考音。"
+  },
+  "objectives": [
+    {"id":"pulse","text":"用两拍循环拍手，保持4拍的稳定节拍","evidence":"教师观察两拍循环是否连续，不以示例分数判定"},
+    {"id":"pitch","text":"辨认并模唱C4到G4的小幅上下行","evidence":"对照8个参考音符逐音检查，自动检测在后续任务实现"}
+  ],
+  "constraints": {"minMinutes":10,"maxMinutes":90,"minStudents":1,"maxStudents":80,"defaultMinutes":40,"defaultStudents":28,"defaultGrade":"一年级","smallGroupThreshold":24,"groupSize":7,"equipmentAlternatives":{"无钢琴":"结构样本电子音参考 + 拍手计拍 + 轻声模唱","有钢琴":"教师键盘示范同一C调短乐句 + 学生模唱"}},
+  "activities": [
+    {"id":"warmup","title":"声音热身","weight":5,"goal":"pulse","teacher":"轻声模仿自然声音，做舒适音区的呼应。","student":"听到老师提示后轻声模仿。"},
+    {"id":"pulse","title":"两拍律动","weight":7,"goal":"pulse","teacher":"按1强、2弱循环示范，随后保持稳定4拍。","student":"以拍手和轻拍膝盖表示两拍循环。"},
+    {"id":"reference","title":"聆听两小节","weight":5,"goal":"pitch","teacher":"播放结构样本参考，指出延续音节的拖长。","student":"不急着唱，用手势跟随旋律高低。"},
+    {"id":"imitate","title":"分句模唱","weight":10,"goal":"pitch","teacher":"先逐小节模唱，再连接两小节。","student":"模唱8个音，注意延续音节。"},
+    {"id":"observe","title":"录音与观察","weight":6,"goal":"pitch","teacher":"选择单人短乐句录音并回听；本版无自动评分。","student":"演唱两小节，其他孩子安静聆听。"},
+    {"id":"practice","title":"针对性练习","weight":5,"goal":"pitch","teacher":"按实际回听选择两拍律动或拖腔练习；自动决策仍为示例。","student":"先修正一个问题，再唱原短句。"},
+    {"id":"summary","title":"课堂小结","weight":2,"goal":"pulse","teacher":"请孩子说出延续音节和末音两个观察点。","student":"描述今天听到的变化，不把示例分数当成学习结果。"}
+  ]
+}

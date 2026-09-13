@@ -1,0 +1,30 @@
+{
+  "id": "src-jianpu-demo-sample",
+  "kind": "score",
+  "sourceType": "project-original",
+  "title": "山野简谱格式示例（本项目自撰的占位旋律，不对应任何真实曲目）",
+  "work": {
+    "title": "山野小练习",
+    "variant": "本项目为演示「两行对齐」录入格式而自撰的 8 拍走句（5 6 5 0 | 3 2 1 -）",
+    "creators": [
+      { "role": "music", "name": "本项目（声入山野）", "deathDate": null }
+    ],
+    "creatorsNote": "作者即本项目，故由本项目直接以 CC0 放弃权利；此处不适用「逝世年份 + 50 年」推导。"
+  },
+  "url": null,
+  "retrievedAt": "2026-09-13",
+  "sha256": null,
+  "sha256Note": "内容随示例保存在本仓库内，无需外部哈希。",
+  "locator": { "location": "docs/音乐资源与课件生成方案.md §4.2 示例" },
+  "license": {
+    "type": "cc0",
+    "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "note": "本项目自撰的格式示例旋律，以 CC0 1.0 放弃全部权利，可自由使用与改写。"
+  },
+  "verifiedBy": "人工核对：确认该旋律为本项目自撰，与任何真实曲目无对应关系",
+  "verifiedAt": "2026-09-13",
+  "caveats": [
+    "这 8 拍只为演示录入格式，不是教学曲目，不得作为课堂曲目收录。",
+    "它的作用是让老师在不涉及任何他人权利的前提下，把「手抄 → 课程安排」整条链路走通一遍。"
+  ]
+}

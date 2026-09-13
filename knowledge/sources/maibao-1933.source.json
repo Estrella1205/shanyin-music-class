@@ -1,0 +1,30 @@
+{
+  "id": "src-maibao-1933",
+  "kind": "score",
+  "sourceType": "public-domain-work",
+  "title": "卖报歌",
+  "work": {
+    "title": "卖报歌",
+    "creators": [
+      { "role": "lyric", "name": "安娥", "deathDate": "1976-08-18" },
+      { "role": "music", "name": "聂耳", "deathDate": "1935-07-17" }
+    ],
+    "creatorsNote": "典型的词曲保护期不同步案例：曲早已届满，词尚未届满。"
+  },
+  "url": null,
+  "retrievedAt": "2026-09-13",
+  "sha256": null,
+  "license": {
+    "type": "public-domain",
+    "url": null,
+    "note": "声明为公有领域以便闸门复核。曲作者聂耳 1935 年逝世，曲的权利已于 1985-12-31 届满；词作者安娥 1976-08-18 逝世，词的权利至 2026-12-31 届满。"
+  },
+  "status": "blocked",
+  "statusNote": "记录在案但不得使用。闸门当前判定为 link-only，须待 2027-01-01 起方可收录词曲正文。保留此条作为闸门行为的回归测试样本。",
+  "verifiedBy": "人工核对：安娥生卒 1905-10-11 至 1976-08-18；聂耳 1935 年逝世",
+  "verifiedAt": "2026-09-13",
+  "caveats": [
+    "本条目的存在目的不是待用曲目，而是证明「词曲保护期分别计算」这条规则确实被机器执行。",
+    "若未来收录，仍须自行记谱，不得使用任何第三方谱面与录音。"
+  ]
+}

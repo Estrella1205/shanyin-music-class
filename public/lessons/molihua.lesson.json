@@ -6,6 +6,8 @@
   "variant": "江苏民歌；按湖南艺术职业学院所载谱例开头两小节",
   "status": "score-checked-local-reference",
   "source": {
+    "sourceType": "pdf-excerpt",
+    "sourceId": "src-molihua-arthn-2021",
     "title": "湖南艺术职业学院2021级公共文化服务与管理专业技能考核标准及题库",
     "url": "https://jwc.arthn.com/__local/7/B3/83/3107CEF266DCC87041DDD41E5CA_A3C890B5_1DAFB6.pdf",
     "pdfPage": 30,

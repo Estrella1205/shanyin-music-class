@@ -1,0 +1,11 @@
+# 二进制资源不允许做行尾转换，避免 WAV/PNG 被当作文本改动
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.wav binary
+*.mp3 binary
+*.m4a binary
+*.webm binary
+*.pdf binary

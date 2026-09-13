@@ -55,7 +55,29 @@ function realSection(){
  <details><summary>查看逐音样本量与参考音高</summary><div class="reference-table-wrap"><table class="reference-table"><thead><tr><th>音符</th><th>小节 / 拍位</th><th>唱名</th><th>参考音高</th><th>参考频率</th><th>样本量</th><th>平均偏差</th><th>方向</th></tr></thead><tbody>${o.notes.map(n=>`<tr><td>${n.index}</td><td>${n.measure} / ${n.beat}</td><td>${esc(n.degree)}</td><td>${esc(n.pitch)}</td><td>${n.referenceHz} Hz</td><td>${n.sampleSize}</td><td>${num(n.meanCents)} 音分</td><td>${esc(n.direction||'—')}</td></tr>`).join('')}</tbody></table></div></details>`;
  const improving=o.improving?`<h3 style="margin-top:24px">复测前后比较</h3><div class="comparison-grid"><div><label>可比对复测</label><b>${o.improving.comparable} 组</b><small>两组录音均为有效测量</small></div><div><label>音高误差改善</label><b>${o.improving.improved} 组</b><small>没有进步也会照实记录</small></div><div><label>退步 / 无明显变化</label><b>${o.improving.regressed} / ${o.improving.unchanged}</b><small>按 5 音分容差判定</small></div></div>`:'';
  const rows=o.attempts.slice().reverse().map(a=>`<article class="panel report-row attempt-row"><div><h3>${stamp(a.createdAt)} <span class="badge ${a.valid?'real':'warn'}">${a.valid?'有效测量':'无效录音'}</span></h3><p>${a.valid?`平均绝对偏差 ${a.meanAbsoluteCents} 音分 · ${a.estimatedBpm} BPM · 起音误差 ${a.meanOnsetErrorSeconds} 秒 · 建议：${esc(a.decisionTitle||'—')}`:`不参与平均：${esc((a.invalidReasons||[]).join('；'))}`}</p><div class="attempt-meta"><code>${esc(a.source)}</code><code>${esc(a.context)}</code><code>SHA ${esc(a.sha256)}…</code>${a.practiceRequests?`<span class="muted">练习请求 ${a.practiceRequests} 次</span>`:''}${a.previousId?'<span class="muted">含复测</span>':''}</div></div><button class="btn secondary small" data-report-open="${a.id}">查看报告 ${icon('arrow')}</button></article>`).join('');
- return `<section class="panel">${head}${stats}${perNote}${improving}<h3 style="margin-top:24px">记录明细（新→旧）</h3><div class="report-list">${rows}</div>${declarationList(o)}</section>`;
+ return `<section class="panel">${head}${coachBlock()}${stats}${perNote}${improving}<h3 style="margin-top:24px">记录明细（新→旧）</h3><div class="report-list">${rows}</div>${declarationList(o)}</section>`;
+}
+let classTask={status:'idle',error:'',result:null};
+function classReportBody(){
+ if(classTask.status==='loading')return `<p>正在按真实测量汇总…</p><div class="progress-track"><div style="width:60%"></div></div>`;
+ if(classTask.status==='error')return `<div class="report-note"><b>汇总未完成</b><br>${esc(classTask.error)}</div><button class="btn secondary" data-rr="class">重新汇总</button>`;
+ if(classTask.status==='ready'){
+  const s=classTask.result.summary;
+  if(!s.sampleSize)return `<div class="report-note">${esc(s.note)}</div><button class="btn secondary" data-rr="class">重新汇总</button>`;
+  return `<div class="summary-box"><b>样本量 ${s.sampleSize} 次有效录音</b>${s.excluded?`（另有 ${s.excluded} 次无效录音，不计入平均）`:''}<br>平均绝对音高偏差：${num(s.meanAbsoluteCents)} 音分<br>平均速度比：${num(s.tempoRatio)}（1 为参考速度）</div><p class="fine-print">${esc(s.note)}</p><button class="btn secondary" data-rr="class">重新汇总</button>`;
+ }
+ return `<p class="fine-print">服务端按本账号已保存的有效录音汇总；没有录音时不会补造任何数字，未配置模型时同样可用。</p><button class="btn" data-rr="class">生成班级汇总</button>`;
+}
+function coachBlock(){return `<div class="coaching-box no-print"><h3>班级汇总（Agent）</h3><div data-coach-out>${classReportBody()}</div></div>`;}
+function startClassReport(){
+ if(classTask.status==='loading')return;
+ classTask={status:'loading',error:'',result:null};render();
+ const poll=(id,n)=>api('agent/tasks/'+id).then(t=>{
+  if(t.status==='running'&&n>0)return setTimeout(()=>poll(id,n-1),300);
+  classTask=t.status==='completed'&&t.result?{status:'ready',error:'',result:t.result}:{status:'error',error:agentErrorText(t.error||'AGENT_FAILED'),result:null};
+  if(state.route==='reports')render();
+ });
+ api('agent/class-report-tasks','POST',{}).then(k=>poll(k.id,20)).catch(e=>{classTask={status:'error',error:e.message||'汇总未完成',result:null};if(state.route==='reports')render()});
 }
 function declarationList(o){
  return `<div class="fine-print" style="margin-top:18px">${o.declarations.map(d=>`· ${esc(d)}`).join('<br>')}<br>· 谱源：<a href="${esc(o.lesson.source.url)}#page=${o.lesson.source.pdfPage}" target="_blank" rel="noopener">${esc(o.lesson.source.title)}</a>（PDF 第 ${o.lesson.source.pdfPage} 页 / 印刷页 ${esc(o.lesson.source.printedPage)}）<br>· 参考音频：${esc(o.lesson.audioProvenance)}</div>`;
@@ -125,13 +147,14 @@ document.addEventListener('click',e=>{
  if(open)return openMeasured(open);
  if(measured.id&&e.target.closest('[data-report],[data-action="sample-report"]')){measured={id:null,record:null,status:'idle',error:''};render();return}
  const rr=e.target.closest('[data-rr]')?.dataset.rr;
+ if(rr==='class')startClassReport();
  if(rr==='reload'){overview=null;overviewError='';overviewState='idle';ensureOverview();render()}
  if(rr==='print')printMeasured();
  if(rr==='text')downloadMeasuredText();
  if(rr==='json'&&measured.record){const url=URL.createObjectURL(new Blob([JSON.stringify(measured.record,null,2)],{type:'application/json'})),link=document.createElement('a');link.href=url;link.download='测量-'+measured.id+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 });
 render=function(){
- if(overviewOwner&&overviewOwner!==currentUser?.id){overview=null;overviewState='idle';overviewError='';overviewOwner=null;measured={id:null,record:null,status:'idle',error:''}}
+ if(overviewOwner&&overviewOwner!==currentUser?.id){overview=null;overviewState='idle';overviewError='';overviewOwner=null;measured={id:null,record:null,status:'idle',error:''};classTask={status:'idle',error:'',result:null}}
  reportsBaseRender();
 };
 render();

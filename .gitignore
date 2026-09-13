@@ -9,3 +9,8 @@ _shots/
 .env
 .env.*
 !.env.example
+dist/
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini

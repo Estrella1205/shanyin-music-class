@@ -2,7 +2,7 @@
 let currentUser=null,authReady=false,saveChain=Promise.resolve(),saveError=null,planStep=6,planRun=0;
 const guestSnapshot=JSON.parse(JSON.stringify(state));
 const freshState=()=>({route:'home',tab:'plan',grade:'四年级',students:28,duration:40,song:'茉莉花',level:'初学者',equipment:'无钢琴',request:'',plan:null,stage:0,analysis:null,attempt:0,records:[],workLog:[]});
-async function api(route,method='GET',data){const r=await fetch('/api/'+route,{method,credentials:'same-origin',headers:{'Content-Type':'application/json','X-Shengru-Client':'local-web'},...(data?{body:JSON.stringify(data)}:{})});let result;try{result=await r.json()}catch{throw Error('请使用本地服务打开页面，账号功能需要本地服务。')}if(!r.ok)throw Error(result.error||'操作未完成');return result}
+async function api(route,method='GET',data){const r=await fetch('/api/'+route,{method,credentials:'same-origin',headers:{'Content-Type':'application/json','X-Shengru-Client':'local-web'},...(data?{body:JSON.stringify(data)}:{})});let result;try{result=await r.json()}catch{throw Error('请使用本地服务打开页面，账号功能需要本地服务。')}if(!r.ok){const err=Error(result.error||'操作未完成');err.hint=result.hint||null;throw err}return result}
 window.accountStore=()=>{if(!authReady)return;if(!currentUser){localStorage.setItem('shanyin-demo',JSON.stringify({...state,route:'home'}));return}const data=JSON.parse(JSON.stringify({...state,route:'home'}));saveChain=saveChain.catch(()=>{}).then(()=>api('state','PUT',{state:data})).then(()=>{saveError=null}).catch(e=>{saveError=e;toast('课堂数据保存失败，请保持页面打开后重试。')})};
 async function flushAccount(){persist();await saveChain;if(saveError)throw saveError}
 const teacher=()=>currentUser?.name||'徐老师';

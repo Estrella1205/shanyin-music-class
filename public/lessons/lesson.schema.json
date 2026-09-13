@@ -1,17 +1,123 @@
 {
  "$schema":"https://json-schema.org/draft/2020-12/schema",
- "$id":"urn:shengru:lesson:v1",
+ "$id":"urn:shengru:lesson:v2",
  "title":"声入山野可验证音乐课对象",
  "type":"object",
  "required":["id","version","title","source","teaching","events","audio","objectives","constraints","activities"],
  "properties":{
-  "id":{"type":"string","minLength":1},"version":{"type":"string","pattern":"^[0-9]+\\.[0-9]+\\.[0-9]+$"},"title":{"type":"string"},
-  "source":{"type":"object","required":["title","url","pdfPage","location","key","tonicMidi","meter","rights"],"properties":{"url":{"type":"string","format":"uri"},"pdfPage":{"type":"integer","minimum":1},"tonicMidi":{"type":"integer","minimum":0,"maximum":127},"meter":{"type":"array","items":{"type":"integer"},"minItems":2,"maxItems":2}}},
-  "teaching":{"type":"object","required":["key","tonicMidi","transposeSemitones","meter","bpm","slowBpm","beats","measures","pitchRange"],"properties":{"bpm":{"type":"number","minimum":30,"maximum":240},"slowBpm":{"type":"number","minimum":30,"maximum":240},"beats":{"type":"number","exclusiveMinimum":0},"measures":{"type":"integer","minimum":1}}},
-  "events":{"type":"array","minItems":1,"items":{"type":"object","required":["id","measure","beat","degree","octave","midi","pitch","durationBeats"],"properties":{"id":{"type":"string"},"measure":{"type":"integer","minimum":1},"beat":{"type":"number","minimum":0},"degree":{"type":"integer","minimum":1,"maximum":7},"octave":{"type":"integer"},"midi":{"type":"integer","minimum":0,"maximum":127},"pitch":{"type":"string"},"durationBeats":{"type":"number","exclusiveMinimum":0}}}},
-  "audio":{"type":"object","required":["sampleRate","channels","bitDepth","reference","slow","countIn","gateRatio","provenance"],"properties":{"sampleRate":{"type":"integer","minimum":8000},"channels":{"const":1},"bitDepth":{"const":16},"gateRatio":{"type":"number","exclusiveMinimum":0,"maximum":1}}},
+  "id":{"type":"string","minLength":1},
+  "version":{"type":"string","pattern":"^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+  "title":{"type":"string"},
+  "variant":{"type":"string"},
+  "status":{"type":"string"},
+  "source":{
+   "type":"object",
+   "required":["sourceType","title","key","tonicMidi","meter"],
+   "properties":{
+    "sourceType":{"enum":["pdf-excerpt","public-domain-work","musicxml-import","jianpu-import","teacher-handwritten"]},
+    "sourceId":{"type":"string","minLength":1},
+    "title":{"type":"string"},
+    "url":{"type":"string","format":"uri"},
+    "pdfPage":{"type":"integer","minimum":1},
+    "printedPage":{"type":"string"},
+    "location":{"type":"string"},
+    "accessed":{"type":"string"},
+    "key":{"type":"string"},
+    "tonicMidi":{"type":"integer","minimum":0,"maximum":127},
+    "meter":{"type":"array","items":{"type":"integer"},"minItems":2,"maxItems":2},
+    "tempoText":{"type":"string"},
+    "rights":{"type":"string"}
+   },
+   "allOf":[
+    {"if":{"properties":{"sourceType":{"const":"pdf-excerpt"}},"required":["sourceType"]},"then":{"required":["pdfPage"]}}
+   ]
+  },
+  "teaching":{
+   "type":"object",
+   "required":["key","tonicMidi","transposeSemitones","meter","bpm","slowBpm","beats","measures","pitchRange"],
+   "properties":{
+    "key":{"type":"string"},
+    "tonicMidi":{"type":"integer","minimum":0,"maximum":127},
+    "transposeSemitones":{"type":"integer","minimum":-24,"maximum":24},
+    "meter":{"type":"array","items":{"type":"integer"},"minItems":2,"maxItems":2},
+    "bpm":{"type":"number","minimum":30,"maximum":240},
+    "slowBpm":{"type":"number","minimum":30,"maximum":240},
+    "beats":{"type":"number","exclusiveMinimum":0},
+    "measures":{"type":"integer","minimum":1},
+    "pitchRange":{"type":"array","items":{"type":"integer"},"minItems":2,"maxItems":2},
+    "description":{"type":"string"}
+   }
+  },
+  "events":{
+   "type":"array",
+   "minItems":1,
+   "items":{
+    "type":"object",
+    "required":["id","measure","beat","durationBeats"],
+    "properties":{
+     "id":{"type":"string"},
+     "measure":{"type":"integer","minimum":1},
+     "beat":{"type":"number","minimum":0},
+     "degree":{"type":["integer","null"],"minimum":1,"maximum":7},
+     "octave":{"type":["integer","null"]},
+     "midi":{"type":["integer","null"],"minimum":0,"maximum":127},
+     "pitch":{"type":["string","null"]},
+     "rest":{"type":"boolean","description":"true 表示休止：midi/pitch/degree/octave 必须为 null，且不计入音域"},
+     "durationBeats":{"type":"number","exclusiveMinimum":0},
+     "slur":{"type":["string","null"]},
+     "lyric":{"description":"单个音节对象；同一音符上叠多个音节（多字一音）时用数组","oneOf":[{"$ref":"#/$defs/syllable"},{"type":"array","minItems":1,"items":{"$ref":"#/$defs/syllable"}}]}
+    },
+    "allOf":[
+     {"if":{"properties":{"rest":{"const":true}},"required":["rest"]},
+      "else":{"required":["degree","octave","midi","pitch"]}}
+    ]
+   }
+  },
+  "lyrics":{
+   "type":"object",
+   "required":["language","sourceId","lines"],
+   "properties":{
+    "language":{"type":"string"},
+    "sourceId":{"type":"string","minLength":1,"description":"必须能解析到 knowledge/sources/ 中 redistribute 为 true 的记录"},
+    "lines":{
+     "type":"array",
+     "minItems":1,
+     "items":{
+      "type":"object",
+      "required":["id","text","syllables"],
+      "properties":{
+       "id":{"type":"string","minLength":1},
+       "text":{"type":"string"},
+       "syllables":{"type":"array","minItems":1,"items":{"type":"string","minLength":1}}
+      }
+     }
+    }
+   }
+  },
+  "audio":{
+   "type":"object",
+   "required":["sampleRate","channels","bitDepth","reference","slow","countIn","gateRatio","provenance"],
+   "properties":{
+    "sampleRate":{"type":"integer","minimum":8000},
+    "channels":{"const":1},
+    "bitDepth":{"const":16},
+    "gateRatio":{"type":"number","exclusiveMinimum":0,"maximum":1}
+   }
+  },
   "objectives":{"type":"array","minItems":1,"items":{"type":"object","required":["id","text","evidence"]}},
   "constraints":{"type":"object","required":["minMinutes","maxMinutes","minStudents","maxStudents","equipmentAlternatives"]},
   "activities":{"type":"array","minItems":1,"items":{"type":"object","required":["id","title","weight","goal","teacher","student"],"properties":{"weight":{"type":"number","exclusiveMinimum":0}}}}
+ },
+ "$defs":{
+  "syllable":{
+   "type":"object",
+   "required":["lineId","index","syllable"],
+   "properties":{
+    "lineId":{"type":"string","minLength":1},
+    "index":{"type":"integer","minimum":0},
+    "syllable":{"type":"string","minLength":1},
+    "melisma":{"type":"boolean","description":"true 表示本音符延续上一个音节（一字多音），不计作新音节；此时 index 与 syllable 必须与起始音符一致"}
+   }
+  }
  }
 }

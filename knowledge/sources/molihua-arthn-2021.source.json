@@ -1,0 +1,29 @@
+{
+  "id": "src-molihua-arthn-2021",
+  "kind": "score",
+  "sourceType": "pdf-excerpt",
+  "title": "湖南艺术职业学院2021级公共文化服务与管理专业技能考核标准及题库",
+  "work": {
+    "title": "茉莉花",
+    "variant": "江苏民歌；按该 PDF 所载谱例开头两小节",
+    "creators": [],
+    "creatorsNote": "曲调为世代流传的传统民歌，无特定作者，曲调本身不受著作权保护。此处登记的是本项目的谱例来源版本，该版本的记谱/排版仍属原机构。"
+  },
+  "url": "https://jwc.arthn.com/__local/7/B3/83/3107CEF266DCC87041DDD41E5CA_A3C890B5_1DAFB6.pdf",
+  "retrievedAt": "2026-09-12",
+  "sha256": null,
+  "sha256Note": "未下载原 PDF（避免再分发），因此无本地哈希。核对方式为人工比对指定页码。",
+  "locator": { "pdfPage": 30, "printedPage": "27", "location": "试题2-6《茉莉花》，第一行前两小节" },
+  "license": {
+    "type": "excerpt-only",
+    "url": null,
+    "note": "公开谱例，未标明开放许可证。原 PDF 不随本项目分发，仅转录所选短乐句供本地校验。"
+  },
+  "quotation": { "limitMeasures": 2, "usedMeasures": 2, "basis": "仅转录前两小节旋律，不复制谱面图像" },
+  "verifiedBy": "人工核对原 PDF 第30页（印刷页27）",
+  "verifiedAt": "2026-09-12",
+  "caveats": [
+    "80/60 BPM 为项目练习设置，不是谱源标注的数值。",
+    "未使用任何第三方录音，音频由本项目逐音合成。"
+  ]
+}

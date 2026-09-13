@@ -1,0 +1,30 @@
+{
+  "id": "src-guoxue-molihua-qupai",
+  "kind": "biography-reference",
+  "sourceType": "academic-article",
+  "title": "《明清俗曲〈茉莉花〉曲牌的流变》（国学网转载页）",
+  "work": {
+    "title": "明清俗曲《茉莉花》曲牌的流变",
+    "variant": "国学网（guoxue.com）转载页，用于了解《茉莉花》／《鲜花调》曲牌的流传脉络",
+    "creators": [
+      { "role": "article", "name": "转载页未标注作者", "deathDate": null }
+    ],
+    "creatorsNote": "原文作者与首发刊物需人工核对。本记录按 link-only 处理，只登记链接与标题，不复制正文。"
+  },
+  "url": "http://www.guoxue.com/wk/000439.htm",
+  "retrievedAt": "2026-09-13",
+  "sha256": null,
+  "sha256Note": "转载页面为动态页面，不做内容哈希。",
+  "locator": { "location": "文章页；正式引用前需回溯原刊出处、作者与页码" },
+  "license": {
+    "type": "link-only",
+    "url": "http://www.guoxue.com/wk/000439.htm",
+    "note": "只登记链接与标题，不分发正文；课件中引用时只出现文章标题与链接。"
+  },
+  "verifiedBy": null,
+  "verifiedAt": null,
+  "caveats": [
+    "这是转载页而不是原刊，作者、刊物、年份都还空着，对外使用前必须补齐。",
+    "18 世纪末至 19 世纪初西人记谱带回国这一段，不同资料的译者名与书名写法不一（巴罗／贝罗，《中国旅行》／《中国旅行记》），本记录不做取舍，留待人工核对。"
+  ]
+}
