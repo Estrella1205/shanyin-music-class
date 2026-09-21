@@ -35,18 +35,26 @@
     "description": "保留谱源音程和时值，移调降低音区；80/60 BPM为项目练习设置，不是谱源标注的数值。"
   },
   "events": [
-    {"id":"n01","measure":1,"beat":0,"degree":3,"octave":0,"midi":64,"pitch":"E4","durationBeats":1,"slur":null},
-    {"id":"n02","measure":1,"beat":1,"degree":3,"octave":0,"midi":64,"pitch":"E4","durationBeats":0.5,"slur":null},
-    {"id":"n03","measure":1,"beat":1.5,"degree":5,"octave":0,"midi":67,"pitch":"G4","durationBeats":0.5,"slur":null},
-    {"id":"n04","measure":1,"beat":2,"degree":6,"octave":0,"midi":69,"pitch":"A4","durationBeats":0.5,"slur":"s1"},
-    {"id":"n05","measure":1,"beat":2.5,"degree":1,"octave":1,"midi":72,"pitch":"C5","durationBeats":0.5,"slur":"s1"},
-    {"id":"n06","measure":1,"beat":3,"degree":1,"octave":1,"midi":72,"pitch":"C5","durationBeats":0.5,"slur":null},
-    {"id":"n07","measure":1,"beat":3.5,"degree":6,"octave":0,"midi":69,"pitch":"A4","durationBeats":0.5,"slur":null},
-    {"id":"n08","measure":2,"beat":4,"degree":5,"octave":0,"midi":67,"pitch":"G4","durationBeats":1,"slur":null},
-    {"id":"n09","measure":2,"beat":5,"degree":5,"octave":0,"midi":67,"pitch":"G4","durationBeats":0.5,"slur":"s2"},
-    {"id":"n10","measure":2,"beat":5.5,"degree":6,"octave":0,"midi":69,"pitch":"A4","durationBeats":0.5,"slur":"s2"},
-    {"id":"n11","measure":2,"beat":6,"degree":5,"octave":0,"midi":67,"pitch":"G4","durationBeats":2,"slur":null}
+    {"id":"n01","measure":1,"beat":0,"degree":3,"octave":0,"midi":64,"pitch":"E4","durationBeats":1,"slur":null,"lyric":{"lineId":"l1","index":0,"syllable":"好"}},
+    {"id":"n02","measure":1,"beat":1,"degree":3,"octave":0,"midi":64,"pitch":"E4","durationBeats":0.5,"slur":null,"lyric":{"lineId":"l1","index":1,"syllable":"一"}},
+    {"id":"n03","measure":1,"beat":1.5,"degree":5,"octave":0,"midi":67,"pitch":"G4","durationBeats":0.5,"slur":null,"lyric":{"lineId":"l1","index":2,"syllable":"朵"}},
+    {"id":"n04","measure":1,"beat":2,"degree":6,"octave":0,"midi":69,"pitch":"A4","durationBeats":0.5,"slur":"s1","lyric":{"lineId":"l1","index":3,"syllable":"美"}},
+    {"id":"n05","measure":1,"beat":2.5,"degree":1,"octave":1,"midi":72,"pitch":"C5","durationBeats":0.5,"slur":"s1","lyric":{"lineId":"l1","index":4,"syllable":"丽"}},
+    {"id":"n06","measure":1,"beat":3,"degree":1,"octave":1,"midi":72,"pitch":"C5","durationBeats":0.5,"slur":null,"lyric":{"lineId":"l1","index":5,"syllable":"的"}},
+    {"id":"n07","measure":1,"beat":3.5,"degree":6,"octave":0,"midi":69,"pitch":"A4","durationBeats":0.5,"slur":null,"lyric":{"lineId":"l1","index":6,"syllable":"茉"}},
+    {"id":"n08","measure":2,"beat":4,"degree":5,"octave":0,"midi":67,"pitch":"G4","durationBeats":1,"slur":null,"lyric":{"lineId":"l1","index":7,"syllable":"莉"}},
+    {"id":"n09","measure":2,"beat":5,"degree":5,"octave":0,"midi":67,"pitch":"G4","durationBeats":0.5,"slur":"s2","lyric":{"lineId":"l1","index":8,"syllable":"花"}},
+    {"id":"n10","measure":2,"beat":5.5,"degree":6,"octave":0,"midi":69,"pitch":"A4","durationBeats":0.5,"slur":"s2","lyric":{"lineId":"l1","index":8,"syllable":"花","melisma":true}},
+    {"id":"n11","measure":2,"beat":6,"degree":5,"octave":0,"midi":67,"pitch":"G4","durationBeats":2,"slur":null,"lyric":{"lineId":"l1","index":8,"syllable":"花","melisma":true}}
   ],
+  "lyrics": {
+    "language": "zh",
+    "sourceId": "src-molihua-arthn-2021",
+    "lines": [
+      {"id":"l1","text":"好一朵美丽的茉莉花","syllables":["好","一","朵","美","丽","的","茉","莉","花"]}
+    ],
+    "provenance": "唱词随旋律片段逐音引用（来源记录 quotation 范围内）；末字「花」按拖腔跨最后三个音演唱。"
+  },
   "audio": {
     "renderer": "additive-synthesis-v1",
     "sampleRate": 44100,
@@ -57,8 +65,10 @@
     "reference": "assets/audio/molihua-c-80.wav",
     "slow": "assets/audio/molihua-c-60.wav",
     "countIn": "assets/audio/molihua-c-80-countin.wav",
+    "vocal": "assets/audio/molihua-c-80-vocal.wav",
+    "vocalSlow": "assets/audio/molihua-c-60-vocal.wav",
     "countInBeats": 4,
-    "provenance": "由本JSON逐音合成；电子音参考，不是真人范唱，也不模拟民族唱腔与谱面表情。音符间留8%分离间隙便于辨音，乐谱时值不缩短。"
+    "provenance": "由本JSON逐音合成；电子音参考，不是真人范唱，也不模拟民族唱腔与谱面表情。带歌词示范用共振峰元音合成逐字唱出唱词（vocal-formant-v2：声母起音+复合元音滑动+轻微颤音），同样是合成音，不是真人演唱。音符间留8%分离间隙便于辨音，乐谱时值不缩短。"
   },
   "objectives": [
     {"id":"pulse","text":"用四拍循环拍手，保持8拍的稳定节拍","evidence":"教师观察四拍循环是否连续，不以示例分数判定"},

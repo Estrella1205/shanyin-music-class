@@ -2,6 +2,11 @@
 *.tar.gz
 node_modules/
 .local-data/
+# 课件成片渲染用的 ffmpeg 二进制（222MB，超过 GitHub 单文件 100MB 上限），
+# 需自行下载放进 tools/ffmpeg/，不入库。
+tools/
+*.exe
+*.dll
 test-results/
 research/
 .openai/

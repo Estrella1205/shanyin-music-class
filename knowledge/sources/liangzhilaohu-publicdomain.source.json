@@ -1,0 +1,33 @@
+{
+  "id": "src-liangzhilaohu-publicdomain",
+  "kind": "score",
+  "sourceType": "public-domain-folksong",
+  "title": "《两只老虎》（公版儿歌，旋律源自法国童谣《雅克兄弟》）",
+  "work": {
+    "title": "两只老虎",
+    "variant": "法国童谣《雅克兄弟》(Frère Jacques) 改编；公版儿歌",
+    "creators": [
+      { "role": "music", "name": "佚名（法国传统轮唱童谣《雅克兄弟》）", "deathDate": "1800-01-01" },
+      { "role": "lyric", "name": "佚名（通行公版中文填词）", "deathDate": "1900-01-01" }
+    ],
+    "creatorsNote": "旋律源自法国传统童谣《雅克兄弟》（Frère Jacques），18 世纪已广泛流传，原作者不可考；此处以 1800 年作为保守估计的逝世年份（远超 50 年保护期，可确证进入公有领域）。中文填词「两只老虎…真奇怪」为民国时期通行公版填词，填词人不可考，以 1900 年作为保守估计。"
+  },
+  "url": "https://zh.wikipedia.org/wiki/两只老虎",
+  "retrievedAt": "2026-09-20",
+  "sha256": null,
+  "sha256Note": "公版曲调与填词，无需下载原谱；本项目仅按通行版本转录短乐句供本地校验。",
+  "locator": { "location": "通行公版版本，C大调 4/4" },
+  "license": {
+    "type": "public-domain",
+    "url": null,
+    "note": "旋律与中文填词均属公有领域，可自由用于教学与分发；本项目音频由逐音合成，未使用任何第三方录音。"
+  },
+  "quotation": { "limitMeasures": 8, "usedMeasures": 8, "basis": "转录通行公版版本全曲 8 小节；唱词为公版填词逐音引用。" },
+  "verifiedBy": "人工核对通行公版版本",
+  "verifiedAt": "2026-09-20",
+  "caveats": [
+    "96/72 BPM 为项目练习设置，不是谱源标注数值。",
+    "未使用任何第三方录音，音频由本项目逐音合成。",
+    "八分音符成对出现在「一只没有耳朵/尾巴」两句，为通行版本记法。"
+  ]
+}

@@ -100,6 +100,23 @@ function diagnose(analysis, history = []) {
 
   if (!analysis || typeof analysis !== 'object') return { ruleVersion: RULE_VERSION, problemTypes: [{ id: 'pitch_accuracy', label: '数据不足', dimension: 'data', evidence: ['没有可用的测量结果'], weight: 1 }], primary: 'pitch_accuracy', confidence: 0, basedOn: 'measurement' };
 
+  // 多人 / 全班齐唱：不产出任何个人诊断（混唱无法分离个体），只回传整体概览结论。
+  if (analysis.context === 'group') {
+    return {
+      ruleVersion: RULE_VERSION, primary: null, confidence: analysis.confidence ?? 0, basedOn: 'group-overview',
+      problemTypes: [{
+        id: 'group_overview', label: '全班齐唱概览', dimension: 'ensemble',
+        evidence: [
+          `整体音高：${analysis.pitch?.note || '未测出'}`,
+          `音高离散 ${analysis.pitch?.pitchSpreadSemitones ?? '?'} 个半音`,
+          `整体速度：${analysis.rhythm?.estimatedBpm ?? '未测出'} BPM`,
+          `起音对齐：${analysis.ensemble?.alignment || '未测出'}`
+        ],
+        weight: 1
+      }]
+    };
+  }
+
   if (!analysis.valid) {
     return {
       ruleVersion: RULE_VERSION, primary: null, confidence: 0, basedOn: 'measurement',

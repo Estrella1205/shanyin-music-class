@@ -6,13 +6,14 @@
  * 三条硬纪律，全部落在代码里而不是文档里：
  *   1. **无来源即不输出**：任何一句要上幻灯片的话，都必须能解析到 knowledge/sources/ 里已登记的来源；
  *      解析不到的句子被丢掉，并记进 dropped[] 说明为什么丢。整张幻灯片丢空了，连幻灯片一起丢。
- *   2. **不谎称已合成视频**：本项目不引无头浏览器，所以不假装能一键出 MP4。
- *      给的是「分镜脚本 + 幻灯片矢量图 + 可直接运行的 ffmpeg 命令」，并如实报告 ffmpeg 是否可用。
+ *   2. **不谎称已合成视频**：MP4 只有在 Edge（截图幻灯片）与 ffmpeg（合成）都真实可用时才生成；
+ *      缺任何一样就如实报告缺什么、怎么装，绝不返回假链接。
  *   3. **未核对就标明**：材料来源 verifiedBy 为空时，课件全程带「待人工核对」标记，不静默通过。
  */
 
 const crypto = require('node:crypto');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const licensing = require('./licensing.cjs');
@@ -273,14 +274,98 @@ function renderFfmpegScript(storyboard, { slidesDir = 'slides', audioFile = null
 }
 
 let ffmpegProbe = null;
-/** 如实报告 ffmpeg 在不在，不在就给安装指引，而不是假装视频已经生成。 */
+/** 如实报告 ffmpeg 在不在（支持 FFMPEG_PATH 环境变量与项目内 tools/ffmpeg 副本），不在就给安装指引，而不是假装视频已经生成。 */
 function detectFfmpeg() {
   if (ffmpegProbe) return ffmpegProbe;
-  const probe = spawnSync('ffmpeg', ['-version'], { encoding: 'utf8', timeout: 5000 });
-  ffmpegProbe = probe.status === 0
-    ? { available: true, version: (probe.stdout ?? '').split('\n')[0].trim(), hint: null }
-    : { available: false, version: null, hint: '没有检测到 ffmpeg。装上即可（Windows：winget install Gyan.FFmpeg；macOS：brew install ffmpeg；Ubuntu：apt install ffmpeg），或先把 SVG／PNG 交给任意剪辑工具。' };
+  const candidates = [
+    process.env.FFMPEG_PATH || null,
+    'ffmpeg',
+    path.join(__dirname, '..', 'tools', 'ffmpeg', 'ffmpeg.exe'),
+  ].filter(Boolean);
+  for (const command of candidates) {
+    const probe = spawnSync(command, ['-version'], { encoding: 'utf8', timeout: 5000 });
+    if (probe.status === 0) {
+      ffmpegProbe = { available: true, version: (probe.stdout ?? '').split('\n')[0].trim(), command, hint: null };
+      return ffmpegProbe;
+    }
+  }
+  ffmpegProbe = {
+    available: false, version: null, command: null,
+    hint: '没有检测到 ffmpeg。装上即可（Windows：winget install Gyan.FFmpeg，或把 ffmpeg.exe 放进项目 tools/ffmpeg/；macOS：brew install ffmpeg；Ubuntu：apt install ffmpeg），或先把 SVG／PNG 交给任意剪辑工具。',
+  };
   return ffmpegProbe;
+}
+
+let edgeProbe = null;
+/** Edge 无头模式负责把幻灯片 SVG 截成 1920×1080 PNG —— 这是本项目唯一用到的浏览器能力，且只在真合成视频时调用。 */
+function detectEdge() {
+  if (edgeProbe) return edgeProbe;
+  const candidates = [
+    process.env.EDGE_PATH || null,
+    'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+    'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+  ].filter(Boolean);
+  const found = candidates.find(p => fs.existsSync(p));
+  edgeProbe = found
+    ? { available: true, path: found, hint: null }
+    : { available: false, path: null, hint: '没有检测到 Microsoft Edge。装好后重试，或用环境变量 EDGE_PATH 指向 msedge.exe。' };
+  return edgeProbe;
+}
+
+/**
+ * 真实合成 MP4：Edge 无头把每张幻灯片 SVG 截成 1920×1080 PNG，
+ * 每张图按分镜时长独立循环输入，用 concat 滤镜串接（时长逐张精确，没有 concat 解复用器的尾部怪癖）；
+ * 给了音频就循环垫底（-stream_loop -1）并用 -shortest 对齐视频长度。
+ * 三个前置都如实检查：Edge、ffmpeg、每一张截图都必须真实落盘 —— 缺什么就抛带指引的错误。
+ */
+async function renderVideo({ built, outDir, audioFile = null, edgePath = null, ffmpegPath = null, fps = 30, onProgress = () => {} }) {
+  if (!edgePath) throw badRequest('没有检测到 Microsoft Edge，无法把幻灯片截成图片。');
+  if (!ffmpegPath) throw badRequest('没有检测到 ffmpeg，无法合成 MP4。');
+  fs.mkdirSync(outDir, { recursive: true });
+  const pad = index => String(index + 1).padStart(2, '0');
+  const pngs = [];
+  for (let i = 0; i < built.slides.length; i += 1) {
+    const svgFile = path.join(outDir, `slide-${pad(i)}.svg`);
+    fs.writeFileSync(svgFile, renderSlideSvg(built.slides[i], { index: i + 1, total: built.slides.length, courseware: built }));
+    const png = path.join(outDir, `slide-${pad(i)}.png`);
+    const profile = path.join(os.tmpdir(), `edge-cw-${process.pid}-${i}`);
+    onProgress({ step: 'png', index: i + 1, total: built.slides.length });
+    const result = spawnSync(edgePath, [
+      '--headless=new', '--disable-gpu', `--user-data-dir=${profile}`, '--default-background-color=FFFFFFFF',
+      `--screenshot=${png}`, '--window-size=1920,1080', '--virtual-time-budget=4000',
+      `file:///${svgFile.replace(/\\/g, '/')}`,
+    ], { encoding: 'utf8', timeout: 30000 });
+    fs.rmSync(profile, { recursive: true, force: true });
+    if (!fs.existsSync(png) || fs.statSync(png).size < 1000) {
+      throw Object.assign(new Error(`第 ${i + 1} 张幻灯片截图失败${result?.error ? `：${result.error.message}` : ''}`), { statusCode: 500 });
+    }
+    pngs.push(png);
+  }
+  const inputs = [], branches = [];
+  pngs.forEach((png, i) => {
+    inputs.push('-loop', '1', '-t', String(shotSeconds(built.slides[i])), '-i', png);
+    branches.push(`[${i}:v]scale=${SLIDE_WIDTH}:${SLIDE_HEIGHT},fps=${fps},setsar=1,format=yuv420p[v${i}]`);
+  });
+  let audioIndex = null;
+  const totalSeconds = built.slides.reduce((sum, slide) => sum + shotSeconds(slide), 0);
+  if (audioFile && fs.existsSync(audioFile)) {
+    audioIndex = pngs.length;
+    inputs.push('-stream_loop', '-1', '-i', audioFile);
+  }
+  const concatIn = pngs.map((_, i) => `[v${i}]`).join('');
+  const filter = `${branches.join(';')};${concatIn}concat=n=${pngs.length}:v=1:a=0[vout]`;
+  const mp4 = path.join(outDir, 'courseware.mp4');
+  const args = ['-y', ...inputs, '-filter_complex', filter, '-map', '[vout]'];
+  // 循环 BGM + 输出总时长精确封顶（-shortest 配循环音频会被流间同步提前截断，实测少 8 秒）。
+  if (audioIndex !== null) args.push('-map', `${audioIndex}:a`, '-c:a', 'aac', '-b:a', '128k', '-t', String(totalSeconds));
+  args.push('-c:v', 'libx264', '-preset', 'veryfast', '-crf', '23', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', mp4);
+  onProgress({ step: 'ffmpeg', total: built.slides.length });
+  const result = spawnSync(ffmpegPath, args, { encoding: 'utf8', timeout: 600000, maxBuffer: 64 * 1024 * 1024 });
+  if (result.status !== 0 || !fs.existsSync(mp4) || fs.statSync(mp4).size < 10000) {
+    const tail = (result.stderr ?? '').split('\n').filter(Boolean).slice(-3).join(' ');
+    throw Object.assign(new Error(`ffmpeg 合成失败：${tail || '未知原因'}`), { statusCode: 500 });
+  }
+  return { mp4, shots: pngs.length, seconds: totalSeconds };
 }
 
 /** 一张幻灯片的矢量图：1920×1080，无浏览器也能生成，转 PNG 后即可进 ffmpeg。 */
@@ -411,6 +496,105 @@ function coursewareId(courseware) {
   return crypto.createHash('sha256').update(JSON.stringify({ slides: courseware.slides, bioIds: courseware.bioIds, lesson: courseware.lesson, theme: courseware.theme })).digest('hex').slice(0, 24);
 }
 
+/*
+ * PPTX 导出（纯 JS，零依赖）：
+ * PPTX 本质是一个 ZIP 包。这里全部条目用 stored（不压缩）方式写入，CRC32 自己算 ——
+ * 幻灯片写成原生文本框而不是截图，老师在 PowerPoint / WPS 里可以直接改字。
+ */
+const CRC_TABLE = (() => {
+  const table = new Uint32Array(256);
+  for (let n = 0; n < 256; n += 1) { let c = n; for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; table[n] = c >>> 0; }
+  return table;
+})();
+function crc32(buffer) {
+  let c = 0xffffffff;
+  for (let i = 0; i < buffer.length; i += 1) c = CRC_TABLE[(c ^ buffer[i]) & 0xff] ^ (c >>> 8);
+  return (c ^ 0xffffffff) >>> 0;
+}
+/** 最小 ZIP 写出器：本地文件头 + 中央目录 + 结尾记录，全部 stored。 */
+function buildZip(entries) {
+  const local = [], central = [];
+  let offset = 0;
+  const dosTime = 0, dosDate = ((2026 - 1980) << 9) | (1 << 5) | 1;
+  for (const [name, data] of entries) {
+    const nameBuf = Buffer.from(name, 'utf8'), checksum = crc32(data);
+    const head = Buffer.alloc(30);
+    head.writeUInt32LE(0x04034b50, 0); head.writeUInt16LE(20, 4); head.writeUInt16LE(0, 6);
+    head.writeUInt16LE(dosTime, 10); head.writeUInt16LE(dosDate, 12);
+    head.writeUInt32LE(checksum, 14); head.writeUInt32LE(data.length, 18); head.writeUInt32LE(data.length, 22);
+    head.writeUInt16LE(nameBuf.length, 26);
+    local.push(head, nameBuf, data);
+    const dir = Buffer.alloc(46);
+    dir.writeUInt32LE(0x02014b50, 0); dir.writeUInt16LE(20, 4); dir.writeUInt16LE(20, 6);
+    dir.writeUInt16LE(dosTime, 12); dir.writeUInt16LE(dosDate, 14);
+    dir.writeUInt32LE(checksum, 16); dir.writeUInt32LE(data.length, 20); dir.writeUInt32LE(data.length, 24);
+    dir.writeUInt16LE(nameBuf.length, 28); dir.writeUInt32LE(offset, 42);
+    central.push(dir, nameBuf);
+    offset += 30 + nameBuf.length + data.length;
+  }
+  const centralBuf = Buffer.concat(central), end = Buffer.alloc(22);
+  end.writeUInt32LE(0x06054b50, 0); end.writeUInt16LE(entries.length, 8); end.writeUInt16LE(entries.length, 10);
+  end.writeUInt32LE(centralBuf.length, 12); end.writeUInt32LE(offset, 16);
+  return Buffer.concat([...local, centralBuf, end]);
+}
+
+const PPTX_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n`;
+const SLIDE_W_EMU = 12192000, SLIDE_H_EMU = 6858000;
+const pptxPara = (text, { size = 1800, bold = false, color = '2F4432', bullet = false, spaceAfter = 8 } = {}) =>
+  `<a:p><a:pPr>${bullet ? '<a:buChar char="•"/>' : ''}<a:spcAft><a:spcPts val="${spaceAfter * 100}"/></a:spcAft></a:pPr><a:r><a:rPr lang="zh-CN" sz="${size}" b="${bold ? 1 : 0}" dirty="0"><a:solidFill><a:srgbClr val="${color}"/></a:solidFill><a:latin typeface="Microsoft YaHei"/><a:ea typeface="Microsoft YaHei"/></a:rPr><a:t>${esc(text)}</a:t></a:r></a:p>`;
+const pptxTextbox = (id, name, x, y, cx, cy, paragraphs) =>
+  `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="${esc(name)}"/><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="${x}" y="${y}"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr><p:txBody><a:bodyPr wrap="square" rtlCol="0"><a:normAutofit/></a:bodyPr><a:lstStyle/>${paragraphs}</p:txBody></p:sp>`;
+const pptxSpTree = shapes =>
+  `<p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${shapes}</p:spTree>`;
+const PPTX_EMPTY_TREE = pptxSpTree('');
+
+/** 一张幻灯片 → 一个文本框组合：封面居中大字；引用页逐条列出来源与许可；其余页标题 + 要点 + 出处。 */
+function pptxSlideXml(slide, index, total, pendingReview) {
+  const shapes = [];
+  const badge = pendingReview ? pptxTextbox(90, 'badge', SLIDE_W_EMU - 2600000, 300000, 2200000, 400000, [pptxPara('待人工核对', { size: 1200, color: '8A6D34' })]) : '';
+  if (slide.layout === 'cover') {
+    shapes.push(pptxTextbox(2, 'theme', 600000, 1400000, SLIDE_W_EMU - 1200000, 700000, [pptxPara(slide.section ?? '', { size: 2000, color: '7C9A6B' })]));
+    shapes.push(pptxTextbox(3, 'title', 600000, 2200000, SLIDE_W_EMU - 1200000, 1600000, [pptxPara(slide.title, { size: 5400, bold: true })]));
+    if (slide.subtitle) shapes.push(pptxTextbox(4, 'subtitle', 600000, 3900000, SLIDE_W_EMU - 1200000, 900000, [pptxPara(slide.subtitle, { size: 2400, color: '5F7A55' })]));
+  } else if (slide.layout === 'citations') {
+    const paras = (slide.citations ?? []).map(c => pptxPara(`${c.title}　${c.licenseLabel}　${c.tierLabel}${c.verifiedBy ? '' : '　⚠ 待人工核对'}`, { size: 1400, color: '33422F', spaceAfter: 4 })
+      + pptxPara(c.url ? c.url : c.locator ? `位置：${c.locator}` : '', { size: 1100, color: '7B8A72', spaceAfter: 8 })).join('');
+    shapes.push(pptxTextbox(2, 'title', 600000, 500000, SLIDE_W_EMU - 1200000, 800000, [pptxPara(slide.title, { size: 3200, bold: true })]));
+    shapes.push(pptxTextbox(3, 'cites', 600000, 1400000, SLIDE_W_EMU - 1200000, SLIDE_H_EMU - 1900000, [pptxPara('', { size: 100 }) + paras]));
+  } else {
+    const paras = slide.bullets.map(bullet =>
+      pptxPara(bullet.text, { size: 1800, bullet: true })
+      + pptxPara(`出处：${bullet.sourceTitles.join('、')}`, { size: 1100, color: '9AA791', spaceAfter: 12 })).join('');
+    shapes.push(pptxTextbox(2, 'title', 600000, 500000, SLIDE_W_EMU - 1200000, 800000, [pptxPara(slide.title, { size: 3200, bold: true })]));
+    shapes.push(pptxTextbox(3, 'body', 600000, 1500000, SLIDE_W_EMU - 1200000, SLIDE_H_EMU - 2000000, [pptxPara('', { size: 100 }) + paras]));
+    shapes.push(pptxTextbox(4, 'page', SLIDE_W_EMU - 1400000, SLIDE_H_EMU - 600000, 800000, 400000, [pptxPara(`${index} / ${total}`, { size: 1200, color: 'B6C1AD' })]));
+  }
+  return `${PPTX_XML}<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:cSld><p:bg><p:bgPr><a:solidFill><a:srgbClr val="FBFCF7"/></a:solidFill><a:effectLst/></p:bgPr></p:bg>${pptxSpTree(shapes.join('') + badge)}</p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`;
+}
+
+/** 生成的课件 → .pptx 字节流（每一句都带出处；「待人工核对」标记跟随主标记）。 */
+function buildPptx(courseware) {
+  const slides = courseware.slides;
+  const entries = [];
+  const overrides = slides.map((_, i) => `<Override PartName="/ppt/slides/slide${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>`).join('');
+  entries.push(['[Content_Types].xml', Buffer.from(`${PPTX_XML}<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/><Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/><Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/><Override PartName="/ppt/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>${overrides}</Types>`, 'utf8')]);
+  entries.push(['_rels/.rels', Buffer.from(`${PPTX_XML}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="ppt/presentation.xml"/></Relationships>`, 'utf8')]);
+  const slideIds = slides.map((_, i) => `<p:sldId id="${256 + i}" r:id="rId${i + 2}"/>`).join('');
+  const slideRels = slides.map((_, i) => `<Relationship Id="rId${i + 2}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide${i + 1}.xml"/>`).join('');
+  entries.push(['ppt/presentation.xml', Buffer.from(`${PPTX_XML}<p:presentation xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst><p:sldIdLst>${slideIds}</p:sldIdLst><p:sldSz cx="${SLIDE_W_EMU}" cy="${SLIDE_H_EMU}"/><p:notesSz cx="6858000" cy="9144000"/></p:presentation>`, 'utf8')]);
+  entries.push(['ppt/_rels/presentation.xml.rels', Buffer.from(`${PPTX_XML}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="slideMasters/slideMaster1.xml"/>${slideRels}</Relationships>`, 'utf8')]);
+  entries.push(['ppt/slideMasters/slideMaster1.xml', Buffer.from(`${PPTX_XML}<p:sldMaster xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:cSld>${PPTX_EMPTY_TREE}</p:cSld><p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/><p:sldLayoutIdLst><p:sldLayoutId id="2147483649" r:id="rId1"/></p:sldLayoutIdLst></p:sldMaster>`, 'utf8')]);
+  entries.push(['ppt/slideMasters/_rels/slideMaster1.xml.rels', Buffer.from(`${PPTX_XML}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="../theme/theme1.xml"/></Relationships>`, 'utf8')]);
+  entries.push(['ppt/slideLayouts/slideLayout1.xml', Buffer.from(`${PPTX_XML}<p:sldLayout xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" type="blank" preserve="1"><p:cSld name="空白">${PPTX_EMPTY_TREE}</p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>`, 'utf8')]);
+  entries.push(['ppt/slideLayouts/_rels/slideLayout1.xml.rels', Buffer.from(`${PPTX_XML}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="../slideMasters/slideMaster1.xml"/></Relationships>`, 'utf8')]);
+  entries.push(['ppt/theme/theme1.xml', Buffer.from(`${PPTX_XML}<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="声入山野"><a:themeElements><a:clrScheme name="声入山野"><a:dk1><a:srgbClr val="2F4432"/></a:dk1><a:lt1><a:srgbClr val="FBFCF7"/></a:lt1><a:dk2><a:srgbClr val="375D3A"/></a:dk2><a:lt2><a:srgbClr val="E9F1DD"/></a:lt2><a:accent1><a:srgbClr val="6A9A5B"/></a:accent1><a:accent2><a:srgbClr val="8FAE7A"/></a:accent2><a:accent3><a:srgbClr val="AEBFB2"/></a:accent3><a:accent4><a:srgbClr val="C6D2BC"/></a:accent4><a:accent5><a:srgbClr val="5F7A55"/></a:accent5><a:accent6><a:srgbClr val="7C9A6B"/></a:accent6><a:hlink><a:srgbClr val="397049"/></a:hlink><a:folHlink><a:srgbClr val="8A9683"/></a:folHlink></a:clrScheme><a:fontScheme name="声入山野"><a:majorFont><a:latin typeface="Microsoft YaHei"/><a:ea typeface="Microsoft YaHei"/><a:cs typeface=""/></a:majorFont><a:minorFont><a:latin typeface="Microsoft YaHei"/><a:ea typeface="Microsoft YaHei"/><a:cs typeface=""/></a:minorFont></a:fontScheme><a:fmtScheme name="声入山野"><a:fillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:fillStyleLst><a:lnStyleLst><a:ln w="6350"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:ln><a:ln w="12700"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:ln><a:ln w="19050"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:ln></a:lnStyleLst><a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle></a:effectStyleLst><a:bgFillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:bgFillStyleLst></a:fmtScheme></a:themeElements></a:theme>`, 'utf8')]);
+  slides.forEach((slide, i) => {
+    entries.push([`ppt/slides/slide${i + 1}.xml`, Buffer.from(pptxSlideXml(slide, i + 1, slides.length, courseware.pendingReview), 'utf8')]);
+    entries.push([`ppt/slides/_rels/slide${i + 1}.xml.rels`, Buffer.from(`${PPTX_XML}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/></Relationships>`, 'utf8')]);
+  });
+  return buildZip(entries);
+}
+
 module.exports = {
   VERSION,
   SLIDE_WIDTH,
@@ -421,6 +605,9 @@ module.exports = {
   storyboardMarkdown,
   renderFfmpegScript,
   detectFfmpeg,
+  detectEdge,
+  renderVideo,
+  buildPptx,
   renderSlideSvg,
   renderSlidesHtml,
   coursewareId,

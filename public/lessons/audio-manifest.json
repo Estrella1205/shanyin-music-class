@@ -1,12 +1,13 @@
 {
   "lessonId": "molihua-opening-v1",
   "version": "1.0.0",
-  "sourceSha256": "be1279bac4839bdd89d6074c210ade8b0d437776f623fe6e024436ece51e2a2f",
+  "sourceSha256": "7b9bdd165c6ee73076a8cab4c5769c043b084d2db204d28fe44ea89d5376a3e2",
   "files": [
     {
       "file": "molihua-c-80.wav",
       "bpm": 80,
       "countIn": 0,
+      "vocal": false,
       "durationSeconds": 6.25,
       "sha256": "e1fa32b404d76e7a139fc2f7b9e73fc6568a3d250c9c4f47d51e954a7d8cc626"
     },
@@ -14,6 +15,7 @@
       "file": "molihua-c-60.wav",
       "bpm": 60,
       "countIn": 0,
+      "vocal": false,
       "durationSeconds": 8.25,
       "sha256": "6866a60920f79587da04782d72300030b8e5cbb7240d0877cc8b72765dc57f73"
     },
@@ -21,8 +23,25 @@
       "file": "molihua-c-80-countin.wav",
       "bpm": 80,
       "countIn": 4,
+      "vocal": false,
       "durationSeconds": 9.25,
       "sha256": "33fabc08cb38a7be1a6a89c3cab9c0d884ba696a62edf5109c11591adf536be8"
+    },
+    {
+      "file": "molihua-c-80-vocal.wav",
+      "bpm": 80,
+      "countIn": 0,
+      "vocal": true,
+      "durationSeconds": 6.25,
+      "sha256": "5dd8bc1c61c8b0a24928e463472b8d10c6bf18814acaf6134ddf165b26f19113"
+    },
+    {
+      "file": "molihua-c-60-vocal.wav",
+      "bpm": 60,
+      "countIn": 0,
+      "vocal": true,
+      "durationSeconds": 8.25,
+      "sha256": "dfbd4ba3f5a356e4ac442b1f3dfb33755fd8a09f20067d9a710e314d030dc493"
     }
   ]
 }

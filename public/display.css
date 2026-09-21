@@ -1,0 +1,48 @@
+/* 学生端大屏 · 16:9 全屏、大字、大按钮、可投屏。
+   只作用于 .display-screen 容器，不影响教师端样式。 */
+.display-screen{position:fixed;inset:0;display:flex;flex-direction:column;background:linear-gradient(160deg,#f7f5ef 0%,#eef4ee 100%);color:var(--ink,#1f3a2c);z-index:50;padding:clamp(12px,2vh,28px) clamp(16px,3vw,48px);box-sizing:border-box}
+
+/* 顶栏：返回 / 歌曲信息 / 全屏 */
+.display-topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-shrink:0}
+.display-songinfo{display:flex;align-items:center;gap:clamp(10px,1.8vw,24px);font-size:clamp(14px,1.4vw,22px)}
+.display-songinfo b{font-size:clamp(18px,1.8vw,30px);color:var(--green-700,#2d5d4a)}
+.display-songinfo span{color:var(--muted,#6b7a6e)}
+.display-chip{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:1.5px solid var(--line,#d9e0d6);border-radius:999px;background:#fff;color:var(--ink,#1f3a2c);cursor:pointer;font-size:clamp(13px,1.1vw,17px);transition:all .2s}
+.display-chip:hover{background:var(--green-50,#eaf3ec);border-color:var(--green-500,#5b8c72)}
+.display-chip svg{width:18px;height:18px}
+
+/* 中央舞台：大字当前音 + 简谱条 + 提示 */
+.display-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(16px,3vh,40px);min-height:0}
+.display-now{text-align:center;display:flex;flex-direction:column;gap:clamp(6px,1vh,14px)}
+.display-now em{font-style:normal;font-size:clamp(48px,9vw,160px);font-weight:900;line-height:1;color:var(--green-700,#2d5d4a);min-height:1em;letter-spacing:.04em;text-shadow:0 4px 0 rgba(45,93,74,.08)}
+.display-now b{font-size:clamp(20px,2.4vw,42px);color:var(--green-600,#5b8c72);font-weight:700;min-height:1.2em}
+.display-notation{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(4px,.6vw,10px);max-width:100%;padding:clamp(10px,1.6vw,20px);background:rgba(255,255,255,.6);border-radius:14px;box-shadow:0 2px 16px rgba(31,58,44,.06)}
+.display-notation .score-event{font-size:clamp(20px,2.4vw,38px);min-width:clamp(48px,5vw,84px);padding:clamp(8px,1.2vw,16px)}
+.display-notation .score-event .lyric{font-size:clamp(16px,1.8vw,28px);margin-top:6px}
+.display-notation .score-event small{font-size:clamp(11px,1vw,16px)}
+.display-notation .active-note{background:var(--green-600,#5b8c72);color:#fff;transform:scale(1.12);box-shadow:0 8px 22px rgba(91,140,114,.4);border-radius:12px}
+.display-notation .active-note .lyric,.display-notation .active-note .degree,.display-notation .active-note small{color:#fff}
+.display-notation .active-note .degree{color:#fff}
+.display-hint{font-size:clamp(14px,1.3vw,20px);color:var(--muted,#6b7a6e)}
+
+/* 底部大按钮 */
+.display-controls{display:flex;justify-content:center;gap:clamp(10px,1.8vw,28px);flex-shrink:0;flex-wrap:wrap}
+.btn-big{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:clamp(16px,2.4vh,32px) clamp(24px,3vw,48px);border:2px solid var(--line,#d9e0d6);border-radius:18px;background:#fff;color:var(--ink,#1f3a2c);cursor:pointer;min-width:clamp(120px,12vw,200px);min-height:clamp(72px,9vh,130px);transition:all .18s;font-family:inherit}
+.btn-big span{font-size:clamp(14px,1.4vw,20px);line-height:1.3;font-weight:600}
+.btn-big svg{display:none}
+.btn-big.light{background:var(--green-50,#eaf3ec);border-color:var(--green-400,#7fa68e)}
+.btn-big.primary{background:var(--green-600,#5b8c72);color:#fff;border-color:var(--green-700,#2d5d4a)}
+.btn-big.primary span{color:#fff}
+.btn-big.secondary{background:#fff;border-color:var(--green-500,#5b8c72);color:var(--green-700,#2d5d4a)}
+.btn-big.ghost{background:transparent;border-color:var(--line,#d9e0d6);color:var(--muted,#6b7a6e)}
+.btn-big:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(31,58,44,.16)}
+.btn-big:active{transform:translateY(-1px)}
+
+.display-foot{text-align:center;font-size:clamp(12px,1vw,15px);color:var(--muted,#6b7a6e);flex-shrink:0;margin-top:8px}
+
+/* 大屏不显示教师端页头页脚（已经在 .display-screen 固定布局里了） */
+.display-screen ~ header,.display-screen ~ footer{display:none}
+
+/* 全屏模式下适配投影 */
+:fullscreen .display-screen,:-webkit-full-screen .display-screen{padding:24px 48px}
+:fullscreen .display-now em,:-webkit-full-screen .display-now em{font-size:clamp(64px,11vw,200px)}

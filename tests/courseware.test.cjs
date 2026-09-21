@@ -155,3 +155,49 @@ test('幻灯片矢量图：不靠浏览器也能出图，转 PNG 后就能进 ff
   assert.doesNotMatch(svg,/<[^>]*>\s*undefined/);
  });
 });
+
+test('PPTX 导出：ZIP 结构合法、CRC 一致、每张幻灯片都有对应条目与文本',()=>{
+ const built=courseware.buildCourseware({bios,sources,options:{bioIds:['bio-lijinhui']},asOf:'2026-09-13'});
+ const pptx=courseware.buildPptx(built);
+ assert.ok(Buffer.isBuffer(pptx));
+ assert.equal(pptx.toString('ascii',0,2),'PK');
+ // 按 EOCD 规范解析：sig(0) disk(4) cdDisk(6) entriesThisDisk(8) entriesTotal(10) cdSize(12) cdOffset(16)
+ const eocd=pptx.length-22;
+ assert.equal(pptx.readUInt32LE(eocd),0x06054b50);
+ const entries=pptx.readUInt16LE(eocd+10),cdSize=pptx.readUInt32LE(eocd+12),cdStart=pptx.readUInt32LE(eocd+16);
+ assert.equal(entries,built.slides.length*2+9,'每张幻灯片 xml+rels，另加 content-types/.rels/presentation+rels/master+rels/layout+rels/theme');
+ assert.equal(pptx.toString('ascii',cdStart,cdStart+4),'PK\x01\x02');
+ const names=[];let p=cdStart;
+ for(let i=0;i<entries;i+=1){
+  assert.equal(pptx.readUInt32LE(p),0x02014b50);
+  const crc=pptx.readUInt32LE(p+16),size=pptx.readUInt32LE(p+24),nameLen=pptx.readUInt16LE(p+28),extraLen=pptx.readUInt16LE(p+30),commentLen=pptx.readUInt16LE(p+32),localOffset=pptx.readUInt32LE(p+42);
+  const name=pptx.slice(p+46,p+46+nameLen).toString('utf8');names.push(name);
+  // 回读本地头与数据，重算 CRC 对上
+  assert.equal(pptx.readUInt32LE(localOffset),0x04034b50,'local header of '+name);
+  const lNameLen=pptx.readUInt16LE(localOffset+26),lExtraLen=pptx.readUInt16LE(localOffset+28);
+  const data=pptx.slice(localOffset+30+lNameLen+lExtraLen,localOffset+30+lNameLen+lExtraLen+size);
+  assert.equal(crc32Of(data),crc,'crc mismatch for '+name);
+  p+=46+nameLen+extraLen+commentLen;
+ }
+ assert.equal(p,cdStart+cdSize,'central directory size consistent');
+ for(let i=1;i<=built.slides.length;i+=1)assert.ok(names.includes(`ppt/slides/slide${i}.xml`),`slide${i} entry present`);
+ assert.ok(names.includes('[Content_Types].xml')&&names.includes('ppt/presentation.xml')&&names.includes('ppt/theme/theme1.xml'));
+ // 幻灯片内容是文本框：正文里能找到事实文本与出处行，且「出处」不缺失
+ const slide1=pptxEntry(pptx,names,'ppt/slides/slide1.xml').toString('utf8');
+ assert.match(slide1,/p:spTree/);
+ const bodySlide=pptxEntry(pptx,names,'ppt/slides/slide2.xml').toString('utf8');
+ assert.match(bodySlide,/出处：/);
+ assert.match(bodySlide,/Microsoft YaHei/);
+});
+const CRC_TABLE_LOCAL=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n+=1){let c=n;for(let k=0;k<8;k+=1)c=c&1?0xedb88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32Of(buf){let c=0xffffffff;for(const b of buf)c=CRC_TABLE_LOCAL[(c^b)&0xff]^(c>>>8);return (c^0xffffffff)>>>0}
+function pptxEntry(zip,names,name){const idx=names.indexOf(name);let p=zip.length-22;const cdStart=zip.readUInt32LE(p+16);p=cdStart;for(let i=0;i<=idx;i+=1){if(i===idx){const size=zip.readUInt32LE(p+24),nameLen=zip.readUInt16LE(p+28),extraLen=zip.readUInt16LE(p+30),commentLen=zip.readUInt16LE(p+32),localOffset=zip.readUInt32LE(p+42);const lNameLen=zip.readUInt16LE(localOffset+26),lExtraLen=zip.readUInt16LE(localOffset+28);return zip.slice(localOffset+30+lNameLen+lExtraLen,localOffset+30+lNameLen+lExtraLen+size)}p+=46+zip.readUInt16LE(p+28)+zip.readUInt16LE(p+30)+zip.readUInt16LE(p+32)}}
+
+test('视频合成环境：如实报告 ffmpeg 与 Edge，Edge 探测不弹窗不落盘',()=>{
+ const edge=courseware.detectEdge();
+ assert.equal(typeof edge.available,'boolean');
+ if(!edge.available)assert.match(edge.hint,/Edge/);
+ const ff=courseware.detectFfmpeg();
+ assert.equal(typeof ff.available,'boolean');
+ if(ff.available)assert.ok(ff.command,'available ffmpeg exposes the command actually probed');
+});

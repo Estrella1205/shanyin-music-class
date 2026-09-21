@@ -6,7 +6,7 @@ const req={...defaults,query:'茉莉花 初学 节奏 模唱',summary:'初学班
 const plan={summary:'先听后唱，以教师观察检查稳定节奏',activities:[5,7,5,10,6,5,2].map((min,i)=>({title:'活动'+i,min,teacher:'播放参考并示范',student:'轻声模唱',goal:'稳定节奏',evidence:'能连续保持8拍',tool:'reference',sourceIds:['score','practice']}))};
 const headers={'Content-Type':'application/json','X-Shengru-Client':'local-web'};
 const tick=ms=>new Promise(r=>setTimeout(r,ms));
-async function startServer(t,{agentAdapter}={}){const dir=fs.mkdtempSync(path.join(os.tmpdir(),'sr-report-'));const server=require('../server/auth-server.cjs').createApp({dataDir:dir,agentAdapter});await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(async()=>{await new Promise(r=>server.close(r));fs.rmSync(dir,{recursive:true,force:true})});return {base:'http://127.0.0.1:'+server.address().port,dir}}
+async function startServer(t,{agentAdapter}={}){const dir=fs.mkdtempSync(path.join(os.tmpdir(),'sr-report-'));const server=require('../server/auth-server.cjs').createApp({dataDir:dir,agentAdapter,webSearcher:null});await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(async()=>{await new Promise(r=>server.close(r));fs.rmSync(dir,{recursive:true,force:true})});return {base:'http://127.0.0.1:'+server.address().port,dir}}
 async function register(base,username,extra={}){const res=await fetch(base+'/api/register',{method:'POST',headers,body:JSON.stringify({username,password:'local-test-1234',name:'测试老师',...extra})});assert.equal(res.status,200);return res.headers.get('set-cookie').split(';')[0]}
 const withCookie=cookie=>({...headers,Cookie:cookie});
 async function getJson(url,cookie){const res=await fetch(url,{headers:cookie?{Cookie:cookie}:undefined});return {status:res.status,data:await res.json()}}

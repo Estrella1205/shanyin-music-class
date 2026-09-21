@@ -78,7 +78,7 @@
    "required":["language","sourceId","lines"],
    "properties":{
     "language":{"type":"string"},
-    "sourceId":{"type":"string","minLength":1,"description":"必须能解析到 knowledge/sources/ 中 redistribute 为 true 的记录"},
+    "sourceId":{"type":"string","minLength":1,"description":"必须能解析到 knowledge/sources/ 中已登记的来源记录；收录方式须满足该记录的许可判定（full 可整篇收录；excerpt-only 仅限登记范围内的片段引用，导入流水线中不可收录则拒绝生成）"},
     "lines":{
      "type":"array",
      "minItems":1,

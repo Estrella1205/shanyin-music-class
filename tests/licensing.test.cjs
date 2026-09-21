@@ -157,6 +157,7 @@ test('the registered source files agree with what the gate decides', () => {
     'molihua-arthn-2021.source.json': 'quote',
     'xiaotuzi-lijinhui-1920.source.json': 'full',
     'jianpu-demo-sample.source.json': 'full', // 本项目自撰的格式示例，以 CC0 放弃权利
+    'liangzhilaohu-publicdomain.source.json': 'full', // 公版儿歌，公有领域
     'maibao-1933.source.json': 'link-only',
     'eol-zh-music.source.json': 'link-only',        // 生平材料：只登记条目定位，不分发正文
     'guoxue-molihua-qupai.source.json': 'link-only', // 生平材料：转载页，只登记链接

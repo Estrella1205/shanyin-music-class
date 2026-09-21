@@ -1,2 +1,2 @@
 const {parentPort,workerData}=require('node:worker_threads');
-try{parentPort.postMessage(require('./audio-analysis.cjs').analyze(workerData.samples,workerData.context))}catch{parentPort.postMessage({error:'音频分析失败，请重新录音'})}
+try{const {analyze,analyzeGroup}=require('./audio-analysis.cjs');const out=workerData.context==='group'?analyzeGroup(workerData.samples,workerData.lesson):analyze(workerData.samples,workerData.context,workerData.lesson);parentPort.postMessage(out)}catch{parentPort.postMessage({error:'音频分析失败，请重新录音'})}

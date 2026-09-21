@@ -26,4 +26,42 @@ function sungFixture({octave=0,merge=false,sustain=false,vibrato=true,consonant=
   }
   return encodeWav(x);
 }
-module.exports={fixture,sungFixture};
+/* 多人/全班齐唱样本：多个轻微失谐、不同音色的声部叠加在同一旋律上。
+   每个声部起音略有先后（毫秒级），音高在目标音附近随机散布，模拟真实齐唱的"整体音高 + 起音对齐"。
+   referenceMidis 必须与 lesson 的参考旋律一致，analyzeGroup 用它算"整体音高中心"。
+   opts:
+     voiceCount  声部数量（默认 5）
+     centsSpread 各声部音高相对目标音的随机散布幅度（音分，默认 30，模拟轻微失谐）
+     onsetJitter 各声部起音时间的随机偏移幅度（秒，默认 0.06）
+     speed       整体速度倍率（默认 1）
+     detune      整体音高偏移（音分，默认 0，模拟全班整体偏高/偏低）
+     silent      是否静音（默认 false） */
+function groupFixture({voiceCount=5,centsSpread=30,onsetJitter=0.06,speed=1,detune=0,silent=false}={}){
+  const midi=[64,64,67,69,72,72,69,67,67,69,67],beats=[1,.5,.5,.5,.5,.5,.5,1,.5,.5,2],sr=16000;
+  const total=Math.ceil((.3+6/speed+.5)*sr),x=new Float32Array(total);
+  let seed=20260919;
+  const rnd=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296*2-1);
+  if(silent){return require('../server/audio-analysis.cjs').encodeWav(x)}
+  let t=.3;
+  for(let k=0;k<midi.length;k++){
+    const dur=beats[k]*.75/speed,target=midi[k]+detune/100;
+    for(let v=0;v<voiceCount;v++){
+      // 每个声部有自己的音高偏移、起音偏移、谐波结构和振幅，模拟不同孩子的声音
+      const off=rnd()*centsSpread/100,onset=t+rnd()*onsetJitter/speed;
+      const f=440*2**((target+off-69)/12);
+      const harm=[1,.5+.2*rnd(),.3+.2*rnd()],amp=(0.16/voiceCount)*(1+.3*rnd());
+      const n=Math.floor(dur*.9*sr),at=Math.floor(Math.max(0,onset)*sr);
+      let phase=0;
+      for(let i=0;i<n;i++){
+        const dt=i/sr,env=Math.min(1,dt/.01,(dur*.9-dt)/.01);
+        if(at+i>=total)break;
+        let s=0;
+        for(let h=0;h<harm.length;h++){s+=harm[h]*Math.sin(2*Math.PI*f*(h+1)*dt)}
+        x[at+i]+=amp*env*s/Math.max(1,harm.reduce((a,b)=>a+b,0));
+      }
+    }
+    t+=dur;
+  }
+  return require('../server/audio-analysis.cjs').encodeWav(x);
+}
+module.exports={fixture,sungFixture,groupFixture};

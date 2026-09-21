@@ -1,0 +1,45 @@
+﻿# Subtest: the registered source files agree with what the gate decides
+ok 86 - the registered source files agree with what the gate decides
+  ---
+  duration_ms: 2.0928
+  type: 'test'
+  ...
+# Subtest: the blocked 鍗栨姤姝?record documents why it is retained
+ok 87 - the blocked 鍗栨姤姝?record documents why it is retained
+  ---
+  duration_ms: 0.2825
+  type: 'test'
+  ...
+# Subtest: asOf defaults to today and rejects malformed dates
+ok 88 - asOf defaults to today and rejects malformed dates
+  ---
+  duration_ms: 3.4351
+  type: 'test'
+  ...
+# Subtest: report only averages valid takes and keeps every number traceable
+ok 89 - report only averages valid takes and keeps every number traceable
+  ---
+  duration_ms: 14.5842
+  type: 'test'
+  ...
+# Subtest: report overview exposes real measurements with sample sizes and honest declarations
+ok 90 - report overview exposes real measurements with sample sizes and honest declarations
+  ---
+  duration_ms: 585.4196
+  type: 'test'
+  ...
+# Subtest: agent tasks can be cancelled mid-flight and retried as an independent task
+ok 91 - agent tasks can be cancelled mid-flight and retried as an independent task
+  ---
+  duration_ms: 200.2539
+  type: 'test'
+  ...
+1..91
+# tests 91
+# suites 0
+# pass 91
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3553.7364
