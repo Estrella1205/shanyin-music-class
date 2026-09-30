@@ -13,6 +13,7 @@ function displayView() {
     <div class="display-topbar">
       <button class="display-chip" data-action="back-to-class" title="返回教师端">${icon('arrow')}<span>返回教师端</span></button>
       <div class="display-songinfo"><b>《${esc(l.title)}》</b><span>1=${keyLabel}</span><span>${t.meter.join('/')}</span><span>♩ = ${t.bpm}</span><span>${variantLabel}</span></div>
+      <button class="display-chip" data-action="bigtext" title="儿童大字模式">🔠<span>大字模式：${(typeof bigTextOn === 'function' && bigTextOn()) ? '开' : '关'}</span></button>
       <button class="display-chip" data-action="fullscreen" title="全屏投屏">${icon('play')}<span>全屏</span></button>
     </div>
     <div class="display-stage">
@@ -93,6 +94,7 @@ document.addEventListener('click', e => {
   if (a === 'open-display') { stopSound(); state.route = 'display'; if (location.hash !== '#display') location.hash = 'display'; render(); }
   if (a === 'back-to-class') { stopSound(); cancelAnimationFrame(displayLyricFrame); state.route = 'classroom'; state.tab = 'teach'; if (location.hash !== '#classroom') location.hash = 'classroom'; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   if (a === 'fullscreen') toggleFullscreen();
+  if (a === 'bigtext') toggleBigText();
   if (a === 'stop-display') stopSound();
 });
 

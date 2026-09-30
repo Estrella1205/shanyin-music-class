@@ -15,3 +15,25 @@ body{background:#e8eddf;color:var(--ink)}#app{width:100%;max-width:1440px;min-he
 @media(min-width:1051px){#app[data-page=classroom] .agent-panel{padding-bottom:78px}#app[data-page=classroom] .agent-panel:after{height:75px}}
 @media(min-width:1051px){#app[data-page=listen] .page-heading,#app[data-page=report] .page-heading{height:108px}#app[data-page=listen] .notes{font-size:26px;margin:9px 0}#app[data-page=listen] .score{padding:14px}#app[data-page=listen] .scores{margin:12px 0}#app[data-page=listen] .decision{padding:11px 16px}#app[data-page=report] .stat{padding-top:13px;padding-bottom:13px}#app[data-page=report] .agent-panel{padding-bottom:100px}}
 @media(min-width:1051px){#app[data-page=classroom] .page:not(.prep-page) .page-heading{height:108px}#app[data-page=classroom] .tabs{padding-top:4px;padding-bottom:4px;margin-bottom:10px}#app[data-page=classroom] .timeline{display:grid;grid-template-columns:1fr 1fr;gap:13px 22px;grid-auto-flow:row}#app[data-page=classroom] .timeline-item{min-height:85px;align-items:flex-start;padding:12px 8px;background:#f4f7ed;border-radius:11px;border:0;gap:10px}#app[data-page=classroom] .timeline-item .duration{font-size:11px;white-space:nowrap;padding-top:4px}#app[data-page=classroom] .timeline-text p{font-size:12px;line-height:1.8}#app[data-page=classroom] .timeline-text h3{font-size:14px}#app[data-page=classroom] .lesson-stage{padding-top:10px;padding-bottom:10px}#app[data-page=classroom] .lesson-stage .big-icon{font-size:32px}#app[data-page=classroom] .lesson-stage .notes{margin:10px 0}#app[data-page=classroom] .layout>.panel{padding-top:18px;padding-bottom:18px}}
+
+.recovery-code{font-family:ui-monospace,Consolas,"Courier New",monospace;font-size:21px;letter-spacing:1.5px;text-align:center;padding:14px;margin:14px 0;border:1px dashed #b9a27a;border-radius:10px;background:#fffdf5;user-select:all;word-break:break-all}.recovery-hint{font-size:12px;line-height:1.9;color:#7e8c73;margin:6px 0}
+/* 儿童大字模式 + 离线提示 */
+html.big-text .btn{min-height:48px;font-size:18px;padding:13px 22px}
+html.big-text .btn.small{min-height:42px;font-size:16px;padding:9px 16px}
+html.big-text .btn.light,html.big-text .btn.secondary{min-height:44px;font-size:17px}
+html.big-text .notes{font-size:26px}
+html.big-text .score-event{min-width:66px;font-size:22px}
+html.big-text .score-event .lyric{font-size:18px}
+html.big-text .score-event small{font-size:13px}
+html.big-text p,html.big-text li{font-size:17px;line-height:1.9}
+html.big-text .fine-print,html.big-text .muted,html.big-text .assistant-message span{font-size:15px}
+html.big-text nav button{font-size:17px;padding:10px 14px}
+html.big-text .agent-step p{font-size:18px}
+html.big-text .agent-step{font-size:17px}
+html.big-text h2{font-size:22px}
+html.big-text h3{font-size:19px}
+html.big-text .report-row h3{font-size:19px}
+html.big-text .status-pill,html.big-text .badge{font-size:15px}
+#offline-badge{position:fixed;left:16px;bottom:16px;z-index:60;display:flex;align-items:center;gap:9px;max-width:min(460px,calc(100vw - 32px));padding:11px 16px;border-radius:12px;background:#4a3f2f;color:#fff8ea;font-size:13px;line-height:1.7;box-shadow:0 8px 26px rgba(31,58,44,.28)}
+#offline-badge b{color:#ffd98a}
+#offline-badge span{color:#f4ecdd}

@@ -17,6 +17,7 @@
 
 const crypto = require('node:crypto');
 const jianpu = require('./importers/jianpu.cjs');
+const scorefile = require('./importers/scorefile.cjs');
 const difficulty = require('./difficulty.cjs');
 const licensing = require('./licensing.cjs');
 const core = require('../public/lesson-core.js');
@@ -73,6 +74,8 @@ function verdictFor(sourceId, byId, asOf) {
  * 跑一遍导入流水线。
  * @param {object} input
  * @param {string} input.text 山野简谱文本
+ * @param {object} [input.file] 谱面文件：{kind:'musicxml'|'midi', data:string|Buffer, fileName?, mimeType?, title?, bpm?}
+ *                              给了 file 就先转成简谱文本再走同一条流水线，后面的步骤完全不变。
  * @param {object} [input.options] 传给 buildLessonFromJianpu 的覆盖项
  * @param {object} [input.planParams] 课堂条件（时长/人数/年级/基础/设备）
  * @param {Array} [input.sources] 来源登记对象数组（knowledge/sources/）
@@ -81,7 +84,7 @@ function verdictFor(sourceId, byId, asOf) {
  * @param {string} [input.asOf] 版权核算基准日
  * @returns {Promise<object>}
  */
-async function runImport({ text, options = {}, planParams = {}, sources = [], renderer = null, adapter = null, asOf } = {}) {
+async function runImport({ text, file = null, options = {}, planParams = {}, sources = [], renderer = null, adapter = null, asOf } = {}) {
   const startedAt = Date.now();
   const steps = [];
   /** 同一个工具先 'running' 后 'completed'/'failed'，是**改写同一条**，免得日志里出现两条同名步骤。 */
@@ -94,8 +97,39 @@ async function runImport({ text, options = {}, planParams = {}, sources = [], re
     steps.push({ time: new Date().toISOString(), stage, tool, status, result });
   };
 
+  /* 0. file.convert（可选）—— MusicXML / MIDI → 山野简谱文本。
+     转成文本而不是直接造 lesson：老师能看见并改这一份简谱，后面每一步都与手抄导入完全一致。 */
+  const fileWarnings = [];
+  let raw = String(text ?? '').replace(/\r\n?/g, '\n');
+  if (file) {
+    const kind = String(file.kind || scorefile.guessKind(file.fileName, file.mimeType) || '').toLowerCase();
+    emit('谱面文件转换', 'file.convert', 'running', { kind: kind || '未指定', fileName: file.fileName ?? null });
+    try {
+      const converted = scorefile.scoreFileToJianpu({
+        kind,
+        data: file.data,
+        title: file.title ?? options.title,
+        bpm: file.bpm,
+        sourceId: file.sourceId ?? options.sourceId ?? null,
+      });
+      raw = converted.text;
+      fileWarnings.push(...converted.warnings);
+      emit('谱面文件转换', 'file.convert', 'completed', {
+        source: kind,
+        measures: converted.measures,
+        hasLyrics: converted.hasLyrics,
+        jianpu: raw,
+        warnings: converted.warnings,
+      });
+    } catch (error) {
+      emit('谱面文件转换', 'file.convert', 'failed', { code: error.name || 'FILE_ERROR', reason: error.reason ?? error.message });
+      const wrapped = badRequest(error.reason ?? error.message);
+      wrapped.fileName = file.fileName ?? null;
+      throw withSteps(wrapped, steps);
+    }
+  }
+
   /* 1. import.parse —— 文本 → 记号流（这一步只能证伪：行数、记号数、头部声明） */
-  const raw = String(text ?? '').replace(/\r\n?/g, '\n');
   const lines = raw.split('\n');
   const headerLines = lines.filter(line => /^#\s/.test(line)).length;
   const scoreLines = lines.filter(line => line.trim() && !/^#\s/.test(line)).length;
@@ -171,7 +205,7 @@ async function runImport({ text, options = {}, planParams = {}, sources = [], re
     licensing: gate,
     teachingReady,
     steps,
-    warnings: built.warnings,
+    warnings: [...fileWarnings, ...built.warnings],
     durationMs: 0,
   };
   if (!teachingReady) {

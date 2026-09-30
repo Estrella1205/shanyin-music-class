@@ -46,3 +46,16 @@
 /* 全屏模式下适配投影 */
 :fullscreen .display-screen,:-webkit-full-screen .display-screen{padding:24px 48px}
 :fullscreen .display-now em,:-webkit-full-screen .display-now em{font-size:clamp(64px,11vw,200px)}
+
+/* 儿童大字模式：只放大字号与控件，不改布局逻辑 */
+.big-text .display-now em{font-size:clamp(64px,13vw,220px)}
+.big-text .display-now b{font-size:clamp(26px,3.2vw,56px)}
+.big-text .display-notation .score-event{font-size:clamp(26px,3.2vw,50px);min-width:clamp(62px,6.5vw,112px);padding:clamp(10px,1.6vw,22px)}
+.big-text .display-notation .score-event .lyric{font-size:clamp(20px,2.4vw,36px);margin-top:8px}
+.big-text .display-notation .score-event small{font-size:clamp(13px,1.2vw,19px)}
+.big-text .display-hint{font-size:clamp(17px,1.7vw,26px)}
+.big-text .display-songinfo{font-size:clamp(17px,1.8vw,28px)}
+.big-text .display-chip{font-size:clamp(15px,1.4vw,22px);padding:12px 22px}
+.big-text .btn-big{min-height:clamp(94px,12vh,168px);min-width:clamp(140px,15vw,250px)}
+.big-text .btn-big span{font-size:clamp(17px,1.8vw,26px)}
+.big-text .display-foot{font-size:clamp(14px,1.2vw,19px)}

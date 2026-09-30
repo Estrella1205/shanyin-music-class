@@ -11,10 +11,19 @@ const defaultDataDir = (() => {
 })();
 function createApp({dataDir=process.env.SHANYIN_DATA_DIR||defaultDataDir,agentAdapter,webSearcher,publicDeploy=false}={}){
  const root=path.join(__dirname,'..','public'),dbFile=path.join(dataDir,'accounts.json');
+ /** 离线外壳的版本号 = public/ 全部文件的「路径+大小+修改时间」指纹。
+  *  外壳任何一个文件变了，浏览器下次打开就会发现 sw.js 变了 → 重装 → 刷新离线缓存。
+  *  否则老师拿到的永远是第一次打开时的旧脚本（这种 bug 极难发现）。 */
+ let swStampCache=null;
+ const shellStamp=()=>{if(swStampCache)return swStampCache;const h=crypto.createHash('sha256');const walk=dir=>{for(const entry of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,entry.name);if(entry.isDirectory())walk(p);else{const s=fs.statSync(p);h.update(path.relative(root,p)+'|'+s.size+'|'+Math.floor(s.mtimeMs))}}};walk(root);return (swStampCache=h.digest('hex').slice(0,16))};
  const loadLesson=id=>{const direct=path.join(root,'lessons',`${id}.lesson.json`);if(fs.existsSync(direct))return JSON.parse(fs.readFileSync(direct,'utf8'));/* 兜底：文件名与 lesson.id 不一致（molihua.lesson.json ↔ molihua-opening-v1）时按内部 id 找一遍 */try{for(const file of fs.readdirSync(path.join(root,'lessons')).filter(f=>f.endsWith('.lesson.json'))){const item=JSON.parse(fs.readFileSync(path.join(root,'lessons',file),'utf8'));if(item.id===id)return item}}catch{}return null};
  const audioStoreEarly=require('./audio-store.cjs').createAudioStore(dataDir,{loadLesson});
 const agent=require('./teaching-agent.cjs').createAgent({dataDir,adapter:agentAdapter,store:audioStoreEarly,webSearcher,loadLesson});
  const audioStore=audioStoreEarly;
+ /* 录音保留期清扫：启动时跑一次，之后每小时一次；unref 保证不阻塞进程退出。 */
+ const runSweep=()=>{try{return audioStore.sweepExpired()}catch{return null}};
+ runSweep();
+ const sweepTimer=setInterval(runSweep,3600000);if(typeof sweepTimer.unref==='function')sweepTimer.unref();
  const reportBuilder=require('./report-builder.cjs');
  const sourcesDir=path.join(__dirname,'..','knowledge','sources');
  const importPipeline=require('./import-pipeline.cjs');
@@ -45,6 +54,15 @@ const agent=require('./teaching-agent.cjs').createAgent({dataDir,adapter:agentAd
  const userOf=req=>{const token=tokenOf(req),session=sessions.get(token);if(!session)return null;if(session.expires<Date.now()){sessions.delete(token);return null}return db.users.find(u=>u.id===session.id)};
  async function body(req,limit=350000){let size=0,parts=[];for await(const part of req){size+=part.length;if(size>limit)throw new Error('请求内容过大');parts.push(part)}return JSON.parse(Buffer.concat(parts).toString()||'{}')}
  async function hash(password,salt){return (await scrypt(password,salt,64)).toString('hex')}
+ /* ---- 账号找回：恢复码 ----
+  * 乡村老师没有邮箱、也不一定绑手机，所以找回只能靠"注册时发一枚一次性恢复码"。
+  * 码只存哈希（与密码同一套 scrypt 参数），只在发放的那一刻明文出现一次；
+  * 用过一次立刻换新的 —— 旧码当场失效，避免"抄在备课本上的那张纸"被人捡到后反复可用。 */
+ const RECOVERY_ALPHABET='ABCDEFGHJKMNPQRSTVWXYZ23456789';   // 去掉 I L O U，免得手抄时和 1 0 混淆
+ const normalizeRecoveryCode=value=>String(value??'').toUpperCase().replace(/[^0-9A-Z]/g,'');
+ const newRecoveryCode=()=>{const out=[];while(out.length<16){for(const byte of crypto.randomBytes(32)){if(byte>=240)continue;out.push(RECOVERY_ALPHABET[byte%30]);if(out.length===16)break}}return out.join('').replace(/(.{4})(?=.)/g,'$1-')};
+ /** 生成并保存一枚新恢复码，返回明文（调用方负责只显示这一次）。 */
+ async function setRecoveryCode(u){const code=newRecoveryCode(),salt=crypto.randomBytes(16).toString('hex');u.recovery={salt,hash:await hash(normalizeRecoveryCode(code),salt),createdAt:new Date().toISOString()};save();return code}
  function issue(req,res,u){sessions.delete(tokenOf(req));const token=crypto.randomBytes(32).toString('hex');sessions.set(token,{id:u.id,expires:Date.now()+43200000});cookie(res,token)}
  return http.createServer(async(req,res)=>{res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','same-origin');
  try{const route=new URL(req.url,'http://localhost').pathname;
@@ -64,33 +82,52 @@ const agent=require('./teaching-agent.cjs').createAgent({dataDir,adapter:agentAd
    if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:'需要 JSON 请求'});
   }
   const user=userOf(req);
-  if(route==='/api/session'&&req.method==='GET')return json(res,200,{user:user?publicUser(user):null,state:user?.state||null});
+  if(route==='/api/session'&&req.method==='GET')return json(res,200,{user:user?publicUser(user):null,state:user?.state||null,policy:{audioRetentionDays:audioStore.retentionDays}});
   if((route==='/api/register'||route==='/api/login')&&req.method==='POST'){
    const key=clientKey(req);let rate=attempts.get(key);if(!rate||rate.until<Date.now()){rate={n:0,until:Date.now()+900000};attempts.set(key,rate)}if(++rate.n>30)return json(res,429,{error:'尝试次数过多，请15分钟后再试'});
    const b=await body(req),username=String(b.username||'').trim().toLowerCase(),password=String(b.password||'');
    if(!/^[a-z0-9_.-]{3,32}$/.test(username)||password.length<8||password.length>128)return json(res,400,{error:'账号需为3–32位英文、数字或._-，密码需为8–128位'});
    const role=b.role==='student'?'student':'teacher';
-   let u=db.users.find(x=>x.username===username);
+   let u=db.users.find(x=>x.username===username);let recoveryCode=null;
    if(route==='/api/register'){
     if(u)return json(res,409,{error:'这个账号已注册，请登录或更换账号'});
     const name=String(b.name||'').trim();if(!name||name.length>20)return json(res,400,{error:role==='student'?'请填写1–20字的称呼或昵称':'请填写1–20字的教师称呼'});
     const salt=crypto.randomBytes(16).toString('hex'),passwordHash=await hash(password,salt);
     if(db.users.some(x=>x.username===username))return json(res,409,{error:'这个账号已注册'});
     u={id:crypto.randomUUID(),username,name,school:'',avatar:role==='student'?'🧒': '🧑🏻‍🏫',role,salt,passwordHash,state:null};db.users.push(u);save();
+    recoveryCode=await setRecoveryCode(u);   // 注册即发码：不然"忘了密码"这条路一开始就不通
    }else{
     const candidate=await hash(password,u?.salt||'invalid-user-salt');
     if(!u||!crypto.timingSafeEqual(Buffer.from(candidate,'hex'),Buffer.from(u.passwordHash,'hex')))return json(res,401,{error:'账号或密码不正确'});
    }
-   issue(req,res,u);return json(res,200,{user:publicUser(u),state:u.state});
+   issue(req,res,u);return json(res,200,{user:publicUser(u),state:u.state,...(recoveryCode?{recoveryCode}:{})});
+  }
+  // 忘了密码：用恢复码重设。用完立即换新码，旧码当场失效。
+  if(route==='/api/recover'&&req.method==='POST'){
+   const rateKey='recover:'+clientKey(req);let rate=attempts.get(rateKey);if(!rate||rate.until<Date.now()){rate={n:0,until:Date.now()+900000};attempts.set(rateKey,rate)}if(++rate.n>10)return json(res,429,{error:'尝试次数过多，请15分钟后再试'});
+   const b=await body(req),username=String(b.username||'').trim().toLowerCase(),code=normalizeRecoveryCode(b.code),password=String(b.password||'');
+   if(!username||!code||password.length<8||password.length>128)return json(res,400,{error:'请填写账号、恢复码与新密码（新密码需8–128位）'});
+   const u=db.users.find(x=>x.username===username);
+   if(!u?.recovery)return json(res,400,{error:'这个账号没有可用的恢复码：请用原密码登录后，在「个人资料 · 账号找回」里生成一枚；若原密码也忘了，只能重新注册一个账号'});
+   const candidate=await hash(code,u.recovery.salt);
+   if(!crypto.timingSafeEqual(Buffer.from(candidate,'hex'),Buffer.from(u.recovery.hash,'hex')))return json(res,401,{error:'账号或恢复码不正确'});
+   u.salt=crypto.randomBytes(16).toString('hex');u.passwordHash=await hash(password,u.salt);
+   for(const [k,v] of sessions)if(v.id===u.id)sessions.delete(k);
+   const recoveryCode=await setRecoveryCode(u);
+   issue(req,res,u);return json(res,200,{user:publicUser(u),state:u.state,recoveryCode});
   }
   if(route==='/api/logout'&&req.method==='POST'){sessions.delete(tokenOf(req));cookie(res,'',0);return json(res,200,{ok:true})}
   // 山野简谱文本导入（方案 §4.2 / §4.4）：不依赖任何外部谱源，老师手抄什么就录什么。
   // 不写用户数据、不依赖登录态 —— 老师可以先试录一遍，再决定要不要拿它上课。
   if(route==='/api/lesson/import-jianpu'&&req.method==='POST'){
    try{
-    const payload=await body(req,200000);
+    const payload=await body(req,2000000);
+    // 谱面文件（MusicXML / MIDI）：先转成山野简谱文本，再走与手抄导入完全相同的流水线。
+    const f=payload.file;
+    if(f&&String(f.data??'').length>1500000)return json(res,400,{error:'谱面文件过大，一期只支持单乐段（约 1MB 以内）',steps:[]});
     const result=await importPipeline.runImport({
      text:payload.text,
+     file:f?{kind:f.kind,data:f.data,fileName:f.fileName,mimeType:f.mimeType,title:f.title,bpm:f.bpm,sourceId:f.sourceId}:null,
      options:{id:payload.id,title:payload.title,sourceId:payload.sourceId,description:payload.description},
      planParams:{...(payload.planParams||payload.params||{})},
      sources:loadSources(),
@@ -170,7 +207,7 @@ const agent=require('./teaching-agent.cjs').createAgent({dataDir,adapter:agentAd
   if(route==='/api/audio/attempts'&&req.method==='GET')return json(res,200,{attempts:audioStore.list(user.id)});
   if(route==='/api/audio/attempts'&&req.method==='POST'){try{return json(res,201,await audioStore.submit(user.id,await body(req,900000)))}catch(e){return json(res,400,{error:e.message,hint:e.hint||null})}}
   const audioRoute=route.match(/^\/api\/audio\/attempts\/([a-f0-9-]{36})(?:\/(wav|practice))?$/);
-  if(audioRoute){const [,id,action]=audioRoute;if(action==='practice'&&req.method==='POST'){try{return json(res,200,audioStore.practice(id,user.id))}catch{return json(res,404,{error:'录音不存在'})}}if(req.method==='GET'){const r=action==='wav'?audioStore.audio(id,user.id):audioStore.get(id,user.id);if(!r)return json(res,404,{error:'录音不存在'});if(action==='wav'){res.writeHead(200,{'Content-Type':'audio/wav','Cache-Control':'no-store'});return res.end(r)}return json(res,200,r)}}
+  if(audioRoute){const [,id,action]=audioRoute;if(action==='practice'&&req.method==='POST'){try{return json(res,200,audioStore.practice(id,user.id))}catch{return json(res,404,{error:'录音不存在'})}}if(req.method==='GET'){const r=audioStore.get(id,user.id);if(!r)return json(res,404,{error:'录音不存在'});if(action==='wav'){if(r.audioDeleted)return json(res,410,{error:'录音音频已按保留策略自动删除',hint:`录音音频保留 ${r.retentionDays??audioStore.retentionDays} 天后自动删除；测量与诊断结果不受影响`});const wav=audioStore.audio(id,user.id);if(!wav)return json(res,410,{error:'录音音频文件缺失'});res.writeHead(200,{'Content-Type':'audio/wav','Cache-Control':'no-store'});return res.end(wav)}return json(res,200,r)}}
   if(route==='/api/reports/overview'&&req.method==='GET')return json(res,200,reportBuilder.buildReport(user.id,audioStore.list(user.id)));
   if(route==='/api/agent/status'&&req.method==='GET')return json(res,200,{configured:agent.configured});
   if(route==='/api/agent/tasks'&&req.method==='GET')return json(res,200,{tasks:agent.list(user.id)});
@@ -197,6 +234,8 @@ const agent=require('./teaching-agent.cjs').createAgent({dataDir,adapter:agentAd
    if(!avatarSets[role].includes(b.avatar))return json(res,400,{error:'请选择提供的头像'});
    Object.assign(user,{name,school,avatar:b.avatar});save();return json(res,200,{user:publicUser(user)});
   }
+  // 登录后重新发一枚恢复码：旧码立刻失效。忘记密码前没保存过码的老师也能在这里补一枚。
+  if(route==='/api/recover/code'&&req.method==='POST')return json(res,200,{recoveryCode:await setRecoveryCode(user)});
   if(route==='/api/password'&&req.method==='POST'){
    const b=await body(req);if(typeof b.password!=='string'||b.password.length<8||b.password.length>128||typeof b.current!=='string'||b.current.length>128)return json(res,400,{error:'新密码需为8–128位'});
    const previous=await hash(b.current,user.salt);if(!crypto.timingSafeEqual(Buffer.from(previous,'hex'),Buffer.from(user.passwordHash,'hex')))return json(res,401,{error:'原密码不正确'});
@@ -210,6 +249,11 @@ const agent=require('./teaching-agent.cjs').createAgent({dataDir,adapter:agentAd
  }
  let pathname;try{pathname=decodeURIComponent(route)}catch{return json(res,400,{error:'路径不正确'})}
  const file=path.resolve(root,'.'+(pathname==='/'?'/index.html':pathname));if(!file.startsWith(root+path.sep))return json(res,403,{error:'禁止访问'});
+ // 离线脚本：版本号注入外壳指纹，外壳一变浏览器就会自动刷新离线缓存。
+ if(pathname==='/sw.js'){
+  try{const source=fs.readFileSync(file,'utf8');res.writeHead(200,{'Content-Type':'text/javascript; charset=utf-8','Cache-Control':'no-cache'});return res.end(source.split('__BUILD__').join(shellStamp()))}
+  catch{return json(res,404,{error:'离线脚本缺失'})}
+ }
  fs.readFile(file,(err,data)=>{if(err){res.writeHead(404);res.end('Not found');return}res.setHeader('Cache-Control','no-cache');res.setHeader('Content-Type',({'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.png':'image/png','.wav':'audio/wav','.json':'application/json; charset=utf-8'})[path.extname(file)]||'application/octet-stream');res.end(data)});
  }catch(e){json(res,400,{error:e instanceof SyntaxError?'请求内容格式不正确':'操作未完成，请重试'})}});
 }

@@ -1,0 +1,41 @@
+# 把 public/ 作为静态预览站部署到 GitHub Pages。
+#
+# 说明（别把它当成完整版）：本项目的登录、录音测量与版权闸门都要跑
+# `node server/server.cjs`，而 GitHub Pages 只能托管静态文件。
+# 所以这个站点是「可翻看的静态预览版」——谱面、参考音频、学生大屏都能看能听，
+# 打开后应用会自己进入离线模式，并如实说明哪些功能需要连回本机服务。
+# 要完整体验：`npm start` 后打开 http://127.0.0.1:4173
+name: Deploy static preview to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -54,6 +54,57 @@ test('jianpu import api: guests may preview, lyrics reach the gate, export round
   assert.match(wrongBeats.data.error,/第 2 小节共 3 拍，应为 4 拍/);
 
   assert.equal((await post('   ')).status,400);
+
+  /* 谱面文件导入：MusicXML 走同一条流水线，只是多一步"转成简谱" */
+  const musicXml = `<?xml version="1.0"?>
+<score-partwise>
+  <work><work-title>文件导入测试曲</work-title></work>
+  <part-list><score-part id="P1"><part-name>Melody</part-name></score-part></part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes><divisions>4</divisions><time><beats>4</beats><beat-type>4</beat-type></time><key><fifths>0</fifths><mode>major</mode></key></attributes>
+      <direction><sound tempo="96"/></direction>
+      <note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice></note>
+      <note><pitch><step>D</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice></note>
+      <note><pitch><step>E</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice></note>
+      <note><pitch><step>F</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice></note>
+    </measure>
+    <measure number="2">
+      <note><pitch><step>G</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice></note>
+      <note><pitch><step>G</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice></note>
+      <note><pitch><step>A</step><octave>4</octave></pitch><duration>8</duration><voice>1</voice></note>
+    </measure>
+  </part>
+</score-partwise>`;
+  const postFile = async file => {
+    const r = await fetch(base + '/api/lesson/import-jianpu', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Shengru-Client': 'local-web' },
+      body: JSON.stringify({ file }),
+    });
+    return { status: r.status, data: await r.json() };
+  };
+  const fromFile = await postFile({ kind: 'musicxml', data: musicXml, fileName: 'test.musicxml', sourceId: 'src-jianpu-demo-sample' });
+  assert.equal(fromFile.status, 200);
+  assert.equal(fromFile.data.lesson.title, '文件导入测试曲');
+  assert.equal(fromFile.data.lesson.events.length, 7);
+  assert.equal(fromFile.data.lesson.teaching.measures, 2);
+  assert.equal(fromFile.data.lesson.teaching.bpm, 96);
+  assert.equal(fromFile.data.steps[0].stage, '谱面文件转换');
+  assert.equal(fromFile.data.steps[0].tool, 'file.convert');
+  assert.match(fromFile.data.steps[0].result.jianpu, /^# 文件导入测试曲 \/ 4\/4 \/ 1=C/);
+
+  // 不传 kind 也能按文件名认出来
+  const guessed = await postFile({ data: musicXml, fileName: 'twinkle.musicxml', sourceId: 'src-jianpu-demo-sample' });
+  assert.equal(guessed.status, 200);
+
+  // 和弦谱：明确报错，不替老师挑一个音
+  const chordXml = musicXml.replace('<note><pitch><step>D</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice></note>',
+    '<note><pitch><step>D</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice></note><note><chord/><pitch><step>F</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice></note>');
+  const chord = await postFile({ kind: 'musicxml', data: chordXml, fileName: 'chord.musicxml' });
+  assert.equal(chord.status, 400);
+  assert.match(chord.data.error, /和弦/);
+  assert.equal(chord.data.steps.length, 1, '失败也要告诉老师走到哪一步');
  }finally{
   await new Promise(r=>server.close(r));
   const resolved=path.resolve(dir);
