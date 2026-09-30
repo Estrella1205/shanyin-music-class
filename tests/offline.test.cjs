@@ -48,7 +48,8 @@ test('离线外壳清单里的每个地址都能取到，且不含任何 /api/',
     assert.match(sw.headers.get('content-type') || '', /javascript/);
     const served = await sw.text();
     assert.ok(!served.includes('__BUILD__'), '服务端必须把外壳指纹注入 SW 版本号，否则外壳更新后浏览器不会刷新离线缓存');
-    assert.match(served, /shanyin-offline-[0-9a-f]{16}/);
+    // 版本号由 'shanyin-offline-' + BUILD 拼出来，所以查注入后的 BUILD 常量
+    assert.match(served, /const BUILD = '[0-9a-f]{16}'/, 'SW 版本号应带外壳指纹；没有指纹时外壳更新后浏览器不会刷新离线缓存');
   } finally {
     await new Promise(r => server.close(r));
     fs.rmSync(dir, { recursive: true, force: true });
