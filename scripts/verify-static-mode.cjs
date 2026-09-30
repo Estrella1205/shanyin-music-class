@@ -72,6 +72,8 @@ const FLOW = `(async () => {
   await window.ShanyinStatic.ready;
   step('静态后端已启用', window.ShanyinStatic.enabled);
   step('浏览器内核已加载', !!window.ShanyinVendor?.audioAnalysis);
+  // 联网状态明明正常，却挂着"离线模式"角标，是最容易被误判的一类缺陷。
+  step('没有误报离线', !document.getElementById('offline-badge'));
 
   const username = 'judge' + Date.now().toString().slice(-8);
   const password = 'shanye-2026';
