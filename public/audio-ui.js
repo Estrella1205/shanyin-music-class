@@ -1,7 +1,8 @@
 /* Real single-singer measurement; no model key or external audio service. */
 const demoListen=listen,audioPreviousRender=render,previousStopRecording=stopRecording;
 let measuredAttempt=null,measurementOwner=null,retestOf=null,audioWorking=false,audioCommit=false,audioSession=false,audioFailure=null;
-const audioUrl=id=>'/api/audio/attempts/'+encodeURIComponent(id)+'/wav';
+/* 静态托管（GitHub Pages）时没有 /api/，录音音频存在浏览器里，用 blob URL 播放与下载。 */
+const audioUrl=id=>window.ShanyinStatic?.assetUrl?.(id)||'/api/audio/attempts/'+encodeURIComponent(id)+'/wav';
 /* Live "mountain" waveform: shows real input level, never a score. */
 const WAVE_BARS=32;
 let waveAnalyser=null,waveSource=null,waveFrame=0;

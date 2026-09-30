@@ -1,7 +1,7 @@
 /* Real-measurement report center. Aggregates stored, owner-scoped measurements only. */
 const legacyReportsPage=reports,legacyReportPage=report,reportsBaseRender=render;
 let overview=null,overviewState='idle',overviewError='',overviewOwner=null,measured={id:null,record:null,status:'idle',error:''};
-const wavHref=id=>'/api/audio/attempts/'+encodeURIComponent(id)+'/wav';
+const wavHref=id=>window.ShanyinStatic?.assetUrl?.(id)||'/api/audio/attempts/'+encodeURIComponent(id)+'/wav';
 const num=(v,suffix='')=>v===null||v===undefined||(typeof v==='number'&&!Number.isFinite(v))?'—':`${v}${suffix}`;
 const stamp=t=>{try{return new Date(t).toLocaleString('zh-CN',{dateStyle:'medium',timeStyle:'short'})}catch{return String(t||'')}};
 const lessonTitle=()=>overview?.lesson?.title||(typeof lesson!=='undefined'?lesson.title:'茉莉花');

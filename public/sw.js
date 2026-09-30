@@ -20,6 +20,7 @@ const SHELL = [
   '/style.css', '/workspace.css', '/lesson.css', '/reports.css', '/display.css',
   '/app.js', '/workspace.js', '/lesson-core.js', '/lesson-ui.js', '/agent-ui.js',
   '/audio-ui.js', '/reports-ui.js', '/display-ui.js', '/student-ui.js', '/offline-ui.js',
+  '/vendor/shanyin-vendor.js', '/static-backend.js', '/knowledge/sources.json',
   '/lessons/molihua.data.js', '/lessons/liangzhilaohu.data.js',
   '/lessons/molihua.lesson.json', '/lessons/liangzhilaohu.lesson.json',
   '/lessons/audio-manifest.json',

@@ -1,0 +1,279 @@
+{
+  "generatedBy": "scripts/build-browser-vendor.cjs",
+  "sources": [
+    {
+      "id": "src-eol-zh-music",
+      "kind": "biography-reference",
+      "sourceType": "encyclopedia",
+      "title": "《中国大百科全书》第三版网络版（音乐舞蹈学科）",
+      "work": {
+        "title": "《中国大百科全书》第三版网络版「黎锦晖」条目",
+        "variant": "检索入口为中国百科网（zgbk.com）；本记录只登记条目定位，不复制、不分发其正文",
+        "creators": [
+          {
+            "role": "publisher",
+            "name": "中国大百科全书出版社有限公司",
+            "deathDate": null
+          }
+        ],
+        "creatorsNote": "法人作品，保护期按「首次发表后 50 年」计。本记录按 link-only 处理、不复制原文，因此不依赖该推导。"
+      },
+      "url": "https://www.zgbk.com/",
+      "retrievedAt": "2026-09-13",
+      "sha256": null,
+      "sha256Note": "百科条目为动态页面，不做内容哈希；本记录只保留检索入口与条目定位。",
+      "locator": {
+        "location": "在中国百科网检索「黎锦晖」，条目页链接需人工补登到本记录"
+      },
+      "license": {
+        "type": "link-only",
+        "url": "https://www.zgbk.com/",
+        "note": "仅登记条目定位与链接，不分发原文；课件中引用时只出现条目标题与链接。"
+      },
+      "verifiedBy": null,
+      "verifiedAt": null,
+      "caveats": [
+        "条目页链接尚未补登，需人工检索后填入 url。",
+        "本记录未逐字核对条目正文，因此引用它的课件一律带「待人工核对」标记。"
+      ]
+    },
+    {
+      "id": "src-guoxue-molihua-qupai",
+      "kind": "biography-reference",
+      "sourceType": "academic-article",
+      "title": "《明清俗曲〈茉莉花〉曲牌的流变》（国学网转载页）",
+      "work": {
+        "title": "明清俗曲《茉莉花》曲牌的流变",
+        "variant": "国学网（guoxue.com）转载页，用于了解《茉莉花》／《鲜花调》曲牌的流传脉络",
+        "creators": [
+          {
+            "role": "article",
+            "name": "转载页未标注作者",
+            "deathDate": null
+          }
+        ],
+        "creatorsNote": "原文作者与首发刊物需人工核对。本记录按 link-only 处理，只登记链接与标题，不复制正文。"
+      },
+      "url": "http://www.guoxue.com/wk/000439.htm",
+      "retrievedAt": "2026-09-13",
+      "sha256": null,
+      "sha256Note": "转载页面为动态页面，不做内容哈希。",
+      "locator": {
+        "location": "文章页；正式引用前需回溯原刊出处、作者与页码"
+      },
+      "license": {
+        "type": "link-only",
+        "url": "http://www.guoxue.com/wk/000439.htm",
+        "note": "只登记链接与标题，不分发正文；课件中引用时只出现文章标题与链接。"
+      },
+      "verifiedBy": null,
+      "verifiedAt": null,
+      "caveats": [
+        "这是转载页而不是原刊，作者、刊物、年份都还空着，对外使用前必须补齐。",
+        "18 世纪末至 19 世纪初西人记谱带回国这一段，不同资料的译者名与书名写法不一（巴罗／贝罗，《中国旅行》／《中国旅行记》），本记录不做取舍，留待人工核对。"
+      ]
+    },
+    {
+      "id": "src-jianpu-demo-sample",
+      "kind": "score",
+      "sourceType": "project-original",
+      "title": "山野简谱格式示例（本项目自撰的占位旋律，不对应任何真实曲目）",
+      "work": {
+        "title": "山野小练习",
+        "variant": "本项目为演示「两行对齐」录入格式而自撰的 8 拍走句（5 6 5 0 | 3 2 1 -）",
+        "creators": [
+          {
+            "role": "music",
+            "name": "本项目（声入山野）",
+            "deathDate": null
+          }
+        ],
+        "creatorsNote": "作者即本项目，故由本项目直接以 CC0 放弃权利；此处不适用「逝世年份 + 50 年」推导。"
+      },
+      "url": null,
+      "retrievedAt": "2026-09-13",
+      "sha256": null,
+      "sha256Note": "内容随示例保存在本仓库内，无需外部哈希。",
+      "locator": {
+        "location": "docs/音乐资源与课件生成方案.md §4.2 示例"
+      },
+      "license": {
+        "type": "cc0",
+        "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "note": "本项目自撰的格式示例旋律，以 CC0 1.0 放弃全部权利，可自由使用与改写。"
+      },
+      "verifiedBy": "人工核对：确认该旋律为本项目自撰，与任何真实曲目无对应关系",
+      "verifiedAt": "2026-09-13",
+      "caveats": [
+        "这 8 拍只为演示录入格式，不是教学曲目，不得作为课堂曲目收录。",
+        "它的作用是让老师在不涉及任何他人权利的前提下，把「手抄 → 课程安排」整条链路走通一遍。"
+      ]
+    },
+    {
+      "id": "src-liangzhilaohu-publicdomain",
+      "kind": "score",
+      "sourceType": "public-domain-folksong",
+      "title": "《两只老虎》（公版儿歌，旋律源自法国童谣《雅克兄弟》）",
+      "work": {
+        "title": "两只老虎",
+        "variant": "法国童谣《雅克兄弟》(Frère Jacques) 改编；公版儿歌",
+        "creators": [
+          {
+            "role": "music",
+            "name": "佚名（法国传统轮唱童谣《雅克兄弟》）",
+            "deathDate": "1800-01-01"
+          },
+          {
+            "role": "lyric",
+            "name": "佚名（通行公版中文填词）",
+            "deathDate": "1900-01-01"
+          }
+        ],
+        "creatorsNote": "旋律源自法国传统童谣《雅克兄弟》（Frère Jacques），18 世纪已广泛流传，原作者不可考；此处以 1800 年作为保守估计的逝世年份（远超 50 年保护期，可确证进入公有领域）。中文填词「两只老虎…真奇怪」为民国时期通行公版填词，填词人不可考，以 1900 年作为保守估计。"
+      },
+      "url": "https://zh.wikipedia.org/wiki/两只老虎",
+      "retrievedAt": "2026-09-20",
+      "sha256": null,
+      "sha256Note": "公版曲调与填词，无需下载原谱；本项目仅按通行版本转录短乐句供本地校验。",
+      "locator": {
+        "location": "通行公版版本，C大调 4/4"
+      },
+      "license": {
+        "type": "public-domain",
+        "url": null,
+        "note": "旋律与中文填词均属公有领域，可自由用于教学与分发；本项目音频由逐音合成，未使用任何第三方录音。"
+      },
+      "quotation": {
+        "limitMeasures": 8,
+        "usedMeasures": 8,
+        "basis": "转录通行公版版本全曲 8 小节；唱词为公版填词逐音引用。"
+      },
+      "verifiedBy": "人工核对通行公版版本",
+      "verifiedAt": "2026-09-20",
+      "caveats": [
+        "96/72 BPM 为项目练习设置，不是谱源标注数值。",
+        "未使用任何第三方录音，音频由本项目逐音合成。",
+        "八分音符成对出现在「一只没有耳朵/尾巴」两句，为通行版本记法。"
+      ]
+    },
+    {
+      "id": "src-maibao-1933",
+      "kind": "score",
+      "sourceType": "public-domain-work",
+      "title": "卖报歌",
+      "work": {
+        "title": "卖报歌",
+        "creators": [
+          {
+            "role": "lyric",
+            "name": "安娥",
+            "deathDate": "1976-08-18"
+          },
+          {
+            "role": "music",
+            "name": "聂耳",
+            "deathDate": "1935-07-17"
+          }
+        ],
+        "creatorsNote": "典型的词曲保护期不同步案例：曲早已届满，词尚未届满。"
+      },
+      "url": null,
+      "retrievedAt": "2026-09-13",
+      "sha256": null,
+      "license": {
+        "type": "public-domain",
+        "url": null,
+        "note": "声明为公有领域以便闸门复核。曲作者聂耳 1935 年逝世，曲的权利已于 1985-12-31 届满；词作者安娥 1976-08-18 逝世，词的权利至 2026-12-31 届满。"
+      },
+      "status": "blocked",
+      "statusNote": "记录在案但不得使用。闸门当前判定为 link-only，须待 2027-01-01 起方可收录词曲正文。保留此条作为闸门行为的回归测试样本。",
+      "verifiedBy": "人工核对：安娥生卒 1905-10-11 至 1976-08-18；聂耳 1935 年逝世",
+      "verifiedAt": "2026-09-13",
+      "caveats": [
+        "本条目的存在目的不是待用曲目，而是证明「词曲保护期分别计算」这条规则确实被机器执行。",
+        "若未来收录，仍须自行记谱，不得使用任何第三方谱面与录音。"
+      ]
+    },
+    {
+      "id": "src-molihua-arthn-2021",
+      "kind": "score",
+      "sourceType": "pdf-excerpt",
+      "title": "湖南艺术职业学院2021级公共文化服务与管理专业技能考核标准及题库",
+      "work": {
+        "title": "茉莉花",
+        "variant": "江苏民歌；按该 PDF 所载谱例开头两小节",
+        "creators": [],
+        "creatorsNote": "曲调为世代流传的传统民歌，无特定作者，曲调本身不受著作权保护。此处登记的是本项目的谱例来源版本，该版本的记谱/排版仍属原机构。"
+      },
+      "url": "https://jwc.arthn.com/__local/7/B3/83/3107CEF266DCC87041DDD41E5CA_A3C890B5_1DAFB6.pdf",
+      "retrievedAt": "2026-09-12",
+      "sha256": null,
+      "sha256Note": "未下载原 PDF（避免再分发），因此无本地哈希。核对方式为人工比对指定页码。",
+      "locator": {
+        "pdfPage": 30,
+        "printedPage": "27",
+        "location": "试题2-6《茉莉花》，第一行前两小节"
+      },
+      "license": {
+        "type": "excerpt-only",
+        "url": null,
+        "note": "公开谱例，未标明开放许可证。原 PDF 不随本项目分发，仅转录所选短乐句供本地校验。"
+      },
+      "quotation": {
+        "limitMeasures": 2,
+        "usedMeasures": 2,
+        "basis": "仅转录前两小节旋律，不复制谱面图像；唱词「好一朵美丽的茉莉花」九个音节随该旋律片段逐音引用，未复制歌词排版，也未使用其他版本的唱词段落"
+      },
+      "verifiedBy": "人工核对原 PDF 第30页（印刷页27）",
+      "verifiedAt": "2026-09-12",
+      "caveats": [
+        "80/60 BPM 为项目练习设置，不是谱源标注的数值。",
+        "未使用任何第三方录音，音频由本项目逐音合成。",
+        "唱词「好一朵美丽的茉莉花」中「美丽的」三字为何仿1957年整理改编版的用词，非世代流传《鲜花调》原文；此处仅随旋律片段逐音引用，来源登记不等于已获授权，正式对外发布前需完成真实权利核查。",
+        "末字「花」按拖腔跨最后三个音演唱（第10、11音标记为一字多音延续），与谱面连线及常见演唱习惯一致；如需严格按谱演唱，可在教学中调整。"
+      ]
+    },
+    {
+      "id": "src-xiaotuzi-lijinhui-1920",
+      "kind": "score",
+      "sourceType": "public-domain-work",
+      "title": "小兔子乖乖（原名《老虎叫门》，出自儿童歌舞剧《神仙妹妹》）",
+      "work": {
+        "title": "小兔子乖乖",
+        "variant": "黎锦晖 1920 年创作；1922 年以《老虎叫门》为名发表于《小朋友》杂志连载的儿童歌舞剧",
+        "creators": [
+          {
+            "role": "lyric",
+            "name": "黎锦晖",
+            "deathDate": "1967-02-15"
+          },
+          {
+            "role": "music",
+            "name": "黎锦晖",
+            "deathDate": "1967-02-15"
+          }
+        ],
+        "creatorsNote": "词、曲均出自黎锦晖一人之手，无合作作者，保护期计算不存在「最后死亡作者」歧义。"
+      },
+      "url": "https://baike.baidu.com/item/%E5%B0%8F%E5%85%94%E5%AD%90%E4%B9%96%E4%B9%96/606653",
+      "retrievedAt": "2026-09-13",
+      "sha256": null,
+      "sha256Note": "参考页面为动态百科页，不做内容哈希；作品身份以词曲作者与创作年份确定。",
+      "locator": {
+        "location": "词曲作者与创作年份见参考资料；乐谱由本项目自行记谱"
+      },
+      "license": {
+        "type": "public-domain",
+        "url": null,
+        "note": "词曲作者黎锦晖 1967-02-15 逝世，保护期于 2017-12-31 届满，2018-01-01 起进入公有领域。"
+      },
+      "verifiedBy": "人工核对：黎锦晖生卒 1891-09-05 至 1967-02-15；该曲为其独立作词组曲的儿童歌舞剧选段",
+      "verifiedAt": "2026-09-13",
+      "caveats": [
+        "本项目使用自行记谱，未使用任何第三方乐谱排版、谱面影印件或录音。",
+        "网络上流传的「儿歌版」多有改编配器，本项目不采用任何带改编者署名的版本。",
+        "歌词存在地域与年代变体（如「小兔子乖乖」与「小白兔乖乖」），本项目记谱时须固定并在 variant 中注明所用文本。"
+      ]
+    }
+  ]
+}
