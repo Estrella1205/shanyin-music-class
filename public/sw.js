@@ -13,6 +13,11 @@ const VERSION = 'shanyin-offline-' + BUILD;
 const SHELL_CACHE = VERSION + '-shell';
 const RUNTIME_CACHE = VERSION + '-runtime';
 
+/* 部署在子路径下时（GitHub Pages 是 /<仓库名>/），SW 自己的位置就是站点根 —— 据此推导前缀。
+   否则 addAll 会按根路径去找文件、全部 404，离线外壳直接装不上。 */
+const BASE = self.location.pathname.replace(/sw\.js$/, '');
+const prefix = entry => BASE + entry.replace(/^\//, '');
+
 /* 外壳：缺一个页面就打不开，所以全部列出、逐个校验（tests/offline.test.cjs 会查）。 */
 const SHELL = [
   '/',
@@ -26,12 +31,15 @@ const SHELL = [
   '/lessons/audio-manifest.json',
   '/assets/logo.png',
 ];
+/* 真正拿去缓存的是带前缀的版本；上面的数组保持根路径写法，供 tests/offline.test.cjs 直接解析。 */
+const SHELL_URLS = SHELL.map(prefix);
 
 /* 最小离线包：断网也至少能放一遍范唱。装在后台补，不阻塞首次打开。 */
 const OFFLINE_AUDIO = [
   '/assets/audio/molihua-c-80.wav',
   '/assets/audio/liangzhilaohu-c-96.wav',
 ];
+const AUDIO_URLS = OFFLINE_AUDIO.map(prefix);
 
 const CACHEABLE = /\.(js|css|html|json|png|jpg|jpeg|svg|woff2?|wav|mp3|mp4)$/i;
 const offlineJson = (message) => new Response(JSON.stringify({ error: message, offline: true }), {
@@ -42,7 +50,7 @@ const offlineJson = (message) => new Response(JSON.stringify({ error: message, o
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(SHELL_CACHE);
-    await cache.addAll(SHELL);
+    await cache.addAll(SHELL_URLS);
     await self.skipWaiting();
   })());
 });
@@ -55,7 +63,7 @@ self.addEventListener('activate', event => {
     // 后台补离线包：失败也不影响外壳，下次用到时会自动补。
     try {
       const cache = await caches.open(RUNTIME_CACHE);
-      await cache.addAll(OFFLINE_AUDIO);
+      await cache.addAll(AUDIO_URLS);
       broadcast({ type: 'offline-pack', ok: true });
     } catch (e) {
       broadcast({ type: 'offline-pack', ok: false });
@@ -120,7 +128,7 @@ self.addEventListener('fetch', event => {
       try { return await fetch(request); }
       catch (e) {
         const cache = await caches.open(SHELL_CACHE);
-        return (await cache.match('/index.html')) || (await cache.match('/')) || offlineJson('离线');
+        return (await cache.match(BASE + 'index.html')) || (await cache.match(BASE)) || offlineJson('离线');
       }
     })());
     return;

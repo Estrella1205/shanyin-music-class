@@ -76,7 +76,10 @@ test('页面已注册 Service Worker，且大字模式开关先于首屏渲染�
   const html = fs.readFileSync(path.join(PUBLIC, 'index.html'), 'utf8');
   assert.ok(html.indexOf('offline-ui.js') < html.indexOf('app.js'), 'offline-ui.js 必须在 app.js 之前加载：首屏账号菜单就要读大字模式状态');
   const ui = fs.readFileSync(path.join(PUBLIC, 'offline-ui.js'), 'utf8');
-  assert.match(ui, /serviceWorker\.register\('\/sw\.js'\)/);
+  // 不能写死 '/sw.js'：GitHub Pages 部署在 /<仓库名>/ 子路径下，写死会让离线外壳根本装不上。
+  assert.match(ui, /serviceWorker\.register\(new URL\('sw\.js', document\.baseURI\)\.href\)/);
+  assert.doesNotMatch(ui, /register\('\/sw\.js'\)/);
+  assert.match(swSource(), /const BASE = self\.location\.pathname/, 'SW 要按自身位置推导站点前缀，否则子路径部署时外壳装不上');
   assert.match(ui, /classList\.toggle\('big-text'/);
   assert.match(ui, /localStorage/, '大字模式要能记住：老师设一次就行，不用每节课重设');
   // 教师端账号菜单与学生大屏都要有开关

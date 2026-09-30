@@ -185,8 +185,9 @@ const PASSTHROUGH_FLOW = `(async () => {
   await send('Page.navigate', { url: base });
   await new Promise((r) => setTimeout(r, 4000));
 
+  const checkOnly = process.argv[3] === 'passthrough';   // 只验证"没插手"
   const result = await send('Runtime.evaluate', {
-    expression: target ? PASSTHROUGH_FLOW : FLOW.replace('__WAV__', JSON.stringify(WAV_BASE64)),
+    expression: checkOnly ? PASSTHROUGH_FLOW : FLOW.replace('__WAV__', JSON.stringify(WAV_BASE64)),
     awaitPromise: true,
     returnByValue: true,
   });
@@ -194,7 +195,10 @@ const PASSTHROUGH_FLOW = `(async () => {
   let report = value || '';
   if (result.exceptionDetails) report = 'EXCEPTION: ' + JSON.stringify(result.exceptionDetails.exception?.description || result.exceptionDetails.text).slice(0, 1500);
 
-  const text = ['--- ' + (target ? `本机服务模式验证（${target}）：确认静态后端不插手` : '静态模式端到端验证（模拟 GitHub Pages：/api 全 404）') + ' ---', report, '', '控制台错误：' + (consoleErrors.length ? consoleErrors.join('\n') : '无'), ''].join('\n');
+  const label = checkOnly ? `本机服务模式验证（${base}）：确认静态后端不插手`
+    : target ? `线上完整流程验证（${base}）`
+      : '静态模式端到端验证（模拟 GitHub Pages：/api 全 404）';
+  const text = ['--- ' + label + ' ---', report, '', '控制台错误：' + (consoleErrors.length ? consoleErrors.join('\n') : '无'), ''].join('\n');
   fs.writeFileSync(LOG, text, 'utf8');
 
   ws.close();

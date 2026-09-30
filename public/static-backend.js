@@ -500,7 +500,10 @@
     /* 离线探测必须打真实网络：/api/session 在静态站上永远是 404，不能拿它判断联网。
        /sw.js 带唯一查询串时不会进 Service Worker 缓存，每次都是真实请求。 */
     if (pathname === '/api/session' && String(rawUrl).includes('probe=')) {
-      return realFetch('/sw.js?probe=' + Date.now(), { cache: 'no-store', signal: init?.signal });
+      // 站点可能部署在子路径下，按文档基准位置拼，别写死 /sw.js。
+      const probe = new URL('sw.js', document.baseURI);
+      probe.search = 'probe=' + Date.now();
+      return realFetch(probe.href, { cache: 'no-store', signal: init?.signal });
     }
 
     let payload = {};

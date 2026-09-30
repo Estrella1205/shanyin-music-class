@@ -78,7 +78,8 @@
   /* ---- Service Worker ---- */
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').catch(() => { /* 不支持或没权限就照常联网使用 */ });
+      // 站点可能部署在子路径下（GitHub Pages 是 /<仓库名>/），按文档基准位置注册，别写死根路径。
+      navigator.serviceWorker.register(new URL('sw.js', document.baseURI).href).catch(() => { /* 不支持或没权限就照常联网使用 */ });
     });
     navigator.serviceWorker.addEventListener('message', event => {
       const data = event.data || {};
