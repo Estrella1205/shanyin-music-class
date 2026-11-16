@@ -1,0 +1,134 @@
+/* 小花生长进度条 · 仅作用于 .gp-card 内部，不改动主站任何全局样式。
+   配色沿用「声入山野」米色 + 墨绿：#f2f7ea / #5b8c4e / #2c4a32 / #e4ecd9 */
+.gp-card{
+  --gp-p:0; --gp-pct:0%;
+  background:linear-gradient(160deg,#fbfdf6 0%,#f2f7ea 100%);
+  border:1px solid #dfeacd;border-radius:18px;padding:20px 22px 18px;
+  box-shadow:0 4px 18px #354c2610;color:#2c4a32;overflow:hidden;position:relative;
+}
+.gp-card:before{content:'';position:absolute;right:-46px;top:-58px;width:150px;height:150px;border-radius:50%;
+  background:radial-gradient(circle,#ffe9a833,transparent 70%);pointer-events:none}
+.gp-top{display:flex;align-items:center;gap:18px;position:relative;z-index:1}
+.gp-art{flex:0 0 178px;width:178px;position:relative}
+.gp-flower{display:block;width:100%;height:auto;overflow:visible}
+.gp-words{flex:1;min-width:0}
+
+.gp-title{margin:0 0 5px;font-size:20px;line-height:1.4;color:#2b4a32;letter-spacing:.5px}
+.gp-subtitle{margin:0 0 8px;font-size:13px;line-height:1.75;color:#6a7d61}
+.gp-caption{margin:0 0 13px;font-size:13px;line-height:1.6;color:#6a8759!important;
+  background:#fffdf5cc;border:1px dashed #c9dcba;border-radius:10px;padding:7px 11px}
+
+/* ---------- 进度条 ---------- */
+.gp-track{height:13px;border-radius:99px;background:#e4ecd9;position:relative;overflow:visible;
+  box-shadow:inset 0 1px 3px #4d6a3d18}
+.gp-fill{height:100%;width:var(--gp-pct);border-radius:99px;
+  background:linear-gradient(90deg,#8ab96b,#5b8c4e 70%,#4d7f43);
+  transition:width .85s cubic-bezier(.25,.8,.3,1);position:relative;overflow:hidden}
+.gp-fill:after{content:'';position:absolute;inset:0;border-radius:99px;
+  background:linear-gradient(100deg,transparent 20%,#ffffff55 50%,transparent 80%);
+  background-size:200% 100%;animation:gp-shine 2.2s linear infinite}
+@keyframes gp-shine{from{background-position:180% 0}to{background-position:-80% 0}}
+.gp-runner{position:absolute;left:var(--gp-pct);top:50%;transform:translate(-50%,-55%);
+  font-size:19px;line-height:1;transition:left .85s cubic-bezier(.25,.8,.3,1);
+  filter:drop-shadow(0 2px 3px #3c5a2c33);pointer-events:none}
+.gp-card[data-state=running] .gp-runner{animation:gp-bob 1.5s ease-in-out infinite}
+@keyframes gp-bob{0%,100%{transform:translate(-50%,-55%) rotate(-6deg)}50%{transform:translate(-50%,-78%) rotate(8deg)}}
+.gp-meter{display:flex;justify-content:space-between;align-items:baseline;margin-top:7px;
+  font-size:11.5px;color:#8a9683}
+.gp-meter b{font-size:13px;color:#4d7f43;font-variant-numeric:tabular-nums}
+
+/* ---------- 阶段小圆点 ---------- */
+.gp-dots{list-style:none;margin:16px 0 0;padding:13px 0 0;border-top:1px dashed #d8e4c9;
+  display:flex;flex-wrap:wrap;gap:8px;position:relative;z-index:1}
+.gp-dot{display:flex;align-items:center;gap:6px;font-size:11.5px;line-height:1.5;
+  padding:5px 10px;border-radius:99px;background:#fff;border:1px solid #e3e9da;color:#93a08a;
+  transition:background .4s,color .4s,border-color .4s,transform .4s}
+.gp-dot-mark{font-size:12px;line-height:1;font-weight:700}
+.gp-dot.done{background:#eaf3df;border-color:#cfe1bd;color:#4d7f43}
+.gp-dot.current{background:#fdf4d9;border-color:#eed9a0;color:#8a6b2c;
+  animation:gp-pulse 1.5s ease-in-out infinite}
+.gp-card[data-state=done] .gp-dot.done{background:#e4f0d6;border-color:#c6ddb2}
+@keyframes gp-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+
+/* ---------- 花朵各生长阶段 ---------- */
+.gp-stem{transition:stroke-dasharray .9s cubic-bezier(.25,.8,.3,1)}
+.gp-seed,.gp-leaf,.gp-bud,.gp-bloom,.gp-butterfly,.gp-sparks{transition:opacity .55s ease,transform .7s cubic-bezier(.2,.9,.3,1.2)}
+.gp-seed{opacity:1}
+.gp-leaf,.gp-bud,.gp-bloom,.gp-butterfly,.gp-sparks{opacity:0}
+.gp-leaf.left{transform-origin:109px 128px;transform:scale(.1) rotate(-25deg)}
+.gp-leaf.right{transform-origin:111px 108px;transform:scale(.1) rotate(25deg)}
+.gp-bud{transform-origin:110px 72px;transform:scale(.35) translateY(12px)}
+.gp-bloom{transform-origin:110px 58px;transform:scale(.4)}
+.gp-butterfly{transform:translate(-14px,16px) scale(.5)}
+
+.gp-card[data-stage="0"] .gp-seed{opacity:1}
+.gp-card[data-stage="1"] .gp-seed{opacity:.35}
+.gp-card[data-stage="1"] .gp-sparks{opacity:.8}
+.gp-card[data-stage="2"] .gp-seed{opacity:0}
+.gp-card[data-stage="2"] .gp-sparks{opacity:1}
+.gp-card[data-stage="2"] .gp-leaf{opacity:1;transform:scale(1) rotate(0)}
+.gp-card[data-stage="2"] .gp-butterfly{opacity:1;transform:translate(0,0) scale(1)}
+.gp-card[data-stage="3"] .gp-seed{opacity:0}
+.gp-card[data-stage="3"] .gp-sparks{opacity:1}
+.gp-card[data-stage="3"] .gp-leaf{opacity:1;transform:scale(1) rotate(0)}
+.gp-card[data-stage="3"] .gp-butterfly{opacity:1;transform:translate(0,0) scale(1)}
+.gp-card[data-stage="3"] .gp-bud{opacity:1;transform:scale(1) translateY(0)}
+.gp-card[data-stage="4"] .gp-seed{opacity:0}
+.gp-card[data-stage="4"] .gp-bud{opacity:0;transform:scale(.7)}
+.gp-card[data-stage="4"] .gp-sparks{opacity:1}
+.gp-card[data-stage="4"] .gp-leaf{opacity:1;transform:scale(1) rotate(0)}
+.gp-card[data-stage="4"] .gp-butterfly{opacity:1;transform:translate(0,0) scale(1)}
+.gp-card[data-stage="4"] .gp-bloom{opacity:1;transform:scale(1)}
+
+/* 花瓣以花心为轴心依次张开 */
+.gp-petal{transform-box:view-box;transform-origin:110px 58px;opacity:0;transform:scale(.15) rotate(var(--r,0deg));
+  transition:opacity .4s ease,transform .75s cubic-bezier(.2,1.2,.35,1)}
+.gp-petal.p1{--r:0deg}.gp-petal.p2{--r:72deg}.gp-petal.p3{--r:144deg}.gp-petal.p4{--r:216deg}.gp-petal.p5{--r:288deg}
+.gp-card[data-stage="4"] .gp-petal{opacity:1;transform:scale(1) rotate(var(--r));}
+.gp-card[data-stage="4"] .gp-petal.p1{transition-delay:.02s}
+.gp-card[data-stage="4"] .gp-petal.p2{transition-delay:.10s}
+.gp-card[data-stage="4"] .gp-petal.p3{transition-delay:.18s}
+.gp-card[data-stage="4"] .gp-petal.p4{transition-delay:.26s}
+.gp-card[data-stage="4"] .gp-petal.p5{transition-delay:.34s}
+.gp-core{transform-box:view-box;transform-origin:110px 58px;opacity:0;transform:scale(.2);
+  transition:opacity .4s .3s,transform .6s .3s cubic-bezier(.2,1.4,.4,1)}
+.gp-card[data-stage="4"] .gp-core{opacity:1;transform:scale(1)}
+
+/* ---------- 环境动画 ---------- */
+.gp-spark{animation:gp-float 3.4s ease-in-out infinite}
+.gp-spark.s2{animation-delay:.7s}.gp-spark.s3{animation-delay:1.4s}.gp-spark.s4{animation-delay:2.1s}
+@keyframes gp-float{0%,100%{transform:translateY(0);opacity:.45}50%{transform:translateY(-9px);opacity:1}}
+.gp-card[data-state=running] .gp-butterfly{animation:gp-flutter 2.8s ease-in-out infinite alternate}
+@keyframes gp-flutter{from{transform:translate(0,0) rotate(-5deg)}to{transform:translate(10px,-12px) rotate(9deg)}}
+.gp-card[data-stage="3"][data-state=running] .gp-bud{animation:gp-sway 2s ease-in-out infinite alternate}
+@keyframes gp-sway{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
+.gp-card[data-state=done] .gp-art:after{content:'✨';position:absolute;right:2px;top:6px;font-size:19px;
+  animation:gp-twinkle 1.8s ease-in-out infinite alternate}
+@keyframes gp-twinkle{from{opacity:.45;transform:scale(.85) rotate(-8deg)}to{opacity:1;transform:scale(1.15) rotate(12deg)}}
+.gp-card[data-state=done] .gp-title{color:#3c7a43}
+
+/* ---------- 备课页容器与小锦囊 ---------- */
+.gp-panel{background:transparent;border:0;box-shadow:none;padding:0}
+.gp-panel .panel-actions{justify-content:center;margin-top:14px}
+.gp-gentle{margin:12px 2px 0;font-size:13px;line-height:1.7;color:#7b8a6f;text-align:center}
+.gp-tips h2{margin:0 0 16px;font-size:19px;color:#2b4a32}
+.gp-tips h3{margin:19px 0 9px;font-size:14px;color:#4d7f43}
+.gp-tip-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  padding:9px 0;border-bottom:1px dashed #dfe8d2;font-size:13px;color:#8a9683}
+.gp-tip-row b{font-size:13.5px;font-weight:600;color:#375d3a;text-align:right}
+.gp-tips ul{margin:0;padding-left:18px;font-size:12.5px;line-height:2;color:#6a7d61}
+.gp-tips li::marker{color:#8ab96b}
+
+/* ---------- 小屏 ---------- */
+@media(max-width:760px){
+  .gp-card{padding:16px}
+  .gp-top{flex-direction:column;align-items:flex-start;gap:6px}
+  .gp-art{flex:none;width:150px;align-self:center}
+  .gp-words{width:100%}
+  .gp-dots{gap:6px}
+  .gp-dot{font-size:11px;padding:4px 8px}
+}
+@media(prefers-reduced-motion:reduce){
+  .gp-card *{animation:none!important}
+  .gp-fill,.gp-runner,.gp-stem,.gp-seed,.gp-leaf,.gp-bud,.gp-bloom,.gp-butterfly,.gp-sparks,.gp-petal,.gp-core{transition-duration:.01ms!important}
+}

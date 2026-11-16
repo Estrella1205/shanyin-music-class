@@ -1,0 +1,19 @@
+/* 三大板块导航：课前备课 / 上课演示 / 课后总结
+   只改页头的排列方式，配色仍是原站的米色 + 墨绿。 */
+header{height:auto;min-height:88px;padding-top:9px;padding-bottom:9px}
+header nav{flex-direction:column;align-items:flex-end;gap:5px;margin-left:auto}
+header nav .board-row{display:flex;gap:5px}
+header nav .board-btn{padding:9px 15px;border-radius:11px;font-size:14.5px;font-weight:600;color:#354638;background:transparent}
+header nav .board-btn.active{background:var(--green);color:#fff}
+header nav .board-sub{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+header nav .board-sub .sub-btn{padding:4px 11px;border-radius:16px;background:transparent;color:#6d7c69;font-size:12.5px;font-weight:500}
+header nav .board-sub .sub-btn:hover{background:#eef3e8;transform:none}
+header nav .board-sub .sub-btn.on{background:#e6efdd;color:#33573f;font-weight:700}
+@media(max-width:960px){
+  header nav{align-items:center}
+  header nav .board-sub{justify-content:center}
+}
+@media(max-width:620px){
+  header nav .board-btn{padding:8px 11px;font-size:13px}
+  header nav .board-sub .sub-btn{font-size:12px;padding:3px 9px}
+}

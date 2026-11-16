@@ -1,0 +1,179 @@
+/* 上课演示：选课页 + 教学控制台。只用原站米色＋墨绿，课堂里字要大、按钮要大。 */
+
+/* ---------- 选课页 ---------- */
+.teach-page{max-width:1320px;margin:0 auto;padding:28px 34px 48px}
+.teach-class-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#fffdf8f0;border:1px solid #e9e8dc;border-radius:16px;padding:14px 18px;margin-bottom:22px}
+.teach-class-label{font-size:14px;color:#5f7059;font-weight:600}
+.teach-class-chips{display:flex;gap:8px;flex-wrap:wrap}
+.teach-class{border-radius:20px;padding:8px 15px;font-size:13.5px;background:#eef3e7;color:#3f6044;cursor:pointer;border:1px solid transparent}
+.teach-class.on{background:var(--green);color:#fff}
+.teach-class-hint{font-size:12.5px;color:#8a9780;margin-left:auto}
+.teach-section{margin-bottom:26px}
+.teach-section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.teach-section-head h2{margin:0;font-size:20px;color:#28472f}
+.teach-section-head span{font-size:13px;color:#8b9782}
+.teach-prep-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.teach-prep-card{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:var(--shadow)}
+.teach-prep-main{flex:1;min-width:0}
+.teach-prep-main h3{margin:0 0 6px;font-size:18px;color:#27452e}
+.teach-prep-main p{margin:0;font-size:13px;color:#6d7c64;line-height:1.7}
+.teach-prep-sub{color:#94a089 !important;font-size:12px !important}
+.teach-song-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.teach-song-card{display:flex;flex-direction:column;gap:5px;align-items:flex-start;text-align:left;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;cursor:pointer;box-shadow:var(--shadow)}
+.teach-song-card:hover{border-color:#a9c296;transform:translateY(-2px)}
+.teach-song-card b{font-size:16px;color:#28472f}
+.teach-song-card span{font-size:12px;color:#8b9782}
+.teach-song-card em{font-style:normal;font-size:13px;color:var(--green);margin-top:6px;font-weight:600}
+.teach-foot{font-size:12.5px;color:#929e87;margin-top:12px}
+.teach-foot a{color:var(--green)}
+
+/* ---------- 控制台 ---------- */
+.teach-console{padding:18px 26px 40px}
+.teach-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:6px 4px 12px}
+.teach-top .eyebrow{margin:0 0 4px}
+.teach-top h1{margin:0 0 6px;font-size:30px;letter-spacing:1px;color:#1f4229}
+.teach-top-sub{margin:0;font-size:13px;color:#75836b}
+.teach-top-actions{display:flex;gap:10px;padding-top:8px}
+.teach-progress{height:6px;border-radius:6px;background:#e6edda;overflow:hidden;margin-bottom:16px}
+.teach-progress i{display:block;height:100%;background:linear-gradient(90deg,#71a05b,#3f7a4e);transition:width .35s}
+.teach-body{display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px;align-items:start}
+.teach-rail{display:flex;flex-direction:column;gap:6px;position:sticky;top:14px}
+.teach-step{display:flex;align-items:center;gap:10px;background:#fffdf8;border:1px solid #ebe9dd;border-radius:12px;padding:10px 12px;cursor:pointer;text-align:left}
+.teach-step-no{width:24px;height:24px;border-radius:50%;background:#eef3e6;color:#5c7a52;display:grid;place-items:center;font-size:12px;flex-shrink:0}
+.teach-step-name{flex:1;font-size:13.5px;color:#4b5f46}
+.teach-step-min{font-size:11px;color:#9aa58f}
+.teach-step.done .teach-step-no{background:#dcebd0;color:#3f6b3c}
+.teach-step.on{background:#eaf3e1;border-color:#b9d2a6}
+.teach-step.on .teach-step-no{background:var(--green);color:#fff}
+.teach-step.on .teach-step-name{font-weight:700;color:#2c5636}
+.teach-stage{background:#fffdf9;border:1px solid var(--line);border-radius:20px;padding:24px 28px;box-shadow:var(--shadow);min-height:520px;display:flex;flex-direction:column}
+.teach-stage-head{display:flex;gap:14px;align-items:center;margin-bottom:18px}
+.teach-stage-no{width:44px;height:44px;border-radius:50%;background:#eaf2e0;color:#3c6b43;display:grid;place-items:center;font-size:20px;font-weight:700;flex-shrink:0}
+.teach-stage-head h2{margin:0 0 4px;font-size:24px;color:#22442c}
+.teach-stage-head p{margin:0;font-size:13px;color:#84907a;line-height:1.7}
+.teach-nav{display:flex;justify-content:space-between;gap:12px;margin-top:auto;padding-top:22px}
+.btn.big{padding:14px 24px;font-size:16px;border-radius:26px}
+
+/* 开场 */
+.teach-hero{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:22px}
+.teach-hero h3{margin:0 0 10px;font-size:20px;color:#2a4a32}
+.teach-hero p{margin:0 0 14px;font-size:14.5px;line-height:1.9;color:#5f6f57}
+.teach-play-row{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.teach-hint{font-size:12.5px;color:#93a088;line-height:1.8}
+.teach-meta-card{background:#f4f7ec;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;height:fit-content}
+.teach-meta-card>div{display:flex;justify-content:space-between;font-size:13px;color:#6a7a5f}
+.teach-meta-card b{color:#2f5537}
+
+/* 讲故事 */
+.teach-story{background:#fffdf4;border-left:4px solid #a9c78d;border-radius:12px;padding:18px 22px}
+.teach-story h3{margin:0 0 12px;font-size:19px;color:#33553a}
+.teach-story-p{margin:0 0 12px;font-size:16px;line-height:2.05;color:#42563f}
+.teach-story-p:last-child{margin-bottom:0}
+.teach-ask{margin-top:14px;background:#f1f6ea;border-radius:12px;padding:14px 18px;font-size:14px;color:#4d6549}
+.teach-ask ul{margin:8px 0 0;padding-left:20px;line-height:1.95}
+.teach-props{margin:12px 0 0;font-size:13px;color:#74856a}
+.teach-facts{margin:10px 0 0;padding-left:20px;font-size:14px;line-height:1.95;color:#5a6b53}
+
+/* 逐句 */
+.teach-phrase-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.teach-phrase-no{font-size:12.5px;color:#86927c;letter-spacing:1px}
+.teach-phrase-pager{display:flex;gap:8px}
+.teach-phrase-text{margin:16px 0 6px;font-size:34px;line-height:1.7;letter-spacing:3px;color:#20432a;font-weight:700}
+.teach-phrase-jianpu{margin:0 0 8px;font-family:Georgia,serif;font-size:22px;color:#5f7d55;letter-spacing:4px}
+.teach-tips{margin:14px 0 0;padding-left:20px;font-size:14px;line-height:1.95;color:#5d6f55}
+.teach-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+.teach-cols>b{display:block;font-size:13px;color:#7d8a72;margin-bottom:6px}
+.teach-cols ul{margin:0;padding-left:18px;font-size:14px;line-height:1.95;color:#4f6349}
+
+/* 按句教的脚本 */
+.teach-script{background:#f7f8ef;border-radius:12px;padding:18px 22px}
+.teach-script h3{margin:0 0 10px;font-size:18px;color:#33553a}
+.teach-script ol{margin:0;padding-left:22px;font-size:14.5px;line-height:2.05;color:#4f6349}
+
+/* 范唱 / 连唱 */
+.teach-listen h3{margin:0 0 8px;font-size:20px;color:#2a4a32}
+.teach-listen p{margin:0 0 8px;font-size:14px;color:#63725a;line-height:1.9}
+.teach-countin{min-height:74px;display:flex;align-items:center;gap:14px;margin-top:10px;font-size:15px;color:#6d7c63}
+.teach-countin b{font-size:46px;color:var(--green);line-height:1}
+
+/* 完整演唱 */
+.teach-final h3{margin:0 0 12px;font-size:20px;color:#2a4a32}
+.teach-lyrics{display:flex;flex-wrap:wrap;gap:10px 18px;background:#f6f8ee;border-radius:14px;padding:20px 22px;font-size:20px;line-height:2;color:#2c4a34;letter-spacing:2px}
+.teach-lyrics span{padding:2px 4px}
+.teach-lyrics span:last-child{color:#b07a2c;font-weight:700}
+
+/* 下课 */
+.teach-finish{text-align:center;padding:40px 20px}
+.teach-finish-icon{font-size:64px}
+.teach-finish h2{margin:12px 0 8px;font-size:26px;color:#2a4a32}
+.teach-finish p{margin:0 0 10px;font-size:14px;color:#6b7a62}
+.teach-finish .teach-play-row{justify-content:center}
+
+/* 小鸟飞走 */
+.teach-celebrate{position:fixed;inset:0;background:#fbf8f1e8;z-index:40;display:grid;place-items:center}
+.teach-celebrate.hidden{display:none}
+.teach-bird-stage{position:relative;width:min(620px,88vw);height:320px;display:grid;place-items:center}
+.teach-last-char{font-size:96px;color:#2f5d3c;font-weight:800;transition:transform 1.5s ease-in,opacity 1.5s}
+.teach-last-char.fly{transform:translate(120px,-170px) scale(.25) rotate(18deg);opacity:0}
+.teach-bird{position:absolute;font-size:58px;top:52%;left:44%;opacity:0;transition:transform 1.6s ease-out,opacity .5s .8s}
+.teach-bird.fly{opacity:1;transform:translate(150px,-190px) rotate(-8deg)}
+.teach-bird-stage p{position:absolute;bottom:0;font-size:16px;color:#54704f}
+
+@media(max-width:980px){
+  .teach-body{grid-template-columns:1fr}
+  .teach-rail{flex-direction:row;overflow:auto;position:static;padding-bottom:4px}
+  .teach-step{min-width:150px}
+  .teach-hero{grid-template-columns:1fr}
+  .teach-cols{grid-template-columns:1fr}
+  .teach-top h1{font-size:24px}
+  .teach-phrase-text{font-size:26px}
+}
+@media(max-width:620px){
+  .teach-page{padding:20px 16px 36px}
+  .teach-console{padding:14px 14px 28px}
+  .teach-stage{padding:18px 16px}
+  .teach-class-hint{margin-left:0}
+  .btn.big{padding:12px 18px;font-size:15px}
+}
+
+/* 页头压在风景上，垫一层半透明米色，字才看得清 */
+.teach-page .page-heading{background:linear-gradient(90deg,#fffdf7e8,#fffdf7b4 58%,transparent);border-radius:18px;padding:12px 22px}
+.teach-page .page-heading .eyebrow{color:#4f7247}
+.teach-console .teach-top{background:linear-gradient(90deg,#fffdf8f2,#fffdf8c8 65%,#fffdf890);border-radius:18px;padding:14px 22px}
+.teach-cols.single{grid-template-columns:1fr}
+
+/* ---------- 抬头：今天唱什么 / 几位同学 / 多长时间 ---------- */
+.teach-top-mode{margin:2px 0 0;font-size:12.5px;color:#8d9a83;letter-spacing:.3px}
+.teach-next-hint{margin:18px 0 0;font-size:12.5px;color:#8b9781;text-align:right}
+
+/* ---------- 范唱音色 ---------- */
+.teach-voice{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0 4px;padding:12px 16px;background:#f4f7ec;border-radius:12px}
+.teach-voice-label{font-size:13px;color:#6f7f64;font-weight:600}
+.teach-voice-btns{display:flex;gap:6px;flex-wrap:wrap}
+.teach-voice-btns .chip{background:#fff;border:1px solid #dfe6d5;border-radius:16px;padding:6px 13px;font-size:13px;color:#5a6f52;cursor:pointer}
+.teach-voice-btns .chip.on{background:var(--green);border-color:var(--green);color:#fff;font-weight:600}
+
+/* ---------- 课堂评分 ---------- */
+.teach-rec-box{margin-top:16px;background:#f8f9f1;border:1px dashed #d9e2cd;border-radius:14px;padding:16px 18px}
+.teach-rec-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.teach-rec-head b{font-size:15px;color:#33553a}
+.teach-rec-head span{font-size:12px;color:#94a089}
+.teach-score-card{margin-top:12px;background:#fff;border:1px solid #e4e9da;border-radius:12px;padding:14px 16px}
+.teach-score-card.bad{background:#fdf6ee;border-color:#ecd9bd}
+.teach-score-card>b{display:block;font-size:15px;color:#33553a;margin-bottom:6px}
+.teach-score-card p{margin:4px 0;font-size:13.5px;line-height:1.85;color:#5d6f55}
+.teach-score-top{display:flex;align-items:baseline;gap:10px}
+.teach-score-top b{font-size:34px;color:#2f6a44;line-height:1}
+.teach-score-top span{font-size:15px;color:#b78b36;letter-spacing:2px}
+.teach-score-top em{font-style:normal;margin-left:auto;font-size:12px;color:#9aa58f}
+.teach-score-list{margin:8px 0 0;padding-left:20px;font-size:13px;line-height:1.9;color:#6a5a44}
+.teach-score-tip{margin-top:8px !important;background:#eef5e6;border-radius:9px;padding:8px 12px;color:#4b6a4a !important}
+
+/* ---------- 趣味舞台：卡拉OK ---------- */
+.teach-karaoke{display:flex;flex-wrap:wrap;gap:2px 4px;background:#f6f8ee;border-radius:14px;padding:20px 22px;font-size:26px;line-height:1.9;color:#7d8a72;letter-spacing:2px}
+.teach-karaoke .ch{padding:2px 3px;border-radius:6px;transition:color .12s,background .12s,transform .12s}
+.teach-karaoke .ch.done{color:#3f6b44}
+.teach-karaoke .ch.on{color:#fff;background:var(--green);transform:translateY(-2px);font-weight:700}
+.teach-karaoke .ch.rest{color:#b9c4ae}
+.teach-karaoke-bar{height:5px;border-radius:5px;background:#e6edda;overflow:hidden;margin:12px 0 2px}
+.teach-karaoke-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#8db26f,#3f7a4e);transition:width .15s linear}

@@ -1,0 +1,1169 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-11-15T21:09:07.699Z",
+  "sampleRate": 44100,
+  "songs": {
+    "xiaoxingxing": {
+      "bpm": 88,
+      "slowBpm": 66,
+      "seconds": 21.82,
+      "files": {
+        "accompaniment": {
+          "file": "accompaniment.wav",
+          "bytes": 1946458,
+          "sha256": "ad91ad5135c899e88be2f2b9461dfa5fe7aad2f293654218a0868ef9d313be87",
+          "seconds": 22.07
+        },
+        "accompanimentCountIn": {
+          "file": "accompanimentCountIn.wav",
+          "bytes": 2187004,
+          "sha256": "ac3395c4d9c808afe8f953ae365cac23d0e81084670b80271dda4e3432a61333",
+          "seconds": 24.8
+        },
+        "full": {
+          "file": "full.wav",
+          "bytes": 1946458,
+          "sha256": "ee229e51d04ba8acc1da4223555fe705532c11fd75d2d9105bc9d5d02de98049",
+          "seconds": 22.07
+        },
+        "preview": {
+          "file": "preview.wav",
+          "bytes": 882044,
+          "sha256": "0b4e87017dc39570d98108e85314a2aa867dfe4cdeed9a6b2d0c0316daeebea1",
+          "seconds": 10
+        },
+        "slow": {
+          "file": "slow.wav",
+          "bytes": 2587912,
+          "sha256": "5c0d395b4d4924f2986273f3f0282c60f1c9d6549a550de3d167b32628ca7cc5",
+          "seconds": 29.34
+        }
+      },
+      "phrases": [
+        {
+          "index": 0,
+          "text": "一闪一闪亮晶晶",
+          "jianpu": "1 1 5 5 | 6 6 5 -",
+          "bpm": 88,
+          "slowBpm": 66,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/0/accompaniment.wav",
+              "bytes": 503184,
+              "sha256": "3886ec9a0de31b17d69caa00f9a3a4828d12a23bd49df90383622aca7cab28ac",
+              "seconds": 5.7
+            },
+            "full": {
+              "file": "phrases/0/full.wav",
+              "bytes": 503184,
+              "sha256": "a1372c404034ddbc1b4417ecff8ba9afd645f6379ccfa05b0a8e6150bc1ee133",
+              "seconds": 5.7
+            },
+            "slow": {
+              "file": "phrases/0/slow.wav",
+              "bytes": 663548,
+              "sha256": "6c400aab3bb023b2103671e5cde0a4c395f0cd2549230684de37bc78038d5259",
+              "seconds": 7.52
+            },
+            "countIn": {
+              "file": "phrases/0/countIn.wav",
+              "bytes": 743730,
+              "sha256": "e5f0ff6a6c1efbafd2f3b648e227ec4a452d37f50bfe4cb171ab9b6143e89ad4",
+              "seconds": 8.43
+            }
+          }
+        },
+        {
+          "index": 1,
+          "text": "满天都是小星星",
+          "jianpu": "4 4 3 3 | 2 2 1 -",
+          "bpm": 88,
+          "slowBpm": 66,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/1/accompaniment.wav",
+              "bytes": 503184,
+              "sha256": "30d209e9974bfb4eb4d74541ee98965d9769ddf681d5d3e95b184049ff3b0761",
+              "seconds": 5.7
+            },
+            "full": {
+              "file": "phrases/1/full.wav",
+              "bytes": 503184,
+              "sha256": "7868c428a7983ae5cf65799869c1e96ad0ad015d704df47ea57f6c250acbfab0",
+              "seconds": 5.7
+            },
+            "slow": {
+              "file": "phrases/1/slow.wav",
+              "bytes": 663548,
+              "sha256": "07c4473111d64c57bc7a8c76d55be4bab49908b64de7deddb0fada2ff4212445",
+              "seconds": 7.52
+            },
+            "countIn": {
+              "file": "phrases/1/countIn.wav",
+              "bytes": 743730,
+              "sha256": "00b7e889c7b967e03e0d143843f05d77e0ce2b99e16d7c256b4fa31b27dee1d3",
+              "seconds": 8.43
+            }
+          }
+        },
+        {
+          "index": 2,
+          "text": "挂在天上放光明",
+          "jianpu": "5 5 4 4 | 3 3 2 -",
+          "bpm": 88,
+          "slowBpm": 66,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/2/accompaniment.wav",
+              "bytes": 503184,
+              "sha256": "a414184838dbf351c6f128b6c24e0b2108b5f2fa9ce7f3a618dabb4094c0468b",
+              "seconds": 5.7
+            },
+            "full": {
+              "file": "phrases/2/full.wav",
+              "bytes": 503184,
+              "sha256": "59c6de601134ead715ee849e3d2db7601a8e0a0e1a34d4341ee80070ba77f9c6",
+              "seconds": 5.7
+            },
+            "slow": {
+              "file": "phrases/2/slow.wav",
+              "bytes": 663548,
+              "sha256": "aa4cdaa29b1f54e892f32292f05e630cdbf63b0c2c37a33e80e633b7f5b324b6",
+              "seconds": 7.52
+            },
+            "countIn": {
+              "file": "phrases/2/countIn.wav",
+              "bytes": 743730,
+              "sha256": "fd45bc437080956f57fc5d00c5a63eb52139993f10951c7546a459ac7f0bec45",
+              "seconds": 8.43
+            }
+          }
+        },
+        {
+          "index": 3,
+          "text": "好像许多小眼睛",
+          "jianpu": "5 5 4 4 | 3 3 2 -",
+          "bpm": 88,
+          "slowBpm": 66,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/3/accompaniment.wav",
+              "bytes": 503184,
+              "sha256": "a414184838dbf351c6f128b6c24e0b2108b5f2fa9ce7f3a618dabb4094c0468b",
+              "seconds": 5.7
+            },
+            "full": {
+              "file": "phrases/3/full.wav",
+              "bytes": 503184,
+              "sha256": "c341265876685accd7c02ae8255a40f7b47ed5c6c100375cc97641976fe3156f",
+              "seconds": 5.7
+            },
+            "slow": {
+              "file": "phrases/3/slow.wav",
+              "bytes": 663548,
+              "sha256": "9f151b949c6f600a9c6a48373171f2f615353bbb90a0b5537f08b2183574411f",
+              "seconds": 7.52
+            },
+            "countIn": {
+              "file": "phrases/3/countIn.wav",
+              "bytes": 743730,
+              "sha256": "fd45bc437080956f57fc5d00c5a63eb52139993f10951c7546a459ac7f0bec45",
+              "seconds": 8.43
+            }
+          }
+        }
+      ]
+    },
+    "liangzhilaohu": {
+      "bpm": 96,
+      "slowBpm": 72,
+      "seconds": 20,
+      "files": {
+        "accompaniment": {
+          "file": "accompaniment.wav",
+          "bytes": 1786094,
+          "sha256": "331d9a09c8afcdd0158a396da9e01665420faef5459baae620965f54b0602a07",
+          "seconds": 20.25
+        },
+        "accompanimentCountIn": {
+          "file": "accompanimentCountIn.wav",
+          "bytes": 2006594,
+          "sha256": "f7fc06bcb552072c9da365e0430ed52b80241c04a35c5cf9c8767ef9ba85a0dd",
+          "seconds": 22.75
+        },
+        "full": {
+          "file": "full.wav",
+          "bytes": 1786094,
+          "sha256": "1dc844c55e0065704b5985bb3ee191eab49640a8ae9543bc619dd992c9ad9dcb",
+          "seconds": 20.25
+        },
+        "preview": {
+          "file": "preview.wav",
+          "bytes": 882044,
+          "sha256": "4fa7f419f071c409969bd55122cf56330c9f2d62cf6a3cc21f82ebedd8173175",
+          "seconds": 10
+        },
+        "slow": {
+          "file": "slow.wav",
+          "bytes": 2374094,
+          "sha256": "46eb7361517e02002f1e56acd9b4fbf67186ab7d819cffc6e534ac647a6f4579",
+          "seconds": 26.92
+        }
+      },
+      "phrases": [
+        {
+          "index": 0,
+          "text": "两只老虎两只老虎",
+          "jianpu": "1 2 3 1 | 1 2 3 1",
+          "bpm": 96,
+          "slowBpm": 72,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/0/accompaniment.wav",
+              "bytes": 463094,
+              "sha256": "d73473604574635bd114dddf839843db7f0b680a193ff565e5343b356ebeee96",
+              "seconds": 5.25
+            },
+            "full": {
+              "file": "phrases/0/full.wav",
+              "bytes": 463094,
+              "sha256": "2f4339cb0d4b4a69fb2a3e00f3548cd5a8cb82af63fb2f1667996647161fe7fb",
+              "seconds": 5.25
+            },
+            "slow": {
+              "file": "phrases/0/slow.wav",
+              "bytes": 610094,
+              "sha256": "d2bcba05d28cb03f5cfcd9bf48bb890b1fc589ddbad8d59168a82f4971d0fd32",
+              "seconds": 6.92
+            },
+            "countIn": {
+              "file": "phrases/0/countIn.wav",
+              "bytes": 683594,
+              "sha256": "9fad3c35d7ac3cbaed4bd1582c1ebee07fac05b659a93b5ecb7cc79574e6cd30",
+              "seconds": 7.75
+            }
+          }
+        },
+        {
+          "index": 1,
+          "text": "跑得快跑得快",
+          "jianpu": "3 4 5 - | 3 4 5 -",
+          "bpm": 96,
+          "slowBpm": 72,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/1/accompaniment.wav",
+              "bytes": 463094,
+              "sha256": "d73473604574635bd114dddf839843db7f0b680a193ff565e5343b356ebeee96",
+              "seconds": 5.25
+            },
+            "full": {
+              "file": "phrases/1/full.wav",
+              "bytes": 463094,
+              "sha256": "3fc3583e8ebc368a9a0d84cb074595ab65d5b013c5525c7423c561b82b2b4a4a",
+              "seconds": 5.25
+            },
+            "slow": {
+              "file": "phrases/1/slow.wav",
+              "bytes": 610094,
+              "sha256": "8294cc7f563a87419910facd8a725a11c8cef9f5789becf6eef377eceef23f1c",
+              "seconds": 6.92
+            },
+            "countIn": {
+              "file": "phrases/1/countIn.wav",
+              "bytes": 683594,
+              "sha256": "9fad3c35d7ac3cbaed4bd1582c1ebee07fac05b659a93b5ecb7cc79574e6cd30",
+              "seconds": 7.75
+            }
+          }
+        },
+        {
+          "index": 2,
+          "text": "一只没有耳朵一只没有尾巴",
+          "jianpu": "_5 _6 _5 _4 3 1 | _5 _6 _5 _4 3 1",
+          "bpm": 96,
+          "slowBpm": 72,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/2/accompaniment.wav",
+              "bytes": 463094,
+              "sha256": "d73473604574635bd114dddf839843db7f0b680a193ff565e5343b356ebeee96",
+              "seconds": 5.25
+            },
+            "full": {
+              "file": "phrases/2/full.wav",
+              "bytes": 463094,
+              "sha256": "f0f2db4133669aa274b00caedd6ab3e0fac35665caa0dab6bb2e7f38dc8eca04",
+              "seconds": 5.25
+            },
+            "slow": {
+              "file": "phrases/2/slow.wav",
+              "bytes": 610094,
+              "sha256": "958b2615ccb0883acac55d2ea8501c8f7dbaf1fdc73282cf425ac977271690d3",
+              "seconds": 6.92
+            },
+            "countIn": {
+              "file": "phrases/2/countIn.wav",
+              "bytes": 683594,
+              "sha256": "9fad3c35d7ac3cbaed4bd1582c1ebee07fac05b659a93b5ecb7cc79574e6cd30",
+              "seconds": 7.75
+            }
+          }
+        },
+        {
+          "index": 3,
+          "text": "真奇怪真奇怪",
+          "jianpu": "2 5 1 - | 2 5 1 -",
+          "bpm": 96,
+          "slowBpm": 72,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/3/accompaniment.wav",
+              "bytes": 463094,
+              "sha256": "d73473604574635bd114dddf839843db7f0b680a193ff565e5343b356ebeee96",
+              "seconds": 5.25
+            },
+            "full": {
+              "file": "phrases/3/full.wav",
+              "bytes": 463094,
+              "sha256": "e9b0a18970bf2e2011a8cd76cb7be4ba5774af7df6a4445f065bc53cf457d4a5",
+              "seconds": 5.25
+            },
+            "slow": {
+              "file": "phrases/3/slow.wav",
+              "bytes": 610094,
+              "sha256": "403b73492e16ce9577f0df087ab08037acf8fe1a06492c41a71f4b4124859971",
+              "seconds": 6.92
+            },
+            "countIn": {
+              "file": "phrases/3/countIn.wav",
+              "bytes": 683594,
+              "sha256": "9fad3c35d7ac3cbaed4bd1582c1ebee07fac05b659a93b5ecb7cc79574e6cd30",
+              "seconds": 7.75
+            }
+          }
+        }
+      ]
+    },
+    "molihua": {
+      "bpm": 80,
+      "slowBpm": 60,
+      "seconds": 6,
+      "files": {
+        "accompaniment": {
+          "file": "accompaniment.wav",
+          "bytes": 551294,
+          "sha256": "ebd040d0f763dfbd35357fcd000b59b413321216ea421d2def6c7e35e016cee0",
+          "seconds": 6.25
+        },
+        "accompanimentCountIn": {
+          "file": "accompanimentCountIn.wav",
+          "bytes": 815894,
+          "sha256": "7b3299ebe221697fbdd79976a25e99c8315989fa6dbbe730e0a7c87c5b86ab36",
+          "seconds": 9.25
+        },
+        "full": {
+          "file": "full.wav",
+          "bytes": 551294,
+          "sha256": "8866761800bf3913fbb602a8ddd589f8936531751fa0b90fce121d4027a70d8c",
+          "seconds": 6.25
+        },
+        "preview": {
+          "file": "preview.wav",
+          "bytes": 551294,
+          "sha256": "d3bb44fc11539c22222408dfc671d0d2798994265657a3032b29561f09f04d53",
+          "seconds": 6.25
+        },
+        "slow": {
+          "file": "slow.wav",
+          "bytes": 727694,
+          "sha256": "e59a3a13b1436704e7e67231ee825edee876a583b4171c76999c80d111d45402",
+          "seconds": 8.25
+        }
+      },
+      "phrases": [
+        {
+          "index": 0,
+          "text": "好一朵美丽的茉莉花",
+          "jianpu": "3 _3 _5 _6 _1' _1' _6 | 5 _5 _6 5 -",
+          "bpm": 80,
+          "slowBpm": 60,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/0/accompaniment.wav",
+              "bytes": 551294,
+              "sha256": "ebd040d0f763dfbd35357fcd000b59b413321216ea421d2def6c7e35e016cee0",
+              "seconds": 6.25
+            },
+            "full": {
+              "file": "phrases/0/full.wav",
+              "bytes": 551294,
+              "sha256": "8866761800bf3913fbb602a8ddd589f8936531751fa0b90fce121d4027a70d8c",
+              "seconds": 6.25
+            },
+            "slow": {
+              "file": "phrases/0/slow.wav",
+              "bytes": 727694,
+              "sha256": "e59a3a13b1436704e7e67231ee825edee876a583b4171c76999c80d111d45402",
+              "seconds": 8.25
+            },
+            "countIn": {
+              "file": "phrases/0/countIn.wav",
+              "bytes": 815894,
+              "sha256": "7b3299ebe221697fbdd79976a25e99c8315989fa6dbbe730e0a7c87c5b86ab36",
+              "seconds": 9.25
+            }
+          }
+        }
+      ]
+    },
+    "huanlesong": {
+      "bpm": 96,
+      "slowBpm": 72,
+      "seconds": 10,
+      "files": {
+        "accompaniment": {
+          "file": "accompaniment.wav",
+          "bytes": 904094,
+          "sha256": "89301a65d7aaf3288b2530ecd6b651f00da89e89abcc821c8eca52e2ceae07f5",
+          "seconds": 10.25
+        },
+        "accompanimentCountIn": {
+          "file": "accompanimentCountIn.wav",
+          "bytes": 1124594,
+          "sha256": "8481b61201e2a3b19ebba490059280e32551b16d4e3dbfd319b99fe2ae7c9dd1",
+          "seconds": 12.75
+        },
+        "full": {
+          "file": "full.wav",
+          "bytes": 904094,
+          "sha256": "29e495b8b241cfb4e1ed003aebd9b86054ed8761d250cdd1e1398c53a1c555d3",
+          "seconds": 10.25
+        },
+        "preview": {
+          "file": "preview.wav",
+          "bytes": 882044,
+          "sha256": "1e55acaa80de631a5a2df5f75e1054118c528946ca3a32052df729131db4104d",
+          "seconds": 10
+        },
+        "slow": {
+          "file": "slow.wav",
+          "bytes": 1198094,
+          "sha256": "f644b6307449dc85b8ea4e0537851c660ca694f9da149bdff7fcb5d5bf07f0ea",
+          "seconds": 13.58
+        }
+      },
+      "phrases": [
+        {
+          "index": 0,
+          "text": "欢乐女神圣洁美丽",
+          "jianpu": "3 3 4 5 | 5 4 3 2",
+          "bpm": 96,
+          "slowBpm": 72,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/0/accompaniment.wav",
+              "bytes": 463094,
+              "sha256": "d73473604574635bd114dddf839843db7f0b680a193ff565e5343b356ebeee96",
+              "seconds": 5.25
+            },
+            "full": {
+              "file": "phrases/0/full.wav",
+              "bytes": 463094,
+              "sha256": "1821c4ea7abf65f41be7ab536a01ce6125004c4092c1976de628143438b69a48",
+              "seconds": 5.25
+            },
+            "slow": {
+              "file": "phrases/0/slow.wav",
+              "bytes": 610094,
+              "sha256": "203689f559629c24f47a3784ec5234701a667db59a52d97b2d7c89548467d4c0",
+              "seconds": 6.92
+            },
+            "countIn": {
+              "file": "phrases/0/countIn.wav",
+              "bytes": 683594,
+              "sha256": "9fad3c35d7ac3cbaed4bd1582c1ebee07fac05b659a93b5ecb7cc79574e6cd30",
+              "seconds": 7.75
+            }
+          }
+        },
+        {
+          "index": 1,
+          "text": "灿烂光芒照大地",
+          "jianpu": "1 1 2 3 | .3 _2 2 -",
+          "bpm": 96,
+          "slowBpm": 72,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/1/accompaniment.wav",
+              "bytes": 463094,
+              "sha256": "480e53736e71cb021d6efb0458be0b1cd8f9e133d6b9bbb77a439ea6fb59ad30",
+              "seconds": 5.25
+            },
+            "full": {
+              "file": "phrases/1/full.wav",
+              "bytes": 463094,
+              "sha256": "3517d35e280f11ffefaedfcaaa7425d136fb67ccd5b8529fc07ffc05a3c9af5b",
+              "seconds": 5.25
+            },
+            "slow": {
+              "file": "phrases/1/slow.wav",
+              "bytes": 610094,
+              "sha256": "4e52d9761dab3fb87ba7f78fb0aae2eae4a54d0766913fe684b05a0dd704df48",
+              "seconds": 6.92
+            },
+            "countIn": {
+              "file": "phrases/1/countIn.wav",
+              "bytes": 683594,
+              "sha256": "9b083d44b6826f484fad903f1523288cbafeac912c6fc25d8d8af3f8fbdad22c",
+              "seconds": 7.75
+            }
+          }
+        }
+      ]
+    },
+    "lingerdingdang": {
+      "bpm": 108,
+      "slowBpm": 81,
+      "seconds": 17.78,
+      "files": {
+        "accompaniment": {
+          "file": "accompaniment.wav",
+          "bytes": 1590094,
+          "sha256": "b235b346a0d1219837829e16854b695a852bc3faf4c3c9b7caa282f97f5346fe",
+          "seconds": 18.03
+        },
+        "accompanimentCountIn": {
+          "file": "accompanimentCountIn.wav",
+          "bytes": 1786094,
+          "sha256": "d1123035e6a53cd9f4cf394138e5f486a9d8ba308b1224ed3a0a49a7ec202f95",
+          "seconds": 20.25
+        },
+        "full": {
+          "file": "full.wav",
+          "bytes": 1590094,
+          "sha256": "70b024d68b7e096d479a5368a7ebe2dc110e9c4433941a6faf29f7947b818338",
+          "seconds": 18.03
+        },
+        "preview": {
+          "file": "preview.wav",
+          "bytes": 882044,
+          "sha256": "52e916e641587e10615949d9c293d72da60a7c23e34612fac9809c3c1ae19e6e",
+          "seconds": 10
+        },
+        "slow": {
+          "file": "slow.wav",
+          "bytes": 2112760,
+          "sha256": "0cec4db6f8fd191eb7b3e0137d111c35feeff1a57a8b03c76892a264f61cc9c0",
+          "seconds": 23.95
+        }
+      },
+      "phrases": [
+        {
+          "index": 0,
+          "text": "叮叮当叮叮当",
+          "jianpu": "3 3 3 - | 3 3 3 -",
+          "bpm": 108,
+          "slowBpm": 81,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/0/accompaniment.wav",
+              "bytes": 414094,
+              "sha256": "829b73a56cb5104b665b1298400b7aaf8ed25eb3ebc007ba4611b648472a95be",
+              "seconds": 4.69
+            },
+            "full": {
+              "file": "phrases/0/full.wav",
+              "bytes": 414094,
+              "sha256": "4af01e42caccd80e1bcf673b6d5894f491daa1028c000b28adc8a401fb2b3994",
+              "seconds": 4.69
+            },
+            "slow": {
+              "file": "phrases/0/slow.wav",
+              "bytes": 544760,
+              "sha256": "302386d15cf8e04317e7486916737312d61d16a8b94978198b756e08c263c225",
+              "seconds": 6.18
+            },
+            "countIn": {
+              "file": "phrases/0/countIn.wav",
+              "bytes": 610094,
+              "sha256": "ff6f2e8dcf841ca7a1ecc806303c8096510192e4fe7aadaf7e31232800ada302",
+              "seconds": 6.92
+            }
+          }
+        },
+        {
+          "index": 1,
+          "text": "铃儿响叮当",
+          "jianpu": "3 5 1 2 | 3 - - -",
+          "bpm": 108,
+          "slowBpm": 81,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/1/accompaniment.wav",
+              "bytes": 414094,
+              "sha256": "829b73a56cb5104b665b1298400b7aaf8ed25eb3ebc007ba4611b648472a95be",
+              "seconds": 4.69
+            },
+            "full": {
+              "file": "phrases/1/full.wav",
+              "bytes": 414094,
+              "sha256": "42b839752176c7eccb2e405f005521d6ba01a958fa3cad66459e03526ce02b82",
+              "seconds": 4.69
+            },
+            "slow": {
+              "file": "phrases/1/slow.wav",
+              "bytes": 544760,
+              "sha256": "8f8964e219d9ce0a4c1d2b08386c140ed725a900a8cae46b6163cd66cc19228d",
+              "seconds": 6.18
+            },
+            "countIn": {
+              "file": "phrases/1/countIn.wav",
+              "bytes": 610094,
+              "sha256": "ff6f2e8dcf841ca7a1ecc806303c8096510192e4fe7aadaf7e31232800ada302",
+              "seconds": 6.92
+            }
+          }
+        },
+        {
+          "index": 2,
+          "text": "啦啦啦啦啦啦啦啦",
+          "jianpu": "4 4 4 4 | 4 3 3 3",
+          "bpm": 108,
+          "slowBpm": 81,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/2/accompaniment.wav",
+              "bytes": 414094,
+              "sha256": "a724abdc34514596b3f2dece3a6e5f776e2f0a7c3223ec864bd58386409a9e9d",
+              "seconds": 4.69
+            },
+            "full": {
+              "file": "phrases/2/full.wav",
+              "bytes": 414094,
+              "sha256": "e09662c9ef3e02923ddf89a95c69c3d54379a7795ff739b8c92f9a9780ed4646",
+              "seconds": 4.69
+            },
+            "slow": {
+              "file": "phrases/2/slow.wav",
+              "bytes": 544760,
+              "sha256": "a9c1642260e257f8aaa3c42455105e82f6f143bfe9c408e3cb7b996275fec3a4",
+              "seconds": 6.18
+            },
+            "countIn": {
+              "file": "phrases/2/countIn.wav",
+              "bytes": 610094,
+              "sha256": "9e6c4036945e566af32c50e5fcff9edcbc2ad4c1c3158be4f110a00e574d44c3",
+              "seconds": 6.92
+            }
+          }
+        },
+        {
+          "index": 3,
+          "text": "啦啦啦啦啦",
+          "jianpu": "3 2 2 3 | 2 - 5 -",
+          "bpm": 108,
+          "slowBpm": 81,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/3/accompaniment.wav",
+              "bytes": 414094,
+              "sha256": "d98de00a357260dda6e17d4d5529400a887a5bdd4bde6b3c235f4a9fc4d88131",
+              "seconds": 4.69
+            },
+            "full": {
+              "file": "phrases/3/full.wav",
+              "bytes": 414094,
+              "sha256": "09b56724e4146764464c32c74953f6016b5c2bdffa92979b612f4d37d91dca34",
+              "seconds": 4.69
+            },
+            "slow": {
+              "file": "phrases/3/slow.wav",
+              "bytes": 544760,
+              "sha256": "35133a3d2480df9309b1ffde4f2f1f472586fc2c38fce32b48238761a134807e",
+              "seconds": 6.18
+            },
+            "countIn": {
+              "file": "phrases/3/countIn.wav",
+              "bytes": 610094,
+              "sha256": "16c53c6096ef0155c630c4caa8c10070ee2e485efc62c1ab04848b7414ef3087",
+              "seconds": 6.92
+            }
+          }
+        }
+      ]
+    },
+    "youyidijiuchang": {
+      "bpm": 80,
+      "slowBpm": 60,
+      "seconds": 24,
+      "files": {
+        "accompaniment": {
+          "file": "accompaniment.wav",
+          "bytes": 2138894,
+          "sha256": "23654bff480b242710f068d709fb6509d21af8b9d27a669c745897f3de36f1a3",
+          "seconds": 24.25
+        },
+        "accompanimentCountIn": {
+          "file": "accompanimentCountIn.wav",
+          "bytes": 2403494,
+          "sha256": "49f81452a498109e84ac4fb451b4febe420979fdeffb4b12a6a453ab44ee865b",
+          "seconds": 27.25
+        },
+        "full": {
+          "file": "full.wav",
+          "bytes": 2138894,
+          "sha256": "0cfbfdbb9d7c2d24a5c239f1975b70334772b3af305f63b256c81df223ecbd65",
+          "seconds": 24.25
+        },
+        "preview": {
+          "file": "preview.wav",
+          "bytes": 882044,
+          "sha256": "a90652195980c3bb7a186abbc99221e06c9e39fef5286935175bfd9fdf055fda",
+          "seconds": 10
+        },
+        "slow": {
+          "file": "slow.wav",
+          "bytes": 2844494,
+          "sha256": "f6d00a513952d42003a531adf60f472a0bfa6b397fccbc5b45c09b3db4ea483c",
+          "seconds": 32.25
+        }
+      },
+      "phrases": [
+        {
+          "index": 0,
+          "text": "怎能忘记旧日朋友",
+          "jianpu": "1 1 1 3 | 2 1 2 3",
+          "bpm": 80,
+          "slowBpm": 60,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/0/accompaniment.wav",
+              "bytes": 551294,
+              "sha256": "63576339d8ae89ccab34acad46a9bdc735fe2e70fe5a348e5e43bd4fe9e45989",
+              "seconds": 6.25
+            },
+            "full": {
+              "file": "phrases/0/full.wav",
+              "bytes": 551294,
+              "sha256": "edac5da3d10577261a02728ff1b1e44135375e6a61ffe401b0e0702b43cacbfb",
+              "seconds": 6.25
+            },
+            "slow": {
+              "file": "phrases/0/slow.wav",
+              "bytes": 727694,
+              "sha256": "7cb2bc8cacedbc258834d35518946dce7191d17e1d0fa8d060ca7d22cdbaf9a4",
+              "seconds": 8.25
+            },
+            "countIn": {
+              "file": "phrases/0/countIn.wav",
+              "bytes": 815894,
+              "sha256": "a1347ac353093fedb8f77c3a19c8d256189b7584ccb109c21de9cdb111142449",
+              "seconds": 9.25
+            }
+          }
+        },
+        {
+          "index": 1,
+          "text": "心中能不怀想",
+          "jianpu": "1 1 3 5 | 6 - - -",
+          "bpm": 80,
+          "slowBpm": 60,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/1/accompaniment.wav",
+              "bytes": 551294,
+              "sha256": "2979b973fe43a3b4508859f7bae9b1c189c9edddde09399d39c0d4ae4776e03c",
+              "seconds": 6.25
+            },
+            "full": {
+              "file": "phrases/1/full.wav",
+              "bytes": 551294,
+              "sha256": "b577cdd333dc5b640ef024fc0c99639f1c8d511001a32507ceb3622f808423a0",
+              "seconds": 6.25
+            },
+            "slow": {
+              "file": "phrases/1/slow.wav",
+              "bytes": 727694,
+              "sha256": "384a3e93f0ea634b5b2d242842ac3f57e4ed54d8b5bdfd0c0e7dcfe79bad0f72",
+              "seconds": 8.25
+            },
+            "countIn": {
+              "file": "phrases/1/countIn.wav",
+              "bytes": 815894,
+              "sha256": "4b3402f9990a89bf5a232dad48a9e4c6fa4493101f99b6d2855104c43ad32088",
+              "seconds": 9.25
+            }
+          }
+        },
+        {
+          "index": 2,
+          "text": "旧日朋友岂能相忘",
+          "jianpu": "5 3 3 1 | 2 1 2 3",
+          "bpm": 80,
+          "slowBpm": 60,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/2/accompaniment.wav",
+              "bytes": 551294,
+              "sha256": "63576339d8ae89ccab34acad46a9bdc735fe2e70fe5a348e5e43bd4fe9e45989",
+              "seconds": 6.25
+            },
+            "full": {
+              "file": "phrases/2/full.wav",
+              "bytes": 551294,
+              "sha256": "0fc859cd2473d0377d53454d06c426deda2bcf826cf0054fe523656430d52d18",
+              "seconds": 6.25
+            },
+            "slow": {
+              "file": "phrases/2/slow.wav",
+              "bytes": 727694,
+              "sha256": "d70ad274bdf6243b7ae91e459ba965a250b547ece56c00fa83a3d7f201e10ee2",
+              "seconds": 8.25
+            },
+            "countIn": {
+              "file": "phrases/2/countIn.wav",
+              "bytes": 815894,
+              "sha256": "a1347ac353093fedb8f77c3a19c8d256189b7584ccb109c21de9cdb111142449",
+              "seconds": 9.25
+            }
+          }
+        },
+        {
+          "index": 3,
+          "text": "友谊地久天长",
+          "jianpu": "1 6 6 5 | 1 - - -",
+          "bpm": 80,
+          "slowBpm": 60,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/3/accompaniment.wav",
+              "bytes": 551294,
+              "sha256": "58780ab7ad2f2fc6485fca557c2824f62e690d487c78f5d73b0b2fa493a7eca8",
+              "seconds": 6.25
+            },
+            "full": {
+              "file": "phrases/3/full.wav",
+              "bytes": 551294,
+              "sha256": "262481ec6cec9823bff41a625eac1e1cc5ea37bcbc1541f6a24e49802c27a4b1",
+              "seconds": 6.25
+            },
+            "slow": {
+              "file": "phrases/3/slow.wav",
+              "bytes": 727694,
+              "sha256": "865e87ba12801a2a925f581bd571a497f0ab7c6f06ee4b7aa8e7042ed599b570",
+              "seconds": 8.25
+            },
+            "countIn": {
+              "file": "phrases/3/countIn.wav",
+              "bytes": 815894,
+              "sha256": "6caf9602f9d9c32987e04f0023924e7e80955b254e22ea0d5532bcf37815501c",
+              "seconds": 9.25
+            }
+          }
+        }
+      ]
+    },
+    "xinnianhao": {
+      "bpm": 100,
+      "slowBpm": 75,
+      "seconds": 19.2,
+      "files": {
+        "accompaniment": {
+          "file": "accompaniment.wav",
+          "bytes": 1715534,
+          "sha256": "109279c21a4cf75bb785af07ac5e33f7d03233136009e5cafc2432590f152c48",
+          "seconds": 19.45
+        },
+        "accompanimentCountIn": {
+          "file": "accompanimentCountIn.wav",
+          "bytes": 1927214,
+          "sha256": "3abe25ee8bf0c2c2a91dd4ea97f42a66c820b13aae0f2df0a9ecd33f7968036c",
+          "seconds": 21.85
+        },
+        "full": {
+          "file": "full.wav",
+          "bytes": 1715534,
+          "sha256": "1c394f4ea46af035b3b2dd35d0ab640f2cfbae69750c3b91711305bd8e93391a",
+          "seconds": 19.45
+        },
+        "preview": {
+          "file": "preview.wav",
+          "bytes": 882044,
+          "sha256": "2945d58045d229deddd5e784ec302257859abe797a67ed6fe2a7f257c24a5591",
+          "seconds": 10
+        },
+        "slow": {
+          "file": "slow.wav",
+          "bytes": 2280014,
+          "sha256": "77768b3ca0a7d869fe11b546da8855037d508f9f2e9a1637a16071a2c4604019",
+          "seconds": 25.85
+        }
+      },
+      "phrases": [
+        {
+          "index": 0,
+          "text": "新年好呀新年好呀",
+          "jianpu": "1 1 1 5 | 3 3 3 1",
+          "bpm": 100,
+          "slowBpm": 75,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/0/accompaniment.wav",
+              "bytes": 445454,
+              "sha256": "6ce64620607907119692b2ea7862a9aac071466a311b9da74432ff3c36d0ebc3",
+              "seconds": 5.05
+            },
+            "full": {
+              "file": "phrases/0/full.wav",
+              "bytes": 445454,
+              "sha256": "9394053cf633e5a5ea5ef03cd59c0ead5b93d421b1d4258ff199201e326ff479",
+              "seconds": 5.05
+            },
+            "slow": {
+              "file": "phrases/0/slow.wav",
+              "bytes": 586574,
+              "sha256": "0cb5b1c904610536c0b62ffc179c72521ed90a720f7575e252c6824ac0ab484d",
+              "seconds": 6.65
+            },
+            "countIn": {
+              "file": "phrases/0/countIn.wav",
+              "bytes": 657134,
+              "sha256": "88285f7cc4130f27f8b168530108bd5c11e56484a03c3cf314e8025cdb05b07c",
+              "seconds": 7.45
+            }
+          }
+        },
+        {
+          "index": 1,
+          "text": "祝福大家新年好",
+          "jianpu": "1 3 5 5 | 4 3 2 -",
+          "bpm": 100,
+          "slowBpm": 75,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/1/accompaniment.wav",
+              "bytes": 445454,
+              "sha256": "6ce64620607907119692b2ea7862a9aac071466a311b9da74432ff3c36d0ebc3",
+              "seconds": 5.05
+            },
+            "full": {
+              "file": "phrases/1/full.wav",
+              "bytes": 445454,
+              "sha256": "2b5d53b4b1b6c4fbc299f84cd1577eef6ba343a1c102b068195b79bf8d7c2e10",
+              "seconds": 5.05
+            },
+            "slow": {
+              "file": "phrases/1/slow.wav",
+              "bytes": 586574,
+              "sha256": "f8c3594209625038a89d57969cd4c0354268893fa56762ed02ffe2070c993e33",
+              "seconds": 6.65
+            },
+            "countIn": {
+              "file": "phrases/1/countIn.wav",
+              "bytes": 657134,
+              "sha256": "88285f7cc4130f27f8b168530108bd5c11e56484a03c3cf314e8025cdb05b07c",
+              "seconds": 7.45
+            }
+          }
+        },
+        {
+          "index": 2,
+          "text": "我们唱歌我们跳舞",
+          "jianpu": "2 3 4 4 | 3 2 3 1",
+          "bpm": 100,
+          "slowBpm": 75,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/2/accompaniment.wav",
+              "bytes": 445454,
+              "sha256": "5e4847e952d06b1ca0f42542e3fde537b8f93f5e9fcc2f685e609c3a1f06a91f",
+              "seconds": 5.05
+            },
+            "full": {
+              "file": "phrases/2/full.wav",
+              "bytes": 445454,
+              "sha256": "756a3fac5a91bbc03100659f03bc82dc5c8f0b13a7b77d5377903a44864d9b41",
+              "seconds": 5.05
+            },
+            "slow": {
+              "file": "phrases/2/slow.wav",
+              "bytes": 586574,
+              "sha256": "377dc0112e40df8767bc82aaac1a2e5e1566d6df33f308d6a451d863c0e04a7e",
+              "seconds": 6.65
+            },
+            "countIn": {
+              "file": "phrases/2/countIn.wav",
+              "bytes": 657134,
+              "sha256": "0690674d62aa67d86f81154444f84bf4d974db5dfb66b946dbb6f3a1707424db",
+              "seconds": 7.45
+            }
+          }
+        },
+        {
+          "index": 3,
+          "text": "祝福大家新年好",
+          "jianpu": "1 3 2 5 | 7 2 1 -",
+          "bpm": 100,
+          "slowBpm": 75,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/3/accompaniment.wav",
+              "bytes": 445454,
+              "sha256": "52588a6b4e9a65562896a4b0db8e7188249fd34b885540abb5c700e8d25aa8b2",
+              "seconds": 5.05
+            },
+            "full": {
+              "file": "phrases/3/full.wav",
+              "bytes": 445454,
+              "sha256": "169a223efecbb2898cfb520f1f9e89a29a7385944faa2c4bad05bf77d2d52861",
+              "seconds": 5.05
+            },
+            "slow": {
+              "file": "phrases/3/slow.wav",
+              "bytes": 586574,
+              "sha256": "878b44657d1173ad655e81e6ca2e7478a14fd1dd1e404384dc70e9dc13faf745",
+              "seconds": 6.65
+            },
+            "countIn": {
+              "file": "phrases/3/countIn.wav",
+              "bytes": 657134,
+              "sha256": "2ddf55140285dbe961dad4894f7881df1cec82aa4573186cd5c1221715e7c4ee",
+              "seconds": 7.45
+            }
+          }
+        }
+      ]
+    },
+    "yinjiege": {
+      "bpm": 84,
+      "slowBpm": 63,
+      "seconds": 11.43,
+      "files": {
+        "accompaniment": {
+          "file": "accompaniment.wav",
+          "bytes": 1030094,
+          "sha256": "36a51500de8cf029e6cca4774c2cea42af9ba2b092960e7f41f969c4a996a2c1",
+          "seconds": 11.68
+        },
+        "accompanimentCountIn": {
+          "file": "accompanimentCountIn.wav",
+          "bytes": 1282094,
+          "sha256": "8bdb5f2ad138b3ba7de1b42dfe25f76657bcf6aac99d639669a081c054d03ca5",
+          "seconds": 14.54
+        },
+        "full": {
+          "file": "full.wav",
+          "bytes": 1030094,
+          "sha256": "e8d58a219c0c108130c51767a1481a6079e57eab6660e9ef9cd0976ba77ba1f1",
+          "seconds": 11.68
+        },
+        "preview": {
+          "file": "preview.wav",
+          "bytes": 882044,
+          "sha256": "25d1f31a6b5fd3b995323312d13f0a8115fe0af5a5f6ce349c142141d96ee326",
+          "seconds": 10
+        },
+        "slow": {
+          "file": "slow.wav",
+          "bytes": 1366094,
+          "sha256": "d83e01d614f924ad22a0a01a914162d5dddc786cec78706d03a8f3cbf45d3f83",
+          "seconds": 15.49
+        }
+      },
+      "phrases": [
+        {
+          "index": 0,
+          "text": "哆来咪发梭拉西哆",
+          "jianpu": "1 2 3 4 | 5 6 7 1'",
+          "bpm": 84,
+          "slowBpm": 63,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/0/accompaniment.wav",
+              "bytes": 526094,
+              "sha256": "bfe1480d2b92b67d30eddc4e2fd1204b4803ff97d056acc8ffba1292db5c7018",
+              "seconds": 5.96
+            },
+            "full": {
+              "file": "phrases/0/full.wav",
+              "bytes": 526094,
+              "sha256": "6b7be3707be2023a4534579e55f88e3d753f093baefc35c8a2e4ccdc4719057d",
+              "seconds": 5.96
+            },
+            "slow": {
+              "file": "phrases/0/slow.wav",
+              "bytes": 694094,
+              "sha256": "aa2aa76ed724923513c60266e0f29357dc0a397e9139eb8cd2c30b19b93fb6c1",
+              "seconds": 7.87
+            },
+            "countIn": {
+              "file": "phrases/0/countIn.wav",
+              "bytes": 778094,
+              "sha256": "f5d6fb3f74eea92c93f10c2915cdc74aeefdadf1eacb836edb276ac07ce391d2",
+              "seconds": 8.82
+            }
+          }
+        },
+        {
+          "index": 1,
+          "text": "哆西拉梭发咪来哆",
+          "jianpu": "1' 7 6 5 | 4 3 2 1",
+          "bpm": 84,
+          "slowBpm": 63,
+          "countInBeats": 4,
+          "files": {
+            "accompaniment": {
+              "file": "phrases/1/accompaniment.wav",
+              "bytes": 526094,
+              "sha256": "bfe1480d2b92b67d30eddc4e2fd1204b4803ff97d056acc8ffba1292db5c7018",
+              "seconds": 5.96
+            },
+            "full": {
+              "file": "phrases/1/full.wav",
+              "bytes": 526094,
+              "sha256": "c2f1ea8345f6d2963eb27799ea7e0e74239d403ed396d8183d9b4736ae94c633",
+              "seconds": 5.96
+            },
+            "slow": {
+              "file": "phrases/1/slow.wav",
+              "bytes": 694094,
+              "sha256": "e296e99ef628b4560d439cf0694187b0827ef9556d116f8dfe1323861b9cd52b",
+              "seconds": 7.87
+            },
+            "countIn": {
+              "file": "phrases/1/countIn.wav",
+              "bytes": 778094,
+              "sha256": "f5d6fb3f74eea92c93f10c2915cdc74aeefdadf1eacb836edb276ac07ce391d2",
+              "seconds": 8.82
+            }
+          }
+        }
+      ]
+    }
+  }
+}

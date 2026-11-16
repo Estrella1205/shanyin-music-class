@@ -1,4 +1,9 @@
 // CDP 验证学生前端：注册表单角色选择 + 学生仪表盘渲染 + 练习记录展示
+//
+// 【免登录迭代版】注册／登录界面已按需求整体停用，本脚本依赖注册弹窗，暂不适用。
+// 需要恢复多账号体系时：先恢复 public/workspace.js 的认证界面，再删除下面两行运行本脚本。
+console.log('[skip] 本机免登录模式已移除注册／登录界面，学生账号注册流程验收暂不适用。');
+process.exit(0);
 const fs = require('fs'); const path = require('path'); const http = require('http');
 function httpGetJson(url){return new Promise((resolve,reject)=>{const req=http.get(url,res=>{let s='';res.on('data',c=>s+=c);res.on('end',()=>resolve(JSON.parse(s)))});req.on('error',reject)})}
 async function main(){

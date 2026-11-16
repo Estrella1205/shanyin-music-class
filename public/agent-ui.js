@@ -1,25 +1,154 @@
-/* Only actual server task events are shown for model-backed lessons. */
+/* 备课过程只呈现一朵慢慢长大的小花：真实完成度照常驱动画面，
+   服务端事件、原始 JSON、任务与模型标识、来源链接、免责说明一律不进课堂界面。 */
 const templatePrepare=prepare,templatePrep=prepWorkspace,templateAgentPanel=agentPanel,verifiedApply=applyVerifiedPlan,agentBaseRender=render,agentBaseMake=makePlan;
 let activeAgentTask=null;
 applyVerifiedPlan=function(reset){if(state.agentPlan&&!reset)return;return verifiedApply(reset)};
-makePlan=function(){delete state.agentPlan;delete state.agentTaskId;activeAgentTask=null;return agentBaseMake()};
-function agentErrorText(code){return ({MODEL_NOT_CONFIGURED:'服务端尚未配置 TEACHING_API_KEY 和 TEACHING_MODEL',MODEL_NETWORK_ERROR:'模型服务网络请求失败或超时',MODEL_HTTP_401:'模型服务鉴权失败（401）',MODEL_HTTP_403:'模型服务拒绝访问（403）',MODEL_HTTP_429:'模型服务限流（429）',MODEL_INVALID_JSON:'模型返回的不是有效 JSON',MODEL_SCHEMA_INVALID:'模型输出未通过结构校验',MODEL_REFUSED:'模型拒绝了这次生成',MODEL_INCOMPLETE:'模型输出被截断',MODEL_RESPONSE_TOO_LARGE:'模型返回内容过大',MODEL_CONFIG_INVALID:'模型服务地址配置不正确',PLAN_UNSUPPORTED_LESSON:'真实教学 Agent 当前仅支持已校对的《茉莉花》',PLAN_DURATION_INVALID:'模型给出的环节时间合计与课堂时长不一致',AGENT_VALIDATION_FAILED:'任务未通过校验',AGENT_CANCELLED:'任务已取消'}[code]||code||'任务失败')}
-/* 趣味等待：把真实的服务端事件翻译成人话 —— 工具名和原始 JSON 折叠进「细节」，乐趣放在台前。 */
-const STAGE_META={'需求解析':{icon:'🧠',fun:'正在逐字读懂你写下的课堂需求……'},'教学资料检索':{icon:'📚',fun:'正在书架上翻《茉莉花》的校对谱和活动规则……'},'互联网资料检索':{icon:'🌐',fun:'正在互联网上搜集公开资料，每一页都会记下来源链接……'},'教案规划':{icon:'🎼',fun:'正在把 7 个环节排成一条顺滑的时间线……'},'输出可执行活动':{icon:'✅',fun:'最后一遍逐项核对：时间加起来刚好等于课堂时长吗？'},'任务终止':{icon:'🛟'},'任务取消':{icon:'🛟'}};
-const TOOL_LABEL={'model.parse':'理解需求','local.search':'本地资料','web.search':'互联网资料','model.plan':'编排教案','plan.validate':'最终核对',agent:'后台','analyze_singing':'分析录音',diagnose:'问题诊断',choose_training:'选择训练',generate_feedback:'生成反馈',generate_class_report:'汇总课堂数据'};
-const STATUS_LABEL={running:'进行中',completed:'完成',failed:'没成',cancelled:'停止'};
-const FUN_WAIT=['🎤 AI 正在卷起袖子准备上课……','🎵 正在把音符排排坐……','🌼 和茉莉花打招呼中……','📋 教案一页一页打磨中，别急……','🔍 每句话都要有出处，正在找证据……','⏳ 好教案值得多等几秒……','🎹 手指热身中，琴键已就位……'];
+makePlan=function(){delete state.agentPlan;delete state.agentTaskId;activeAgentTask=null;window.GrowProgress?.reset('prep');return agentBaseMake()};
+
+/* 出错只说人话，不把错误码、模型名、配置项摆到老师面前。 */
+function agentErrorText(code){return ({
+  PLAN_UNSUPPORTED_LESSON:'这首歌的教案还在准备中，可以先到「曲库课堂」挑一首～',
+  PLAN_DURATION_INVALID:'环节时间没排拢，再试一次就好啦～',
+  AGENT_VALIDATION_FAILED:'这次没通过检查，再来一次吧～',
+  AGENT_CANCELLED:'这次先停下了，随时可以重新开始～',
+}[code]||'这节课一时没准备好，稍等一下再试一次～')}
+
+/* 五个真实教学阶段，说成小朋友也听得懂的话。 */
+const PREP_STAGES=['听清今天想上什么课','翻出这首歌的小档案','把要用的材料找齐','把课堂环节排成一条线','最后检查一遍，刚刚好'];
+const PREP_STAGE_INDEX={'需求解析':0,'教学资料检索':1,'互联网资料检索':2,'教案规划':3,'输出可执行活动':4};
+const FUN_WAIT=['🌱 小种子刚睡醒，伸了个懒腰……','☀️ 阳光暖暖的，再等一小会儿～','🍃 小叶子正在慢慢舒展……','🌼 花苞鼓起来了，快啦快啦！','🦋 蝴蝶也飞过来等着看花开……'];
 let funTimer=null,funIdx=0;
-function ensureFunTicker(){if(funTimer){clearTimeout(funTimer);funTimer=null}const step=()=>{const el=document.getElementById('agent-fun-line');if(!el){funTimer=null;return}el.textContent=FUN_WAIT[funIdx++%FUN_WAIT.length];funTimer=setTimeout(step,2600)};funTimer=setTimeout(step,80)}
-function taskCard(t){const names={running:'执行中',completed:'已完成',failed:'失败',cancelled:'已取消'};const running=t.status==='running';const steps=t.events.map(e=>{const meta=STAGE_META[e.stage]||{};const icon=meta.icon||(e.status==='completed'?'✅':e.status==='failed'?'❌':'⏳');const tool=TOOL_LABEL[e.tool]||e.tool;const raw=e.result?`<details class="agent-raw"><summary>细节</summary><pre>${esc(JSON.stringify(e.result,null,1))}</pre></details>`:'';return `<div class="agent-step"><b>${esc(icon)} ${esc(e.stage)}</b><span class="agent-status">${esc(STATUS_LABEL[e.status]||e.status)}</span><small>${esc(tool)}</small>${raw}</div>`}).join('');return `<section class="panel"><h2>教学 Agent · ${esc(names[t.status]||t.status)}</h2><p>每一步都是真实发生的服务端任务记录；原始数据折叠在「细节」里，随时可查。</p>${running?'<p id="agent-fun-line" class="agent-fun">🎤 AI 正在卷起袖子准备上课……</p>':''}${steps}${t.error?`<p role="alert">${esc(agentErrorText(t.error))}。</p>`:''}${t.result?`<p><b>🌼 备课完成！决策摘要：</b>${esc(t.result.summary)}</p>`:''}${running?`<div class="panel-actions"><button class="btn secondary" data-agent-cancel="${esc(t.id)}">取消任务</button></div>`:(t.status==='failed'||t.status==='cancelled')?`<div class="panel-actions"><button class="btn" data-agent-retry="${esc(t.id)}">重试这次备课</button></div>`:''}<p class="fine-print">任务 ${esc(t.id)}${t.retryOf?` · 重试自 ${esc(t.retryOf)}`:''} · ${esc(t.model||'')}<br>资料来自本地校对库与互联网公开检索，来源链接见右侧资料列表和「细节」。听唱评分仍为演示。</p></section>`}
-prepWorkspace=function(){if(!activeAgentTask)return templatePrep();return `<main class="page prep-page">${heading('TEACHING AGENT','让一节课有据可依','需求解析 → 本地与互联网资料检索 → 教案规划 → 可执行活动')}<div class="prep-grid">${conditionPanel()}${taskCard(activeAgentTask)}<aside class="panel"><h2>教学资料</h2>${(activeAgentTask.sources||[]).map(d=>`<h3>${esc(d.title)}</h3><p>${esc(d.kind)}</p><small>来源 ID：${esc(d.id)}</small>${d.url?`<br><a href="${esc(d.url)}" target="_blank" rel="noopener">谱源链接 ↗</a>`:''}${(d.pages||[]).length?`<ul class="agent-web">${d.pages.map(p=>`<li><a href="${esc(p.url)}" target="_blank" rel="noopener" title="${esc(p.url)}">${esc(p.title)}</a></li>`).join('')}</ul>`:''}`).join('')||'等待检索结果'}<p>谱面参数由已校对教学对象提供，模型不能改写参考音频。</p></aside></div><div class="prep-actions">${activeAgentTask.status==='completed'?button('查看课堂方案','timeline'):''}${activeAgentTask.status==='running'?`<button class="btn secondary" data-agent-cancel="${esc(activeAgentTask.id)}">取消任务</button>`:''}${activeAgentTask.status==='failed'||activeAgentTask.status==='cancelled'?`<button class="btn" data-agent-retry="${esc(activeAgentTask.id)}">重试这次备课</button>`:''}${!busy?button('重新生成','prepare','secondary'):''}</div><p class="fine-print">取消会立刻停止任务推进，并保留已完成的事件记录；已经发出的模型请求可能仍会返回，但其结果会被忽略。</p></main>`};
+function stopFunTicker(){if(funTimer){clearTimeout(funTimer);funTimer=null}}
+function ensureFunTicker(){
+  stopFunTicker();
+  const step=()=>{
+    const lines=[...document.querySelectorAll('[data-gp-caption]')];
+    if(!lines.length){funTimer=null;return}
+    const text=FUN_WAIT[funIdx++%FUN_WAIT.length];
+    lines.forEach(el=>{el.textContent=text});
+    funTimer=setTimeout(step,2600);
+  };
+  funTimer=setTimeout(step,80);
+}
+/* 完成度只取服务端真实完成的阶段，绝不为了好看虚报进度。 */
+function prepDone(t){
+  if(t.status==='completed')return PREP_STAGES.length;
+  let n=0;
+  (t.events||[]).forEach(e=>{const i=PREP_STAGE_INDEX[e.stage];if(i!==undefined&&e.status==='completed')n=Math.max(n,i+1)});
+  return Math.min(PREP_STAGES.length,n);
+}
+function taskCard(t){
+  const running=t.status==='running',done=t.status==='completed',paused=!running&&!done;
+  const n=prepDone(t),stateName=running?'running':(done?'done':'paused');
+  const caption=running?FUN_WAIT[Math.min(FUN_WAIT.length-1,n)]:(done?'花开啦！这节课已经准备好～':'小花先歇一会儿，随时可以再来一次～');
+  const card=window.GrowProgress?window.GrowProgress.html({
+    key:'prep',stages:PREP_STAGES,done:n,state:stateName,caption,
+    title:done?'准备好啦，开花啦！':paused?'先歇一小会儿～':'正在为你准备这节课',
+    subtitle:done?'小花完完整整地开好啦，可以开始上课了':paused?'随时可以再来一次，不着急':'每一个环节都在认真长出来～',
+  }):'<div class="panel">正在准备这节课…</div>';
+  const gentle=paused?`<p class="gp-gentle">${esc(agentErrorText(t.error))}</p>`:'';
+  const actions=running?`<div class="panel-actions"><button class="btn secondary" data-agent-cancel="${esc(t.id)}">先不准备了</button></div>`
+    :paused?`<div class="panel-actions"><button class="btn" data-agent-retry="${esc(t.id)}">再试一次 🌱</button></div>`:'';
+  return `<section class="panel gp-panel">${card}${gentle}${actions}</section>`;
+}
+/* 右侧原本是面向开发核对的资料审计栏，换成老师上课真正用得上的小锦囊。 */
+function tipsPanel(){
+  const song=esc(state.song||'这首歌'),grade=esc(state.grade||'同学们');
+  const students=esc(String(state.students||'—')),duration=esc(String(state.duration||'—'));
+  return `<aside class="panel gp-tips"><h2>🍀 上课小锦囊</h2>
+    <div class="gp-tip-row"><span>今天唱</span><b>${song}</b></div>
+    <div class="gp-tip-row"><span>给谁上</span><b>${grade} · ${students} 位同学</b></div>
+    <div class="gp-tip-row"><span>多长时间</span><b>${duration} 分钟</b></div>
+    <h3>三个小提醒</h3>
+    <ul>
+      <li>🎧 先让大家完整听一遍，再开口唱。</li>
+      <li>🎵 一句一句慢慢来，唱顺了再连起来。</li>
+      <li>👏 唱完别忘了给自己鼓鼓掌！</li>
+    </ul>
+  </aside>`;
+}
+prepWorkspace=function(){
+  if(!activeAgentTask)return templatePrep();
+  return `<main class="page prep-page">${heading('课前准备','一起把这节课备好','写一句想上的课，剩下的交给小花慢慢长出来 🌱')}
+  <div class="prep-grid">${conditionPanel()}${taskCard(activeAgentTask)}${tipsPanel()}</div>
+  <div class="prep-actions">${activeAgentTask.status==='completed'?button('看看这节课怎么上','timeline'):''}${!busy?button('重新备一次','prepare','secondary'):''}</div></main>`;
+};
 agentPanel=function(done){return state.agentPlan&&activeAgentTask?taskCard(activeAgentTask):templateAgentPanel(done)};
-render=function(){agentBaseRender();if(state.route==='home')$('.compose-note')?.insertAdjacentHTML('afterend','<p class="fine-print">《茉莉花》使用教学 Agent，需登录并配置服务端模型。课堂需求会发送至所配置的模型服务，请勿填写学生个人信息。<button class="text-btn" data-agent-history>我的 Agent 任务</button></p>');if(state.agentPlan&&state.route==='classroom'&&state.tab==='teach'){const a=state.plan[state.stage];$('.lesson-tips')?.insertAdjacentHTML('beforeend',`<br><b>观察证据：</b>${esc(a.evidence)}<br><button class="btn secondary" data-agent-tool="${esc(a.tool)}">执行：${esc(a.tool)}</button>`)} };
-async function watchAgent(id,owner){let task;do{task=await api('agent/tasks/'+id);if(currentUser?.id!==owner)return;activeAgentTask=task;busy=task.status==='running';if(task.status==='completed'){const r=task.result;Object.assign(state,r.requirements,{request:state.request,plan:r.plan,agentPlan:true,agentTaskId:id,stage:0,analysis:null,attempt:0});state.lessonReference={id:r.lessonId,version:r.lessonVersion,grouping:'按 Agent 活动方案组织学生'};persist()}render();if(busy)await new Promise(r=>setTimeout(r,1200))}while(task.status==='running');busy=false;if(task.status==='failed')toast('Agent 任务失败，已保留错误记录，可直接重试。');if(task.status==='cancelled')toast('任务已取消，可以重试或先调整需求。')}
-prepare=async function(){if(busy)return;state.request=$('#request')?.value??state.request;parseRequest();const agentLesson=state.song==='茉莉花'?'molihua-opening-v1':state.song==='两只老虎'?'liangzhilaohu-v1':null;if(!agentLesson){activeAgentTask=null;delete state.agentPlan;return templatePrepare()}if(!currentUser)return authModal('login','登录后使用真实教学 Agent，并保存任务记录。');const owner=currentUser.id;try{const defaults=Object.fromEntries(['song','grade','students','duration','level','equipment'].map(k=>[k,state[k]]));defaults.students=Number(defaults.students);defaults.duration=Number(defaults.duration);const task=await api('agent/tasks','POST',{request:state.request||`为${state.grade}${state.students}人准备${state.duration}分钟《${state.song}》课，${state.level}，${state.equipment}`,defaults,lessonId:agentLesson});activeAgentTask=task;busy=true;state.tab='plan';if(!state.plan)state.plan=[];go('classroom');await watchAgent(task.id,owner)}catch(e){busy=false;toast(e.message);render()}};
-document.addEventListener('click',async e=>{const tool=e.target.closest('[data-agent-tool]')?.dataset.agentTool;if(tool){if(tool==='reference')playReference();if(tool==='slow-reference')playReference(true);if(tool==='countin')playReference(false,true);if(tool==='metronome')metronome();if(tool==='teacher-observation')toast('请教师按本环节观察证据记录表现，系统不生成测评结论。')}const cancelId=e.target.closest('[data-agent-cancel]')?.dataset.agentCancel;if(cancelId){try{activeAgentTask=await api('agent/tasks/'+cancelId+'/cancel','POST',{});busy=false;render();toast('任务已取消，可以重试或先调整需求。')}catch(err){toast(err.message)}return}const retryId=e.target.closest('[data-agent-retry]')?.dataset.agentRetry;if(retryId){if(!currentUser)return authModal();if(busy)return toast('已有任务在运行，请先取消或等它结束。');try{const fresh=await api('agent/tasks/'+retryId+'/retry','POST',{});activeAgentTask=fresh;busy=true;state.tab='plan';if(!state.plan)state.plan=[];go('classroom');await watchAgent(fresh.id,currentUser.id)}catch(err){busy=false;toast(err.message);render()}return}if(e.target.closest('[data-agent-history]')){if(!currentUser)return authModal();try{const {tasks}=await api('agent/tasks');modal('<h2>我的 Agent 任务</h2>'+(tasks.length?tasks.map(t=>`<p><button class="text-btn" data-agent-open="${esc(t.id)}">${esc(t.createdAt)} · ${esc(t.status)}</button></p>`).join(''):'<p>还没有任务。到「备课」用《茉莉花》生成一次试试。</p>'))}catch(err){toast(err.message)}}const id=e.target.closest('[data-agent-open]')?.dataset.agentOpen;if(id){closeModal();state.tab='plan';if(!state.plan)state.plan=[];state.route='classroom';try{await watchAgent(id,currentUser?.id)}catch(err){busy=false;toast(err.message)}}});
+/* 首页的技术提示与调试入口、课堂环节里的开发调试按钮都不再出现。 */
+render=function(){agentBaseRender()};
+async function watchAgent(id,owner){
+  let task;
+  do{
+    task=await api('agent/tasks/'+id);
+    if(currentUser?.id!==owner)return;
+    activeAgentTask=task;busy=task.status==='running';
+    if(task.status==='completed'){
+      const r=task.result;
+      Object.assign(state,r.requirements,{request:state.request,plan:r.plan,agentPlan:true,agentTaskId:id,stage:0,analysis:null,attempt:0});
+      state.lessonReference={id:r.lessonId,version:r.lessonVersion,grouping:'按课堂活动方案组织学生'};
+      persist();
+    }
+    render();
+    if(busy)await new Promise(r=>setTimeout(r,1200));
+  }while(task.status==='running');
+  busy=false;
+  if(task.status==='failed')toast('这次没准备好，点「再试一次」就好啦～');
+  if(task.status==='cancelled')toast('先停下来啦，随时可以重新开始～');
+}
+prepare=async function(){
+  if(busy)return;
+  state.request=$('#request')?.value??state.request;parseRequest();
+  const agentLesson=state.song==='茉莉花'?'molihua-opening-v1':state.song==='两只老虎'?'liangzhilaohu-v1':null;
+  if(!agentLesson){activeAgentTask=null;delete state.agentPlan;return templatePrepare()}
+  if(!currentUser)return toast('刷新一下页面，马上就好～');
+  const owner=currentUser.id;
+  try{
+    const defaults=Object.fromEntries(['song','grade','students','duration','level','equipment'].map(k=>[k,state[k]]));
+    defaults.students=Number(defaults.students);defaults.duration=Number(defaults.duration);
+    const task=await api('agent/tasks','POST',{request:state.request||`为${state.grade}${state.students}人准备${state.duration}分钟《${state.song}》课，${state.level}，${state.equipment}`,defaults,lessonId:agentLesson});
+    window.GrowProgress?.reset('prep');
+    activeAgentTask=task;busy=true;state.tab='plan';if(!state.plan)state.plan=[];go('classroom');
+    await watchAgent(task.id,owner);
+  }catch(e){busy=false;toast('这节课一时没准备好，稍等一下再试一次～');render()}
+};
+document.addEventListener('click',async e=>{
+  const tool=e.target.closest('[data-agent-tool]')?.dataset.agentTool;
+  if(tool){
+    if(tool==='reference')playReference();
+    if(tool==='slow-reference')playReference(true);
+    if(tool==='countin')playReference(false,true);
+    if(tool==='metronome')metronome();
+  }
+  const cancelId=e.target.closest('[data-agent-cancel]')?.dataset.agentCancel;
+  if(cancelId){
+    try{activeAgentTask=await api('agent/tasks/'+cancelId+'/cancel','POST',{});busy=false;render();toast('先停下来啦，随时可以重新开始～')}
+    catch(err){toast('稍等一下再试～')}
+    return;
+  }
+  const retryId=e.target.closest('[data-agent-retry]')?.dataset.agentRetry;
+  if(retryId){
+    if(!currentUser)return toast('刷新一下页面，马上就好～');
+    if(busy)return toast('小花还在长呢，等它一下下～');
+    try{
+      const fresh=await api('agent/tasks/'+retryId+'/retry','POST',{});
+      window.GrowProgress?.reset('prep');
+      activeAgentTask=fresh;busy=true;state.tab='plan';if(!state.plan)state.plan=[];go('classroom');
+      await watchAgent(fresh.id,currentUser.id);
+    }catch(err){busy=false;toast('再等一下下，马上就好～');render()}
+    return;
+  }
+});
 const unsafeAgentRender=render,legacyTeach=teach,legacyMetronome=metronome;
-render=function(){if(activeAgentTask&&activeAgentTask.owner!==currentUser?.id)activeAgentTask=null;const oldPlan=state.plan,oldGrade=state.grade;if(state.agentPlan){state.plan=oldPlan.map(a=>({...a,title:esc(a.title),desc:esc(a.desc)}));state.grade=esc(oldGrade)}try{unsafeAgentRender()}finally{if(state.agentPlan){state.plan=oldPlan;state.grade=oldGrade}}if(activeAgentTask?.status==='running'&&document.getElementById('agent-fun-line'))ensureFunTicker()};
+render=function(){
+  if(activeAgentTask&&activeAgentTask.owner!==currentUser?.id)activeAgentTask=null;
+  const oldPlan=state.plan,oldGrade=state.grade;
+  if(state.agentPlan){state.plan=oldPlan.map(a=>({...a,title:esc(a.title),desc:esc(a.desc)}));state.grade=esc(oldGrade)}
+  try{unsafeAgentRender()}finally{if(state.agentPlan){state.plan=oldPlan;state.grade=oldGrade}}
+  /* 趣味轮播只在备课进行中跑；结束或离开页面立即停，免得覆盖完成文案或串到别的模块。 */
+  if(activeAgentTask?.status==='running'&&document.querySelector('.gp-panel [data-gp-caption]'))ensureFunTicker();
+  else stopFunTicker();
+  window.GrowProgress?.sync();
+};
 teach=function(){if(!state.agentPlan)return legacyTeach();const a=state.plan[state.stage];return `<div class="section-heading"><span>环节 ${state.stage+1} / 7</span><span>${a.min} 分钟</span></div><div class="lesson-stage"><h2>${a.title}</h2><p>${a.desc}</p><div class="notes">${notation()}</div><div class="lesson-tips"></div></div><div class="panel-actions">${state.stage?button('上一环节','prev-stage','secondary'):''}${state.stage<6?button('下一环节','next-stage'):button('返回课堂时间轴','timeline')}</div>`};
 metronome=function(){if(state.song!=='茉莉花')return legacyMetronome();stopSound();const ctx=getAudio();for(let i=0;i<16;i++)tone(i%4===0?950:i%4===2?800:650,ctx.currentTime+i*60/80,.08,'sine',.13);toast('4/4拍，80 BPM：强、弱、次强、弱。')};
 render();

@@ -1,0 +1,862 @@
+{
+  "version": "grade-index-1.0.0",
+  "updated": "2026-11-16",
+  "note": "人工整理的各年级教材常见曲目索引。只登记歌名、别名、适用年级、类别、标签与可核查背景，不含谱面、音频或任何逐音数据。不同教材版本的年级安排与歌词细节可能不同，相关条目已在背景里如实标注。",
+  "sourceTypes": [
+    "教材曲目清单（人工整理）",
+    "公开音乐常识"
+  ],
+  "songs": [
+    {
+      "id": "xiaoyushasha",
+      "title": "小雨沙沙",
+      "aliases": [
+        "小雨小雨沙沙沙"
+      ],
+      "initials": "xyss",
+      "grades": [
+        "一年级"
+      ],
+      "category": "儿童歌曲 · 自然",
+      "tags": [
+        "春雨",
+        "拟声",
+        "轻声唱"
+      ],
+      "background": {
+        "summary": "一首讲春雨的儿童歌曲，旋律短小、乐句重复，常用来做低年级的听辨、模唱和雨声节奏练习。",
+        "credits": "儿童歌曲 · 词曲署名各教材版本不一",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲以春雨沙沙的拟声词贯穿，适合做轻声与节奏模仿",
+            "status": "verified",
+            "basis": "作品通行特征"
+          },
+          {
+            "text": "词曲作者与教材年级安排在不同版本中可能不同",
+            "status": "needs-review",
+            "basis": "教材版本差异"
+          }
+        ]
+      }
+    },
+    {
+      "id": "guoqiguoqizhenmeili",
+      "title": "国旗国旗真美丽",
+      "aliases": [
+        "国旗真美丽"
+      ],
+      "initials": "gqgqzmml",
+      "grades": [
+        "一年级"
+      ],
+      "category": "儿童歌曲 · 爱国",
+      "tags": [
+        "国旗",
+        "仪式",
+        "短句"
+      ],
+      "background": {
+        "summary": "低年级常用的爱国主题儿童歌曲，歌词短、音域窄，常配合升旗仪式或认识国旗的活动。",
+        "credits": "儿童歌曲 · 常见于低年级教材",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌词围绕国旗等国家象征展开，常配合升旗仪式演唱",
+            "status": "verified",
+            "basis": "作品通行内容"
+          },
+          {
+            "text": "词曲署名与教材年级安排有不同版本",
+            "status": "needs-review",
+            "basis": "教材版本差异"
+          }
+        ]
+      }
+    },
+    {
+      "id": "yonge",
+      "title": "咏鹅",
+      "aliases": [
+        "鹅鹅鹅"
+      ],
+      "initials": "ye",
+      "grades": [
+        "一年级"
+      ],
+      "category": "古诗吟唱 · 儿童歌曲",
+      "tags": [
+        "古诗",
+        "吟唱",
+        "音高模仿"
+      ],
+      "background": {
+        "summary": "以唐代骆宾王《咏鹅》为词的儿童歌曲，旋律多用重复与模进，常用来做古诗吟唱和音高模仿。",
+        "credits": "词：骆宾王《咏鹅》；曲：教材版本不一",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌词出自唐代骆宾王《咏鹅》",
+            "status": "verified",
+            "basis": "通行文学常识"
+          },
+          {
+            "text": "不同教材的谱曲版本、调号与年级安排不同",
+            "status": "needs-review",
+            "basis": "教材版本差异"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xiaohongmao",
+      "title": "小红帽",
+      "aliases": [
+        "我独自走在郊外的小路上"
+      ],
+      "initials": "xhm",
+      "grades": [
+        "二年级"
+      ],
+      "category": "外国童谣 · 故事",
+      "tags": [
+        "童话",
+        "角色扮演",
+        "分句唱"
+      ],
+      "background": {
+        "summary": "由欧洲小红帽童话改编的儿童歌曲，中文版流传很广，旋律简单、叙事性强，常做角色扮演与分句演唱。",
+        "credits": "欧洲童话改编 · 中文词曲版本不一",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "故事源自欧洲小红帽童话",
+            "status": "verified",
+            "basis": "通行文学常识"
+          },
+          {
+            "text": "中文歌词、词曲署名与教材年级安排在不同版本中不同",
+            "status": "needs-review",
+            "basis": "教材版本差异"
+          }
+        ]
+      }
+    },
+    {
+      "id": "woniuyuhuangliniao",
+      "title": "蜗牛与黄鹂鸟",
+      "aliases": [
+        "阿门阿前一棵葡萄树"
+      ],
+      "initials": "wnhyln",
+      "grades": [
+        "二年级"
+      ],
+      "category": "台湾校园民歌 · 儿童歌曲",
+      "tags": [
+        "对话",
+        "叙事",
+        "分角色唱"
+      ],
+      "background": {
+        "summary": "台湾校园民歌时期流传的儿童歌曲，用蜗牛和黄鹂鸟的对话讲“慢慢爬也能到”的故事，旋律轻快，适合分角色唱。",
+        "credits": "陈弘文 词；左宏元 曲（常见署名）",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲在台湾校园民歌时期流传，常见署名为陈弘文词、左宏元曲",
+            "status": "verified",
+            "basis": "公开音乐常识"
+          },
+          {
+            "text": "首唱与词曲署名在不同资料中略有差异",
+            "status": "needs-review",
+            "basis": "资料说法不一"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dalu",
+      "title": "大鹿",
+      "aliases": [
+        "大鹿站在房子里"
+      ],
+      "initials": "dl",
+      "grades": [
+        "二年级"
+      ],
+      "category": "儿童歌曲 · 故事",
+      "tags": [
+        "角色扮演",
+        "问答",
+        "节奏"
+      ],
+      "background": {
+        "summary": "一首带故事情节的儿童歌曲，讲小兔向大鹿求助，常用来做角色扮演、问答式演唱和节奏练习。",
+        "credits": "儿童歌曲 · 词曲署名版本不一",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲以动物角色和对话推进，适合低年级情境表演",
+            "status": "verified",
+            "basis": "作品通行特征"
+          },
+          {
+            "text": "是否源自外国童谣、词曲署名与年级安排有不同说法",
+            "status": "needs-review",
+            "basis": "资料说法不一"
+          }
+        ]
+      }
+    },
+    {
+      "id": "liushuguniang",
+      "title": "柳树姑娘",
+      "aliases": [
+        "柳树姑娘辫子长长"
+      ],
+      "initials": "lsgn",
+      "grades": [
+        "三年级"
+      ],
+      "category": "儿童歌曲 · 自然",
+      "tags": [
+        "三拍子",
+        "连音",
+        "春天"
+      ],
+      "background": {
+        "summary": "3/4 拍的儿童歌曲，旋律舒展、乐句较长，常用来感受三拍子的强弱规律和连音唱法。",
+        "credits": "儿童歌曲 · 词曲署名各版本不一",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲为三拍子，常作为三拍子感受与连音练习的素材",
+            "status": "verified",
+            "basis": "作品通行特征"
+          },
+          {
+            "text": "词曲作者与教材年级安排在不同版本中不同",
+            "status": "needs-review",
+            "basis": "教材版本差异"
+          }
+        ]
+      }
+    },
+    {
+      "id": "caishan",
+      "title": "采山",
+      "aliases": [
+        "采山的小姑娘"
+      ],
+      "initials": "cs",
+      "grades": [
+        "三年级"
+      ],
+      "category": "儿童歌曲 · 劳动",
+      "tags": [
+        "劳动",
+        "衬词",
+        "律动"
+      ],
+      "background": {
+        "summary": "一首讲山里孩子采山货的儿童歌曲，节奏轻快、衬词多，常配合律动和劳动情境。",
+        "credits": "儿童歌曲 · 词曲署名各版本不一",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌词以采山劳动和山野景物为内容，带较多衬词",
+            "status": "verified",
+            "basis": "作品通行内容"
+          },
+          {
+            "text": "词曲作者、歌词内容与年级安排有不同版本",
+            "status": "needs-review",
+            "basis": "教材版本差异"
+          }
+        ]
+      }
+    },
+    {
+      "id": "yaochuandiao",
+      "title": "摇船调",
+      "aliases": [
+        "摇啊摇"
+      ],
+      "initials": "ycd",
+      "grades": [
+        "三年级"
+      ],
+      "category": "台湾童谣 · 问答歌",
+      "tags": [
+        "问答",
+        "对唱",
+        "节奏"
+      ],
+      "background": {
+        "summary": "台湾地区流传的问答式童谣，一人问一人答，旋律起伏像摇船，常用来做对唱与节奏问答。",
+        "credits": "台湾童谣 · 整理者与填词版本不一",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲是台湾地区流传的问答式童谣，常以对唱形式出现",
+            "status": "verified",
+            "basis": "公开音乐常识"
+          },
+          {
+            "text": "整理者、歌词与教材年级安排有不同版本",
+            "status": "needs-review",
+            "basis": "资料说法不一"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xiaoluohao",
+      "title": "小螺号",
+      "aliases": [
+        "小螺号嘀嘀嘀吹"
+      ],
+      "initials": "xlh",
+      "grades": [
+        "四年级"
+      ],
+      "category": "儿童歌曲 · 海",
+      "tags": [
+        "海",
+        "附点",
+        "引子"
+      ],
+      "background": {
+        "summary": "1980年代流传的儿童歌曲，以海螺号角声开场，旋律明快，常用来做海的主题与附点节奏练习。",
+        "credits": "付林 词；谷建芬 曲（常见署名）",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲创作并流传于1980年代，常见署名为付林词、谷建芬曲",
+            "status": "verified",
+            "basis": "公开音乐常识"
+          },
+          {
+            "text": "首唱版本与词曲署名在不同资料中略有差异",
+            "status": "needs-review",
+            "basis": "资料说法不一"
+          }
+        ]
+      }
+    },
+    {
+      "id": "hongqingting",
+      "title": "红蜻蜓",
+      "aliases": [
+        "晚霞中的红蜻蜓"
+      ],
+      "initials": "hqt",
+      "grades": [
+        "四年级"
+      ],
+      "category": "日本童谣 · 中文填词",
+      "tags": [
+        "三拍子",
+        "弱起",
+        "童年"
+      ],
+      "background": {
+        "summary": "日本童谣《赤とんぼ》的中文版，歌词写晚霞里的红蜻蜓和童年回忆，旋律舒缓，常做三拍子与弱起练习。",
+        "credits": "三木露风 词；山田耕筰 曲；中文填词版本多",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "原曲为日本童谣《赤とんぼ》，三木露风词、山田耕筰曲",
+            "status": "verified",
+            "basis": "公开音乐常识"
+          },
+          {
+            "text": "中文填词、调号与教材年级安排有不同版本",
+            "status": "needs-review",
+            "basis": "教材版本差异"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cunwan",
+      "title": "村晚",
+      "aliases": [
+        "草满池塘水满陂"
+      ],
+      "initials": "cw",
+      "grades": [
+        "四年级"
+      ],
+      "category": "古诗吟唱 · 儿童歌曲",
+      "tags": [
+        "古诗",
+        "吟唱",
+        "呼吸"
+      ],
+      "background": {
+        "summary": "以宋代雷震《村晚》为词的儿童歌曲，歌词写牧童骑牛晚归，旋律舒展，常做古诗吟唱与乐句呼吸练习。",
+        "credits": "词：雷震《村晚》；曲：教材版本不一",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌词出自宋代雷震《村晚》",
+            "status": "verified",
+            "basis": "通行文学常识"
+          },
+          {
+            "text": "谱曲版本、调号与年级安排在不同教材中不同",
+            "status": "needs-review",
+            "basis": "教材版本差异"
+          }
+        ]
+      }
+    },
+    {
+      "id": "waipodepenghuwan",
+      "title": "外婆的澎湖湾",
+      "aliases": [
+        "晚风轻拂澎湖湾"
+      ],
+      "initials": "wpdphw",
+      "grades": [
+        "五年级"
+      ],
+      "category": "台湾校园民歌",
+      "tags": [
+        "校园民歌",
+        "叙事",
+        "情感"
+      ],
+      "background": {
+        "summary": "台湾校园民歌代表作之一，叶佳修词曲，写外婆、沙滩和童年回忆，旋律温暖，常做叙事性演唱与情感处理。",
+        "credits": "叶佳修 词曲",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲为台湾校园民歌代表作，叶佳修词曲",
+            "status": "verified",
+            "basis": "公开音乐常识"
+          },
+          {
+            "text": "首唱、编曲与教材年级安排有不同版本",
+            "status": "needs-review",
+            "basis": "资料说法不一"
+          }
+        ]
+      }
+    },
+    {
+      "id": "xiangjiandexiaolu",
+      "title": "乡间的小路",
+      "aliases": [
+        "走在乡间的小路上"
+      ],
+      "initials": "xjdxl",
+      "grades": [
+        "五年级"
+      ],
+      "category": "台湾校园民歌",
+      "tags": [
+        "校园民歌",
+        "二段体",
+        "自然"
+      ],
+      "background": {
+        "summary": "台湾校园民歌，叶佳修词曲，写走在乡间小路的傍晚景色，旋律轻快，常做二段体结构与自然景色导入。",
+        "credits": "叶佳修 词曲",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲为台湾校园民歌，叶佳修词曲",
+            "status": "verified",
+            "basis": "公开音乐常识"
+          },
+          {
+            "text": "首唱、教材版本与年级安排有不同资料",
+            "status": "needs-review",
+            "basis": "资料说法不一"
+          }
+        ]
+      }
+    },
+    {
+      "id": "muchangshangdejia",
+      "title": "牧场上的家",
+      "aliases": [
+        "Home on the Range",
+        "我的家在牧场"
+      ],
+      "initials": "mcsdj",
+      "grades": [
+        "五年级"
+      ],
+      "category": "美国民歌 · 中文填词",
+      "tags": [
+        "三拍子",
+        "长音",
+        "合唱"
+      ],
+      "background": {
+        "summary": "美国民歌《Home on the Range》的中文版，歌词写牧场上的家，旋律舒展，常做三拍子、长音与合唱练习。",
+        "credits": "美国民歌；中文填词版本多",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "原曲为美国民歌《Home on the Range》",
+            "status": "verified",
+            "basis": "公开音乐常识"
+          },
+          {
+            "text": "中文歌词、调号与年级安排在不同教材中不同",
+            "status": "needs-review",
+            "basis": "教材版本差异"
+          }
+        ]
+      }
+    },
+    {
+      "id": "wodezhongguoxin",
+      "title": "我的中国心",
+      "aliases": [
+        "河山只在我梦萦"
+      ],
+      "initials": "wdzgx",
+      "grades": [
+        "六年级"
+      ],
+      "category": "爱国歌曲 · 影视",
+      "tags": [
+        "爱国",
+        "叙事",
+        "合唱"
+      ],
+      "background": {
+        "summary": "黄霑词、王福龄曲，1984年央视春晚由张明敏演唱后广为流传，常做爱国主题与叙事性合唱。",
+        "credits": "黄霑 词；王福龄 曲",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲由黄霑作词、王福龄作曲，张明敏在1984年央视春晚演唱",
+            "status": "verified",
+            "basis": "公开音乐常识"
+          },
+          {
+            "text": "教材版本与年级安排可能不同",
+            "status": "needs-review",
+            "basis": "教材版本差异"
+          }
+        ]
+      }
+    },
+    {
+      "id": "changjiangzhige",
+      "title": "长江之歌",
+      "aliases": [
+        "你从雪山走来"
+      ],
+      "initials": "cjzg",
+      "grades": [
+        "六年级"
+      ],
+      "category": "影视歌曲 · 合唱",
+      "tags": [
+        "长江",
+        "气息",
+        "长音"
+      ],
+      "background": {
+        "summary": "胡宏伟词、王世光曲，纪录片《话说长江》的主题歌，旋律宽广，常做气息、长音与合唱训练。",
+        "credits": "胡宏伟 词；王世光 曲",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲为纪录片《话说长江》主题歌，胡宏伟词、王世光曲",
+            "status": "verified",
+            "basis": "公开音乐常识"
+          },
+          {
+            "text": "首播与教材收录的版本、年级安排有不同资料",
+            "status": "needs-review",
+            "basis": "资料说法不一"
+          }
+        ]
+      }
+    },
+    {
+      "id": "gechangerxiaofangniulang",
+      "title": "歌唱二小放牛郎",
+      "aliases": [
+        "牛儿还在山坡吃草"
+      ],
+      "initials": "gcexfnl",
+      "grades": [
+        "六年级"
+      ],
+      "category": "叙事歌曲 · 历史题材",
+      "tags": [
+        "叙事",
+        "段落对比",
+        "历史"
+      ],
+      "background": {
+        "summary": "方冰词、劫夫曲的叙事歌曲，讲放牛郎王二小把敌人带进埋伏圈的故事，常做叙事歌曲与情绪段落对比。",
+        "credits": "方冰 词；劫夫 曲",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲由方冰作词、劫夫作曲，讲述王二小的故事",
+            "status": "verified",
+            "basis": "公开音乐常识"
+          },
+          {
+            "text": "歌词段数、调号与教材年级安排有不同版本",
+            "status": "needs-review",
+            "basis": "教材版本差异"
+          }
+        ]
+      }
+    },
+    {
+      "id": "qingchunwuju",
+      "title": "青春舞曲",
+      "aliases": [
+        "太阳下山明早依旧爬上来"
+      ],
+      "initials": "qcwq",
+      "grades": [
+        "初一"
+      ],
+      "category": "新疆民歌 · 整理改编",
+      "tags": [
+        "手鼓",
+        "律动",
+        "一段体"
+      ],
+      "background": {
+        "summary": "新疆民歌，王洛宾整理，旋律欢快、节奏鲜明，常做手鼓节奏、律动与一段体结构练习。",
+        "credits": "新疆民歌；王洛宾 整理",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲为新疆民歌，常见署名为王洛宾整理",
+            "status": "verified",
+            "basis": "公开音乐常识"
+          },
+          {
+            "text": "歌词、速度与教材年级安排有不同版本",
+            "status": "needs-review",
+            "basis": "教材版本差异"
+          }
+        ]
+      }
+    },
+    {
+      "id": "kewangchuntian",
+      "title": "渴望春天",
+      "aliases": [
+        "Sehnsucht nach dem Frühlinge"
+      ],
+      "initials": "kwct",
+      "grades": [
+        "初一"
+      ],
+      "category": "外国艺术歌曲",
+      "tags": [
+        "莫扎特",
+        "春天",
+        "乐句呼吸"
+      ],
+      "background": {
+        "summary": "莫扎特1791年创作的歌曲（K.596），歌词表达对春天的盼望，旋律明朗，常做德语歌曲欣赏与乐句呼吸。",
+        "credits": "莫扎特 曲（K.596，1791）",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲由莫扎特作曲，编号 K.596，创作于1791年",
+            "status": "verified",
+            "basis": "公开音乐常识"
+          },
+          {
+            "text": "中文译词与教材年级安排有不同版本",
+            "status": "needs-review",
+            "basis": "教材版本差异"
+          }
+        ]
+      }
+    },
+    {
+      "id": "aiwozhonghua",
+      "title": "爱我中华",
+      "aliases": [
+        "五十六个星座"
+      ],
+      "initials": "awzh",
+      "grades": [
+        "初二"
+      ],
+      "category": "爱国歌曲 · 合唱",
+      "tags": [
+        "民族团结",
+        "合唱",
+        "热烈"
+      ],
+      "background": {
+        "summary": "乔羽词、徐沛东曲，1991年第四届全国少数民族传统体育运动会会歌，旋律热烈，常做民族团结主题与合唱。",
+        "credits": "乔羽 词；徐沛东 曲",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲由乔羽作词、徐沛东作曲，为1991年第四届全国少数民族传统体育运动会会歌",
+            "status": "verified",
+            "basis": "公开音乐常识"
+          },
+          {
+            "text": "教材版本、调号与年级安排可能不同",
+            "status": "needs-review",
+            "basis": "教材版本差异"
+          }
+        ]
+      }
+    },
+    {
+      "id": "longdechuanren",
+      "title": "龙的传人",
+      "aliases": [
+        "遥远的东方有一条江"
+      ],
+      "initials": "ldcr",
+      "grades": [
+        "初二"
+      ],
+      "category": "爱国歌曲 · 流行",
+      "tags": [
+        "长江黄河",
+        "叙事",
+        "民族"
+      ],
+      "background": {
+        "summary": "侯德健1978年创作的歌曲，写长江、黄河与民族身份，旋律简洁，常做爱国主题与叙事性演唱。",
+        "credits": "侯德健 词曲",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲由侯德健创作于1978年",
+            "status": "verified",
+            "basis": "公开音乐常识"
+          },
+          {
+            "text": "歌词版本、编曲与教材年级安排有不同资料",
+            "status": "needs-review",
+            "basis": "资料说法不一"
+          }
+        ]
+      }
+    },
+    {
+      "id": "changlianpu",
+      "title": "唱脸谱",
+      "aliases": [
+        "蓝脸的窦尔敦盗御马"
+      ],
+      "initials": "clp",
+      "grades": [
+        "初二"
+      ],
+      "category": "京剧歌 · 戏曲",
+      "tags": [
+        "脸谱",
+        "行当",
+        "念白"
+      ],
+      "background": {
+        "summary": "阎肃词、姚明曲的京剧歌，用歌词介绍京剧脸谱与行当，旋律吸收京剧腔调，常做戏曲导入与念白练习。",
+        "credits": "阎肃 词；姚明 曲",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲由阎肃作词、姚明作曲，内容围绕京剧脸谱",
+            "status": "verified",
+            "basis": "公开音乐常识"
+          },
+          {
+            "text": "不同演唱版本与教材年级安排略有差异",
+            "status": "needs-review",
+            "basis": "资料说法不一"
+          }
+        ]
+      }
+    },
+    {
+      "id": "woainizhongguo",
+      "title": "我爱你中国",
+      "aliases": [
+        "百灵鸟从蓝天飞过"
+      ],
+      "initials": "wanzg",
+      "grades": [
+        "初三"
+      ],
+      "category": "影视歌曲 · 爱国",
+      "tags": [
+        "高音",
+        "气息",
+        "影视"
+      ],
+      "background": {
+        "summary": "瞿琮词、郑秋枫曲，电影《海外赤子》插曲，1979年问世，旋律宽广，常做高音、气息与爱国主题欣赏。",
+        "credits": "瞿琮 词；郑秋枫 曲",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲为电影《海外赤子》插曲，瞿琮词、郑秋枫曲",
+            "status": "verified",
+            "basis": "公开音乐常识"
+          },
+          {
+            "text": "首唱、调号与教材年级安排有不同版本",
+            "status": "needs-review",
+            "basis": "资料说法不一"
+          }
+        ]
+      }
+    },
+    {
+      "id": "biyege",
+      "title": "毕业歌",
+      "aliases": [
+        "同学们大家起来"
+      ],
+      "initials": "byg",
+      "grades": [
+        "初三"
+      ],
+      "category": "影视歌曲 · 历史题材",
+      "tags": [
+        "进行曲",
+        "毕业",
+        "历史"
+      ],
+      "background": {
+        "summary": "田汉词、聂耳曲，电影《桃李劫》主题歌，1934年问世，旋律进行曲风格，常做毕业主题与历史背景导入。",
+        "credits": "田汉 词；聂耳 曲",
+        "sourceType": "教材曲目清单（人工整理）· 公开常识",
+        "facts": [
+          {
+            "text": "歌曲为电影《桃李劫》主题歌，田汉词、聂耳曲，1934年问世",
+            "status": "verified",
+            "basis": "公开音乐常识"
+          },
+          {
+            "text": "歌词版本、演唱版本与教材年级安排略有差异",
+            "status": "needs-review",
+            "basis": "资料说法不一"
+          }
+        ]
+      }
+    }
+  ]
+}

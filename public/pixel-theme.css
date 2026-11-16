@@ -1,0 +1,127 @@
+/* 像素风 · 山野绿 · 可爱主题（反馈④，参照「声入山野」logo 的配色）
+   色板取自 logo：墨绿山 #2d5d3f、草绿 #6aa84f、嫩绿 #a8d5a2、
+   奶油底 #f7f3e6、太阳橙 #f2913d、音符蓝 #7ec4cf。
+   只做外观覆盖：直角像素块、硬投影、粗描边，不动布局逻辑。 */
+:root {
+  --ink: #243b2c;
+  --green: #35664c;
+  --dark: #2d5d3f;
+  --muted: #6f7d6c;
+  --cream: #f7f3e6;
+  --line: #cfdcc2;
+  --soft: #eaf2df;
+  --shadow: 6px 6px 0 rgba(45, 93, 63, .12);
+  --pixel-orange: #f2913d;
+  --pixel-blue: #7ec4cf;
+}
+body {
+  background-color: #f7f3e6;   /* 米色底保底，浅色主题护栏据此判断 */
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 23px, rgba(53, 102, 76, .035) 23px 24px),
+    repeating-linear-gradient(90deg, transparent 0 23px, rgba(53, 102, 76, .035) 23px 24px),
+    linear-gradient(180deg, #f7f3e6 0%, #f2eeda 100%);
+}
+
+/* ===== 像素块按钮：直角 + 硬投影，按下时沉下去 ===== */
+.btn, .chip, .btn-big, .display-chip {
+  border-radius: 4px !important;
+  font-weight: 700;
+}
+.btn {
+  box-shadow: 3px 3px 0 rgba(45, 93, 63, .28);
+  border: 2px solid var(--dark);
+}
+.btn:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 rgba(45, 93, 63, .28); }
+.btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 rgba(45, 93, 63, .28); }
+.btn.secondary { background: var(--cream); }
+.btn.light { background: var(--soft); }
+.btn.ghost { border-style: dashed; box-shadow: none; }
+.chip { border: 1.5px solid #9db98a; box-shadow: 2px 2px 0 rgba(45, 93, 63, .12); }
+.chip.on { background: var(--green); color: #fff; border-color: var(--dark); }
+.chip.prep-chip.on { background: var(--green); color: #fff; }
+.btn-big, .display-chip { border-radius: 6px !important; box-shadow: 4px 4px 0 rgba(45, 93, 63, .2); }
+
+/* ===== 卡片/面板：像素硬投影代替柔和模糊 ===== */
+.panel, .agent-panel, .quick-card, .recent-card, .class-card, .song-card,
+.prep-card-item, .teach-prep-card, .teach-song-card, .stat, .modal, .cls-row,
+.plan-stage, .phrase, .about-card, .score-part, .suggest, .problem {
+  border-radius: 6px;
+  border: 2px solid var(--line);
+  box-shadow: var(--shadow);
+}
+.panel, .agent-panel { border-color: #b9cda6; }
+.song-card.ready { border-color: #6aa84f; }
+.song-card.ref { border-style: dashed; }
+.stat strong, .score strong { font-variant-numeric: tabular-nums; }
+
+/* ===== 标题与徽章 ===== */
+.page-title, .hero-title { letter-spacing: 3px; }
+.page-title { text-shadow: 3px 3px 0 rgba(53, 102, 76, .12); }
+.badge, .tag { border-radius: 4px; border: 1.5px solid #b9cda6; font-weight: 700; }
+.tag.ready { background: #dcefdc; border-color: #6aa84f; color: #2d5d3f; }
+.tag.ref { border-style: dashed; }
+.plan-no, .step-number, .phrase-no, .cls-no {
+  border-radius: 4px;
+  border: 2px solid var(--dark);
+  box-shadow: 2px 2px 0 rgba(45, 93, 63, .2);
+}
+
+/* ===== 页头：像素山 logo 与绿色导航 ===== */
+.brand img.brand-logo, .brand-mark img.pixel-logo {
+  height: 46px; width: auto; display: block;
+  image-rendering: pixelated;
+  filter: drop-shadow(3px 3px 0 rgba(45, 93, 63, .15));
+}
+.brand-mark { font-size: 34px; }
+.brand-mark img.pixel-logo {
+  width: 96px; height: auto; display: block;
+  image-rendering: pixelated;
+  filter: drop-shadow(3px 3px 0 rgba(45, 93, 63, .15));
+}
+header { background: #faf6ea; border-bottom: 3px solid #35664c; }
+.board-btn, .sub-btn { border-radius: 4px; font-weight: 700; }
+.board-btn.active { background: var(--green); color: #fff; box-shadow: 3px 3px 0 rgba(45, 93, 63, .3); }
+.sub-btn.on { background: var(--soft); color: var(--dark); border: 1.5px solid #9db98a; }
+
+/* ===== 顶栏头像与表情角色：描边更"贴纸" ===== */
+.avatar, .guide-avatar, .class-avatar, .prep-item-cover, .sound-art, .quick-icon, .big-icon {
+  border: 2px solid #9db98a;
+  box-shadow: 3px 3px 0 rgba(45, 93, 63, .15);
+}
+
+/* ===== 进度条/评分环：像素方块感 ===== */
+.progress-track, .teach-progress { border: 1.5px solid #9db98a; border-radius: 0; background: repeating-linear-gradient(90deg, #eaf2df 0 8px, #f2f7e8 8px 16px); }
+.progress-track div, .teach-progress i { background: repeating-linear-gradient(90deg, #6aa84f 0 10px, #5b9643 10px 20px); }
+.score-ring { border: 3px solid var(--dark); box-shadow: 4px 4px 0 rgba(45, 93, 63, .2); border-radius: 6px; }
+
+/* ===== 小花生长 / 小鸟：保持原样，只加像素底座 ===== */
+[data-gp] { border: 2px solid #b9cda6; border-radius: 6px; box-shadow: var(--shadow); background: #fdfbf3; }
+
+/* ===== 首页大屏山景：加一层像素网格让画面更"游戏" ===== */
+.home-hero { border-bottom: 4px solid #35664c; }
+.scene-caption { border: 2px solid #35664c; border-radius: 4px; box-shadow: 3px 3px 0 rgba(45, 93, 63, .2); font-weight: 700; }
+
+/* ===== 图表卡片（pixel-theme.js 注入） ===== */
+.pixel-chart-card {
+  background: #fdfbf3;
+  border: 2px solid #35664c;
+  border-radius: 6px;
+  box-shadow: 6px 6px 0 rgba(45, 93, 63, .15);
+  padding: 18px 20px;
+  margin-top: 18px;
+}
+.pixel-chart-card h3 { margin: 0 0 4px; font-size: 16px; color: var(--dark); display: flex; align-items: center; gap: 8px; }
+.pixel-chart-card .pixel-chart-sub { font-size: 12px; color: var(--muted); margin: 0 0 12px; }
+.pixel-chart-card svg { width: 100%; height: auto; display: block; }
+.pixel-chart-chips { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.pixel-chart-chips span {
+  background: var(--soft); border: 1.5px solid #9db98a; border-radius: 4px;
+  padding: 6px 10px; font-size: 13px; font-weight: 700; color: var(--dark);
+}
+.pixel-chart-empty { font-size: 13px; color: var(--muted); padding: 14px 0 4px; }
+
+/* ===== 乐理乐园/游戏按钮：橙色调点缀（logo 的太阳与音符色） ===== */
+.theory-chip, .btn[data-act="theoryPark"], .btn[data-teach-games] {
+  box-shadow: 2px 2px 0 rgba(214, 116, 32, .35);
+  border-color: #d67420;
+}

@@ -29,6 +29,15 @@ const agent=require('./teaching-agent.cjs').createAgent({dataDir,adapter:agentAd
  const importPipeline=require('./import-pipeline.cjs');
  const courseware=require('./courseware.cjs');
  const difficulty=require('./difficulty.cjs');
+ /* AI 音乐课堂：曲库检索 / 逐句拆解 / 评分 / 上传拆解，与浏览器端 vendor 用同一份 server 源码。 */
+ const songLibrary=require('./song-library.cjs');
+ const theory=require('./theory.cjs');
+ const songScoring=require('./song-scoring.cjs');
+ const audioDecompose=require('./audio-decompose.cjs');
+ /** 曲库在启动时构建并校验一次：谱面有问题会让本地服务如实报错，而不是上课时才发现。 */
+ const catalogRaw=JSON.parse(fs.readFileSync(path.join(__dirname,'..','library','catalog.json'),'utf8'));
+ let catalogData=null,catalogError=null;
+ try{catalogData=songLibrary.buildCatalogData(catalogRaw)}catch(e){catalogError=e.message}
  const bioDir=path.join(__dirname,'..','knowledge','biographies');
  const coursewareDir=path.join(dataDir,'courseware');
  /** 来源登记全部读进内存：文件不多，且按 id 索引比按文件名可靠。 */
@@ -82,6 +91,59 @@ const agent=require('./teaching-agent.cjs').createAgent({dataDir,adapter:agentAd
    if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:'需要 JSON 请求'});
   }
   const user=userOf(req);
+  /* ---- AI 音乐课堂：只读曲库 + 本机计算接口（免登录；不读写任何账号数据） ----
+     前端优先用浏览器内核，即使没有 /api 也能完整上课；这些接口供本地服务模式、脚本与验收使用。 */
+  if(route==='/api/library/catalog'&&req.method==='GET'){
+   if(!catalogData)return json(res,500,{error:'曲库校验失败',detail:catalogError});
+   return json(res,200,{version:catalogData.version,stats:catalogData.stats,accuracyPolicy:catalogData.accuracyPolicy,
+    previewSeconds:catalogData.previewSeconds,rightsNote:catalogData.rightsNote,
+    songs:catalogData.songs.map(s=>({id:s.id,title:s.title,status:s.status,built:!!s.built,grades:s.grades,category:s.category,phrases:s.phrases?.length||0,seconds:s.seconds||null,accuracy:s.accuracy}))});
+  }
+  if(route==='/api/library/search'&&req.method==='GET'){
+   const u=new URL(req.url,'http://localhost');
+   return json(res,200,{hits:songLibrary.searchSongs(catalogRaw,u.searchParams.get('q')||'',{grade:u.searchParams.get('grade')||undefined})});
+  }
+  const librarySongRoute=route.match(/^\/api\/library\/songs\/([a-z0-9-]+)$/);
+  if(librarySongRoute&&req.method==='GET'){
+   const song=catalogData?.songs.find(s=>s.id===librarySongRoute[1]);
+   return json(res,song?200:404,song||{error:'曲目不存在'});
+  }
+  /* 联网找歌（可选）：只查公开曲库的"歌名/歌手/封面"这类介绍信息，不下载音频或曲谱、不编造逐句内容。
+     断网或接口不可用就如实回 503，前端退回本地曲库，绝不卡住备课上课。 */
+  if(route==='/api/song-lookup'&&req.method==='GET'){
+   const term=new URL(req.url,'http://localhost').searchParams.get('q')||'';
+   if(!term.trim())return json(res,200,{hits:[]});
+   try{
+    const https=require('node:https');
+    // 不指定 country：中国区 iTunes 音乐搜索已下线会返回空，默认区可正常搜中文歌
+    const url='https://itunes.apple.com/search?term='+encodeURIComponent(term.trim())+'&media=music&entity=song&limit=12';
+    const raw=await new Promise((resolve,reject)=>{
+     const r=https.get(url,{timeout:8000,headers:{'User-Agent':'Mozilla/5.0'}},(resp)=>{let d='';resp.on('data',c=>d+=c);resp.on('end',()=>resolve(d))});
+     r.on('timeout',()=>{r.destroy();reject(new Error('timeout'))});r.on('error',reject);
+    });
+    const data=JSON.parse(raw);
+    const hits=(data.results||[]).map(x=>({
+     id:'net-'+crypto.createHash('sha1').update((x.trackId||'')+'|'+(x.trackName||'')).digest('hex').slice(0,10),
+     title:String(x.trackName||'').slice(0,60),
+     artist:String(x.artistName||'').slice(0,60),
+     album:String(x.collectionName||'').slice(0,60),
+     cover:x.artworkUrl100?String(x.artworkUrl100).replace('100x100','300x300'):'',
+    })).filter(h=>h.title);
+    return json(res,200,{hits});
+   }catch(e){return json(res,503,{hits:[],error:'暂时连不上外面的曲库，先用本地的歌吧'})}
+  }
+  if(route==='/api/library/theory'&&req.method==='GET')return json(res,200,{version:theory.THEORY_VERSION,items:theory.THEORY});
+  if(route==='/api/studio/score'&&req.method==='POST'){
+   const b=await body(req,4000000),song=catalogData?.songs.find(s=>s.id===b.songId);
+   if(!song||!song.built)return json(res,404,{error:'曲目不存在或没有可核对谱面'});
+   try{return json(res,200,songScoring.scorePhrase(Float32Array.from(b.pcm||[]),song,Number(b.phraseIndex)||0))}
+   catch(e){return json(res,400,{error:e.message})}
+  }
+  if(route==='/api/studio/decompose'&&req.method==='POST'){
+   const b=await body(req,8000000);
+   try{return json(res,200,audioDecompose.decompose(Float32Array.from(b.pcm||[]),b.opts||{}))}
+   catch(e){return json(res,400,{error:e.message})}
+  }
   if(route==='/api/session'&&req.method==='GET')return json(res,200,{user:user?publicUser(user):null,state:user?.state||null,policy:{audioRetentionDays:audioStore.retentionDays}});
   if((route==='/api/register'||route==='/api/login')&&req.method==='POST'){
    const key=clientKey(req);let rate=attempts.get(key);if(!rate||rate.until<Date.now()){rate={n:0,until:Date.now()+900000};attempts.set(key,rate)}if(++rate.n>30)return json(res,429,{error:'尝试次数过多，请15分钟后再试'});

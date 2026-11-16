@@ -7,6 +7,8 @@
     "start": "node server/server.cjs",
     "test": "node --test \"tests/*.test.cjs\"",
     "build:lesson": "node scripts/build-lesson.cjs",
+    "build:library": "node scripts/build-library.cjs",
+    "build:grade-index": "node scripts/build-grade-index.cjs",
     "build:vendor": "node scripts/build-browser-vendor.cjs"
   },
   "engines": {

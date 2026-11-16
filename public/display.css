@@ -59,3 +59,25 @@
 .big-text .btn-big{min-height:clamp(94px,12vh,168px);min-width:clamp(140px,15vw,250px)}
 .big-text .btn-big span{font-size:clamp(17px,1.8vw,26px)}
 .big-text .display-foot{font-size:clamp(14px,1.2vw,19px)}
+/* ==== 曲库歌曲大屏（跟随当前课堂的歌） ==== */
+.display-phrase-no{font-size:clamp(16px,1.6vw,26px);color:var(--green-600,#5b8c72);font-weight:700}
+.display-lyric-big{font-size:clamp(44px,8.5vw,150px);font-weight:900;line-height:1.15;color:var(--green-700,#2d5d4a);letter-spacing:.06em;text-align:center;text-shadow:0 4px 0 rgba(45,93,74,.08);max-width:100%}
+.display-jianpu-big{font-size:clamp(22px,3vw,52px);font-weight:700;color:var(--green-600,#5b8c72);letter-spacing:.35em;background:rgba(255,255,255,.65);padding:clamp(8px,1.4vh,18px) clamp(18px,3vw,44px);border-radius:14px;box-shadow:0 2px 16px rgba(31,58,44,.06)}
+.display-tip{font-size:clamp(15px,1.5vw,24px);color:var(--muted,#6b7a6e);text-align:center;max-width:min(80vw,900px)}
+.display-pager{display:flex;justify-content:center;gap:clamp(10px,2vw,32px);flex-shrink:0}
+.big-text .display-lyric-big{font-size:clamp(56px,11vw,190px)}
+.big-text .display-jianpu-big{font-size:clamp(28px,4vw,66px)}
+
+/* ==== 大屏趣味特效：音符与星星轻轻飘动（跟随所选歌曲，纯装饰） ==== */
+.display-floaties{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.display-floaties span{position:absolute;bottom:-40px;font-size:clamp(22px,2.6vw,44px);color:rgba(91,140,114,.22);animation:ds-float 14s linear infinite;animation-delay:calc(var(--d) * -1s)}
+.display-floaties span:nth-child(2n){color:rgba(224,168,60,.28);font-size:clamp(18px,2vw,34px)}
+.display-screen{position:relative}
+.display-screen>*:not(.display-floaties){position:relative;z-index:1}
+@keyframes ds-float{
+  0%{transform:translateY(0) rotate(-8deg);opacity:0}
+  10%{opacity:.85}
+  90%{opacity:.7}
+  100%{transform:translateY(-110vh) translateX(40px) rotate(24deg);opacity:0}
+}
+@media(prefers-reduced-motion:reduce){.display-floaties{display:none}}

@@ -1,0 +1,53 @@
+/* 人物点击小动画：摇摆 + 微笑飘起（mascot.js 配套样式） */
+.mascot-dance {
+  animation: mascot-wiggle .9s ease-in-out;
+  transform-origin: 50% 90%;
+  display: inline-block;
+}
+@keyframes mascot-wiggle {
+  0%   { transform: rotate(0) scale(1); }
+  15%  { transform: rotate(-10deg) scale(1.12); }
+  30%  { transform: rotate(9deg) scale(1.14); }
+  45%  { transform: rotate(-7deg) scale(1.16); }
+  60%  { transform: rotate(6deg) scale(1.12); }
+  75%  { transform: rotate(-3deg) scale(1.06); }
+  100% { transform: rotate(0) scale(1); }
+}
+.mascot-smile {
+  position: fixed;
+  z-index: 9999;
+  font-size: 22px;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  animation: mascot-float 1.15s ease-out forwards;
+  text-shadow: 0 2px 6px rgba(31, 58, 44, .18);
+}
+@keyframes mascot-float {
+  0%   { opacity: 0; transform: translate(-50%, -100%) scale(.6); }
+  18%  { opacity: 1; transform: translate(-50%, -150%) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -260%) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mascot-dance { animation: none; }
+  .mascot-smile { animation-duration: .01s; }
+}
+
+/* ==== 首页小伙伴合唱团：像素风小人，点一下摇摆微笑 ==== */
+.mascot-pals{position:absolute;left:56%;bottom:24px;display:flex;align-items:flex-end;gap:2px;z-index:2}
+.mascot-pals .pal{font-size:40px;line-height:1;cursor:pointer;display:inline-block;filter:drop-shadow(3px 4px 0 rgba(45,93,63,.16));transition:filter .2s}
+.mascot-pals .pal:hover{filter:drop-shadow(3px 4px 0 rgba(45,93,63,.3))}
+.mascot-pals .pal-dog{font-size:30px;margin-left:4px}
+.mascot-pals small{position:absolute;left:0;bottom:-20px;font-size:11px;color:#6b7f63;white-space:nowrap;opacity:.85}
+@media(max-width:1050px){.mascot-pals{left:auto;right:24px;bottom:20px}.mascot-pals small{display:none}}
+
+/* ==== 插画里的小人：点热区，画面对话框位置冒笑脸，整幅画轻轻晃 ==== */
+.scene-pals-hotspot{position:absolute;right:6%;bottom:8%;width:20%;height:44%;background:transparent;border:0;cursor:pointer;z-index:3;border-radius:40%}
+.scene-pals-hotspot:hover{background:rgba(255,255,255,.07)}
+.home-hero{transition:transform .3s}
+.scene-cheer{animation:scene-shake .8s ease-in-out}
+@keyframes scene-shake{
+  0%{transform:rotate(0)}20%{transform:rotate(-.5deg) translateY(-3px)}
+  40%{transform:rotate(.5deg) translateY(-4px)}60%{transform:rotate(-.3deg) translateY(-2px)}
+  80%{transform:rotate(.2deg)}100%{transform:rotate(0)}
+}
+.scene-note{color:#e0a83c}

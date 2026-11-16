@@ -28,6 +28,8 @@ const SOURCES_OUT = path.join(root, 'public', 'knowledge', 'sources.json');
 
 /** 参与打包的模块。**顺序**：被依赖的排前面（顶层 require 在求值时才解析，但按序更稳）。 */
 const MODULES = [
+  'server/theory.cjs',
+  'server/song-library.cjs',
   'server/importers/xml.cjs',
   'server/importers/midi.cjs',
   'server/importers/musicxml.cjs',
@@ -38,8 +40,12 @@ const MODULES = [
   'server/difficulty.cjs',
   'server/audio-analysis.cjs',
   'server/audio-render.cjs',
+  'server/voice-synth.cjs',
   'server/report-builder.cjs',
   'server/import-pipeline.cjs',
+  'server/song-render.cjs',
+  'server/song-scoring.cjs',
+  'server/audio-decompose.cjs',
 ];
 
 /** 浏览器里已经存在的全局（data.js / lesson-core.js 由 index.html 提前加载）。 */
@@ -241,6 +247,13 @@ ${parts.join('\n\n')}
     get importPipeline() { return __require('import-pipeline.cjs'); },
     get audioRender() { return __require('audio-render.cjs'); },
     get jianpu() { return __require('jianpu.cjs'); },
+    /* AI 音乐课堂：曲库检索 / 逐句拆解 / 多版本音频 / 句级评分 / 上传音频拆解 */
+    get theory() { return __require('theory.cjs'); },
+    get songLibrary() { return __require('song-library.cjs'); },
+    get songRender() { return __require('song-render.cjs'); },
+    get voiceSynth() { return __require('voice-synth.cjs'); },
+    get songScoring() { return __require('song-scoring.cjs'); },
+    get audioDecompose() { return __require('audio-decompose.cjs'); },
   };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 `;

@@ -1,0 +1,28 @@
+/* 备课准备页 · 样式只作用于 #prepare-root / .prep-*，沿用原站米色＋墨绿色板，不覆盖全局。 */
+.prep-grid{display:grid;grid-template-columns:minmax(0,2.1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:900px){.prep-grid{grid-template-columns:1fr}}
+#prepare-root .prep-form{display:flex;flex-direction:column;gap:15px;margin-top:8px}
+#prepare-root .prep-field{display:flex;flex-direction:column;gap:7px}
+#prepare-root .prep-field>label{font-size:13px;font-weight:600;color:#6c8460}
+#prepare-root .prep-chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+#prepare-root .prep-chip{cursor:pointer}
+#prepare-root .prep-chip.on{background:#35664c;color:#fff;border-color:#35664c}
+#prepare-root .prep-chip.on:hover{border-color:#35664c}
+#prepare-root .prep-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;align-items:end}
+#prepare-root .prep-input{width:100%;border:1px solid var(--line);border-radius:10px;background:#fff;
+  padding:9px 12px;font-size:14px;color:inherit;font-family:inherit}
+#prepare-root .prep-input:focus{outline:2px solid #b7cba4;border-color:#b7cba4}
+#prepare-root .prep-inline{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:#6c8460}
+#prepare-root .prep-voice-note{font-size:12.5px;color:#6c8460;margin-top:2px}
+#prepare-root #prep-panel{margin-top:16px}
+#prepare-root .prep-done{margin-top:14px;padding:16px;border:1px solid #dbe6d2;border-radius:14px;background:#f4f7f0}
+#prepare-root .prep-hooray{font-size:16px;font-weight:700;color:#35664c;margin-bottom:6px}
+#prepare-root .prep-brief{font-size:13.5px;color:#396444;margin-bottom:10px}
+#prepare-root .prep-count{list-style:none;display:flex;flex-direction:column;gap:5px;font-size:13px;color:#4c6350;margin-bottom:12px}
+#prepare-root .prep-split{font-size:13px;color:#8a6d34;background:#fdf7e8;border:1px solid #f0e0bd;border-radius:10px;padding:9px 12px;margin-bottom:10px}
+/* 联网收进来的歌：封面与歌手，一眼确认选对了歌 */
+.prep-net-song{display:flex;align-items:center;gap:12px;margin:10px 0 4px}
+.prep-net-song img{width:64px;height:64px;object-fit:cover;border-radius:10px;border:2px solid #cfe0bf;box-shadow:3px 3px 0 rgba(45,93,63,.12)}
+.prep-net-song span{font-size:13px;color:#5b7d55;font-weight:700}
+.condition-find{font-size:13px;color:#7d8b76;margin:14px 0 0}
+.condition-find .text-btn{font-size:13px;font-weight:700}

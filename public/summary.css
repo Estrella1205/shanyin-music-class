@@ -1,0 +1,67 @@
+/* 课后总结（#summary）：一节课的收成，米色＋墨绿，字大、留白足。 */
+.summ-page{max-width:1240px;margin:0 auto;padding:28px 34px 52px}
+.summ-head{background:linear-gradient(90deg,#fffdf7e8,#fffdf7b4 58%,transparent);border-radius:18px;padding:12px 22px}
+.summ-head .eyebrow{color:#4f7247}
+.summ-head-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+
+.summ-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:18px 0 28px}
+.summ-stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow)}
+.summ-stat span{display:block;font-size:12.5px;color:#8a9780;letter-spacing:.4px}
+.summ-stat b{display:block;margin:5px 0 2px;font-size:27px;color:#2f6a44;line-height:1.2}
+.summ-stat em{font-style:normal;font-size:11.5px;color:#9aa58f}
+
+.summ-section{margin-bottom:26px}
+.summ-section-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+.summ-section-head h2{margin:0;font-size:19px;color:#28472f}
+.summ-section-head span{font-size:12.5px;color:#94a089}
+.summ-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.summ-song{background:#fff;border:1px solid var(--line);border-radius:17px;padding:18px 20px;box-shadow:var(--shadow)}
+.summ-song.good{border-left:4px solid #8db26f}
+.summ-song.weak{border-left:4px solid #d3a15f}
+.summ-song-top{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:#8b9782}
+.summ-song-stars{letter-spacing:2px;color:#b78b36}
+.summ-lyric{margin:10px 0 8px;font-size:20px;line-height:1.75;color:#2c4a34;letter-spacing:1px}
+.summ-song-score{font-size:30px;color:#2f6a44;font-weight:700;line-height:1}
+.summ-song-score small{font-size:13px;font-weight:400;color:#8a9780}
+.summ-song-note{margin:9px 0 0;font-size:13px;line-height:1.8;color:#6c7c62}
+.summ-none{margin:0;font-size:13.5px;color:#94a089}
+
+.summ-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-bottom:18px}
+.summ-panel{padding:22px 24px}
+.summ-panel h2{margin:0 0 14px;font-size:18px;color:#28472f}
+.summ-issues{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.summ-issues li{display:flex;gap:12px;align-items:flex-start}
+.summ-issue-icon{width:34px;height:34px;flex-shrink:0;border-radius:50%;background:#eef4e6;display:grid;place-items:center;font-size:17px}
+.summ-issues b{display:block;font-size:14px;color:#33553a}
+.summ-issues p{margin:2px 0 0;font-size:13.5px;line-height:1.85;color:#5d6f55}
+.summ-issues em{display:block;margin-top:4px;font-style:normal;font-size:12.5px;color:#8a7a5e;line-height:1.75}
+
+.summ-next{background:#f7faf0}
+.summ-next-list{margin:0;padding-left:22px;font-size:14.5px;line-height:2;color:#4b6347}
+.summ-next-list li{margin-bottom:8px}
+.summ-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}
+.summ-actions .btn{padding:10px 18px;font-size:14px}
+
+.summ-foot{margin-top:6px;font-size:12px;color:#9aa58f}
+
+.summ-empty{text-align:center;padding:48px 24px}
+.summ-empty .big-icon{font-size:60px}
+.summ-empty h2{margin:12px 0 8px;font-size:23px;color:#2a4a32}
+.summ-empty p{margin:0 0 6px;font-size:14px;line-height:1.9;color:#6b7a62}
+.summ-empty .summ-actions{justify-content:center}
+
+@media(max-width:980px){
+  .summ-two{grid-template-columns:1fr}
+  .summ-page{padding:20px 16px 40px}
+}
+@media(max-width:620px){
+  .summ-page{padding:16px 13px 34px}
+  .summ-head{padding:12px 14px}
+  .summ-lyric{font-size:18px}
+  .summ-stats{grid-template-columns:1fr 1fr}
+}
+@media print{
+  header,footer,.summ-head-actions,.summ-actions{display:none!important}
+  .summ-page{padding:0;max-width:none}
+  .summ-song,.summ-stat,.summ-panel{box-shadow:none;break-inside:avoid}
+}

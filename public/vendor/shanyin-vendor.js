@@ -1,7 +1,9 @@
 /* 声入山野 · 浏览器端计算内核 —— **自动生成，请勿手改**
  *
  * 由 scripts/build-browser-vendor.cjs 从服务端 .cjs 源码原样打包而来：
- *  *   server/importers/xml.cjs  1fe3f88a93eb…
+ *  *   server/theory.cjs  c7b304c9d130…
+ *   server/song-library.cjs  56001351afcf…
+ *   server/importers/xml.cjs  1fe3f88a93eb…
  *   server/importers/midi.cjs  a0e09f405f94…
  *   server/importers/musicxml.cjs  2af64bcf8de9…
  *   server/importers/jianpu.cjs  ae01b79a7525…
@@ -10,9 +12,13 @@
  *   server/coaching.cjs  6e1d47066593…
  *   server/difficulty.cjs  82c07d1f76c5…
  *   server/audio-analysis.cjs  abf162524c1a…
- *   server/audio-render.cjs  c19f1069f7d5…
+ *   server/audio-render.cjs  b812bb980950…
+ *   server/voice-synth.cjs  0e7eceb677fc…
  *   server/report-builder.cjs  d0f3e0549ade…
  *   server/import-pipeline.cjs  22d47ca3253c…
+ *   server/song-render.cjs  d05c5a8ac232…
+ *   server/song-scoring.cjs  531bbe60d1e7…
+ *   server/audio-decompose.cjs  135fa3837a49…
  *
  * 目的：GitHub Pages 这类纯静态托管没有 /api/*，但录音测量、课堂报告、简谱导入的算法
  * 全是纯 JS。与其在前端抄一份（必然与服务端漂移），不如把同一份源码包进浏览器跑。
@@ -158,6 +164,709 @@
     __registry[base] = module.exports;
     return module.exports;
   }
+
+  __modules["theory.cjs"] = function (module, exports, require) {
+'use strict';
+/**
+ * 乐理知识库与教学提示规则
+ *
+ * 设计原则（对应需求「内容准确性保障」）：
+ *  1. 每条知识只陈述可核查的乐理事实，配一条课堂上能立刻执行的教学动作；
+ *  2. 不给出生理、心理或唱法归因（例如「气息不足」「紧张」），只描述谱面事实与练习方法；
+ *  3. 知识点一律由谱面特征触发，不由模型自由编造，页面可展开看到触发它的具体音符；
+ *  4. 每条带 basis，说明依据是谱面还是通用教学法，便于老师判断可信度。
+ */
+
+const THEORY = [
+  { id: 'quarter', title: '四分音符', level: '入门', basis: '谱面时值', summary: '在 4/4 拍里，四分音符唱一拍，是数拍的基本单位。', tip: '先用手拍一下、唱一个音，再连成整句；每个音起在拍点上。' },
+  { id: 'eighth', title: '八分音符', level: '入门', basis: '谱面时值', summary: '八分音符是半拍，两个八分音符合起来正好一拍。', tip: '把一拍念成「哒—哒」，两字要均匀，不要前快后慢。' },
+  { id: 'half', title: '二分音符', level: '入门', basis: '谱面时值', summary: '二分音符唱两拍，常见于乐句结尾或拖长的地方。', tip: '心里默数两拍再收声，最后半拍保持住音量，不要提前断。' },
+  { id: 'whole', title: '全音符', level: '入门', basis: '谱面时值', summary: '全音符在 4/4 拍里唱满四拍，也就是一整小节。', tip: '数满四拍再换气；可用手指依次点四下帮助计时。' },
+  { id: 'dotted', title: '附点音符', level: '进阶', basis: '谱面时值', summary: '附点把原时值延长一半：附点四分音符等于一拍半。', tip: '先拆成「一拍 + 半拍」慢练，再合回来，注意后半拍别抢。' },
+  { id: 'rest', title: '休止符', level: '入门', basis: '谱面记号', summary: '休止符是不出声但照样占拍子的记号，音乐仍在走。', tip: '休止时心里继续数拍、手继续打拍子，到下一拍准确进入。' },
+  { id: 'meter', title: '拍号与强弱', level: '入门', basis: '谱面拍号', summary: '拍号分母表示以几分音符为一拍，分子表示每小节几拍。', tip: '每小节第一拍稍强，先用拍手把强弱规律打出来再唱。' },
+  { id: 'countin', title: '预备拍', level: '入门', basis: '通用教学法', summary: '预备拍是演唱前给出的空拍提示，用来统一速度、对齐起音。', tip: '听预备拍时默数、身体跟着律动，最后一拍吸好气再开口。' },
+  { id: 'scale-major', title: '大调音阶', level: '进阶', basis: '谱面音级', summary: '大调音阶按「全全半全全全半」排列，唱名 do 到 do。', tip: '先慢速上下行各唱一遍，再用本句里的音级做接龙模唱。' },
+  { id: 'pentatonic', title: '五声音阶', level: '进阶', basis: '谱面音级', summary: '五声音阶由 do re mi sol la 五个音组成，没有 fa 与 si。', tip: '把这五个音按顺序唱一遍，再听本句落在哪个音上。' },
+  { id: 'step', title: '级进', level: '入门', basis: '谱面音程', summary: '相邻音挨着音阶走（二度），旋律听起来平稳连贯。', tip: '用手指跟着音高上下划一条平滑线，保持每个音之间的距离均匀。' },
+  { id: 'leap', title: '跳进', level: '进阶', basis: '谱面音程', summary: '相邻音相隔三度及以上叫跳进，音准最容易在这里偏。', tip: '单独把跳进前后两个音摘出来反复听唱，再接回整句；先听准再唱。' },
+  { id: 'repeat', title: '同音反复', level: '入门', basis: '谱面音高', summary: '同一个音连续出现时，音高不变，要靠节奏把字分开。', tip: '每个字重新轻起一次音头，但音高保持完全一样，别越唱越高。' },
+  { id: 'melisma', title: '一字多音（拖腔）', level: '进阶', basis: '歌词与音符对齐', summary: '一个字跨多个音演唱时，字头只唱一次，后面在同一元音上换音高。', tip: '先放慢速度把每个音高唱清楚，口型保持不变，再连起来。' },
+  { id: 'phrase', title: '乐句', level: '入门', basis: '分句结构', summary: '乐句像说话的一句话，有起有落，句末通常有长音或停顿。', tip: '一口气唱完一句再换气，唱之前先用朗读找准句子的语气。' },
+  { id: 'breath', title: '换气与停顿', level: '入门', basis: '分句结构', summary: '换气放在乐句结尾或标点处，句子中间换气会打断旋律线。', tip: '在页面标记的换气位置快速吸气，不要在长音中间偷偷换气。' },
+  { id: 'longnote', title: '长音保持', level: '入门', basis: '谱面时值', summary: '两拍及以上的音要保持住音高与时值，不能提前收。', tip: '手平举着不动直到时值走完，同时听自己的音高有没有往下掉。' },
+  { id: 'highnote', title: '高音区', level: '进阶', basis: '谱面音域', summary: '句子里的最高音常是难点，需要提前准备而不是到跟前才用力。', tip: '先用轻声在高音前一个音做好准备，保持同样的轻松感唱上去。' },
+  { id: 'range', title: '音域', level: '入门', basis: '谱面音域', summary: '一首歌最低音到最高音的距离叫音域，决定这首歌适不适合本班。', tip: '若最高音唱不上去，可在设置里整体移调，不要硬喊。' },
+  { id: 'canon', title: '轮唱', level: '进阶', basis: '曲目体裁', summary: '轮唱是各声部先后唱同一旋律，相隔固定拍数进入。', tip: '先全体齐唱到熟练，再分两组相隔两小节进入，各自守住自己的拍子。' },
+];
+
+const BY_ID = new Map(THEORY.map((item) => [item.id, item]));
+
+/** 由一句的谱面特征推导出应出现的知识点，附带触发它的音符索引（前端可展开核对）。 */
+function detectTheory(notes, context = {}) {
+  const hits = new Map();
+  const add = (id, at, why) => {
+    if (!BY_ID.has(id)) return;
+    if (!hits.has(id)) hits.set(id, { id, at: [], why: [] });
+    const item = hits.get(id);
+    if (at !== null && at !== undefined && !item.at.includes(at)) item.at.push(at);
+    if (why) item.why.push(why);
+  };
+  const pitched = notes.filter((n) => !n.rest);
+  const degrees = new Set(pitched.map((n) => n.degree).filter((d) => Number.isInteger(d)));
+
+  for (const [i, n] of notes.entries()) {
+    if (n.rest) { add('rest', i, `第 ${i + 1} 个位置是休止符，占 ${n.durationBeats} 拍`); continue; }
+    if (n.durationBeats === 0.25) add('eighth', i, `第 ${i + 1} 个音为 0.25 拍`);
+    if (n.durationBeats === 0.5) add('eighth', i, `第 ${i + 1} 个音为半拍`);
+    if (n.durationBeats === 1) add('quarter', i, `第 ${i + 1} 个音为一拍`);
+    if (n.durationBeats === 1.5 || n.durationBeats === 0.75) add('dotted', i, `第 ${i + 1} 个音为附点时值 ${n.durationBeats} 拍`);
+    if (n.durationBeats === 2) { add('half', i, `第 ${i + 1} 个音为两拍`); add('longnote', i, '两拍长音'); }
+    if (n.durationBeats >= 3) { add('whole', i, `第 ${i + 1} 个音为 ${n.durationBeats} 拍`); add('longnote', i, '长音'); }
+    if (n.durationBeats >= 2 || i === notes.length - 1) add('phrase', i, '句末长音 / 句尾');
+  }
+
+  for (let i = 1; i < notes.length; i += 1) {
+    const a = notes[i - 1], b = notes[i];
+    if (a.rest || b.rest) continue;
+    const gap = Math.abs(b.midi - a.midi);
+    if (gap === 0) add('repeat', i, `第 ${i}、${i + 1} 个音同为 ${b.pitch}`);
+    else if (gap <= 2) add('step', i, `${a.pitch} → ${b.pitch} 为二度级进`);
+    else if (gap >= 5) add('leap', i, `${a.pitch} → ${b.pitch} 跳进 ${gap} 个半音`);
+  }
+
+  if (notes.some((n) => n.melisma)) add('melisma', null, '本句存在一字多音');
+  if (pitched.length) {
+    const max = Math.max(...pitched.map((n) => n.midi));
+    if (max >= 72) add('highnote', null, `最高音 ${pitched.find((n) => n.midi === max).pitch}`);
+    add('range', null, `本句音域 ${Math.min(...pitched.map((n) => n.midi))}–${max}（MIDI）`);
+    // 至少出现 4 个不同音级、且全部落在五声音阶内，才判为五声性旋律；
+    // 只用到 2–3 个音级时证据不足，不轻易下结论。
+    if (degrees.size >= 4 && [4, 7].every((d) => !degrees.has(d)) && [...degrees].every((d) => [1, 2, 3, 5, 6].includes(d))) add('pentatonic', null, '本句只用到 do re mi sol la，具五声性');
+    if (degrees.size >= 6) add('scale-major', null, '本句覆盖较多大调音级');
+  }
+  if (context.meter) add('meter', null, `${context.meter[0]}/${context.meter[1]} 拍`);
+  if (context.tags?.includes('轮唱')) add('canon', null, '曲目体裁为轮唱');
+  if (context.countIn) add('countin', null, `设置了 ${context.countIn} 拍预备`);
+
+  return [...hits.values()].map((h) => ({ ...BY_ID.get(h.id), at: h.at, why: h.why }));
+}
+
+/**
+ * 演唱注意事项：只描述谱面上发生了什么 + 可执行的练习动作，不做因果推断。
+ * 每条都带 noteIndex，页面可以点它跳到对应音符。
+ */
+function buildTips(notes, phrase, context = {}) {
+  const tips = [];
+  const pitched = notes.filter((n) => !n.rest);
+  const push = (noteIndex, kind, text) => tips.push({ noteIndex, kind, text });
+
+  notes.forEach((n, i) => {
+    if (n.rest) { push(i, 'rest', `这里休止 ${n.durationBeats} 拍，不出声但心里继续数拍，下一拍准时进入。`); return; }
+    if (n.durationBeats >= 2) push(i, 'long', `这个音要唱满 ${n.durationBeats} 拍，数完再收，注意别提前断或音高往下掉。`);
+    if (n.durationBeats === 1.5 || n.durationBeats === 0.75) push(i, 'dotted', `附点节奏：先按「长—短」慢练，短音别抢拍。`);
+    if (n.melisma) push(i, 'melisma', `这是同一个字的拖腔，口型保持不变，只换音高。`);
+  });
+  for (let i = 1; i < notes.length; i += 1) {
+    const a = notes[i - 1], b = notes[i];
+    if (a.rest || b.rest) continue;
+    const gap = b.midi - a.midi;
+    if (Math.abs(gap) >= 5) push(i, 'leap', `${a.pitch} → ${b.pitch} ${gap > 0 ? '上行' : '下行'}跳进 ${Math.abs(gap)} 个半音：先把这两个音单独听准再接回句子。`);
+  }
+  if (pitched.length) {
+    const max = Math.max(...pitched.map((n) => n.midi));
+    const at = notes.findIndex((n) => n.midi === max);
+    if (max >= 72) push(at, 'high', `本句最高音 ${pitched.find((n) => n.midi === max).pitch}，前一个音就提前准备，保持轻声唱上去。`);
+  }
+  const rests = notes.reduce((s, n) => s + (n.rest ? n.durationBeats : 0), 0);
+  if (!rests && notes.length > 4) push(notes.length - 1, 'breath', '本句句末是换气点，唱完再快速吸气，句中不要断开。');
+  if (context.mode === 'hum') push(0, 'hum', '这一句用「啦」模唱：先只唱准音高与节奏，不急着填词。');
+  if (!tips.length) push(0, 'general', '按预备拍进入，一拍一音唱清楚，句末唱满时值。');
+  return tips;
+}
+
+/** 停顿 / 换气 / 休止的结构化标注，供页面画在时间轴上。 */
+function buildBreaks(notes, phraseIndex, totalPhrases) {
+  const breaks = [];
+  notes.forEach((n, i) => {
+    if (n.rest) breaks.push({ type: 'rest', atNote: i, beats: n.durationBeats, label: `休止 ${n.durationBeats} 拍` });
+  });
+  const last = notes.at(-1);
+  if (last && !last.rest) {
+    breaks.push({
+      type: phraseIndex === totalPhrases - 1 ? 'final' : 'breath',
+      atNote: notes.length - 1,
+      beats: 0,
+      label: phraseIndex === totalPhrases - 1 ? '全曲结束（可收声）' : '句末换气点',
+    });
+  }
+  return breaks;
+}
+
+module.exports = { THEORY, BY_ID, detectTheory, buildTips, buildBreaks, THEORY_VERSION: 'theory-rules-1.0.0' };
+
+  };
+
+  __modules["song-library.cjs"] = function (module, exports, require) {
+'use strict';
+/**
+ * 曲库核心：简谱 → 逐音事件 → 逐句教学拆解 → 检索
+ *
+ * 这一层是「内容准确性」的地基：
+ *  · 所有教学结论（音调、注意事项、停顿、休止、乐理知识点）都从谱面确定性推导；
+ *  · 谱面按小节严格校验拍数，跨小节、时值不合法直接构建失败，不静默修正；
+ *  · 歌词与音符的自动对齐会如实标注 alignment.status（完全对齐 / 拖腔 / 一音多字 / 推测），
+ *    老师可以在页面上看到并逐句核对，而不是假装自动识别 100% 正确；
+ *  · 生成的 lesson 与项目既有 schema 兼容，可直接喂给既有音准测量与人声合成，
+ *    不在浏览器里另抄一份算法。
+ *
+ * 纯计算模块：不依赖任何 Node 内置模块，可被 scripts/build-browser-vendor.cjs 原样打包进浏览器。
+ */
+
+const core = require('../public/lesson-core.js');
+const theory = require('./theory.cjs');
+
+const KEY_TO_PC = { C: 0, 'C#': 1, Db: 1, D: 2, 'D#': 3, Eb: 3, E: 4, F: 5, 'F#': 6, Gb: 6, G: 7, 'G#': 8, Ab: 8, A: 9, 'A#': 10, Bb: 10, B: 11 };
+const DEGREE_SEMITONES = [null, 0, 2, 4, 5, 7, 9, 11];
+const PC_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const EPS = 1e-9;
+const NOTE_TOKEN = /^([_.]*)([0-7])(['`,]*)$/;
+const PREVIEW_SECONDS = 10;
+const SOURCE_ID = 'src-personal-local';
+
+const midiToPitch = (midi) => PC_NAMES[((midi % 12) + 12) % 12] + (Math.floor(midi / 12) - 1);
+const round = (v, d = 2) => Number(v.toFixed(d));
+
+/**
+ * 解析一段简谱（一句 = 整数个小节）。
+ * 记号：_ 减半（可叠加）、. 附点、0 休止、' 高八度、, 低八度、| 小节线、- 给前一个音加一拍。
+ */
+function parseScore(text, meter, key) {
+  const info = core.meterInfo(meter);
+  if (!info) throw new Error('不支持的拍号：' + JSON.stringify(meter));
+  const tonic = 60 + (KEY_TO_PC[key] ?? 0);
+  const tokens = String(text ?? '').trim().split(/\s+/).filter(Boolean);
+  if (!tokens.length) throw new Error('简谱为空');
+  const events = [];
+  let beat = 0, measure = 1, beatInMeasure = 0, last = null;
+  const closeMeasure = (where) => {
+    if (Math.abs(beatInMeasure - info.beatsPerMeasure) > EPS) {
+      throw new Error(`第 ${measure} 小节共 ${round(beatInMeasure, 3)} 拍，应为 ${info.beatsPerMeasure} 拍（${where}）`);
+    }
+  };
+  for (const raw of tokens) {
+    if (raw === '|') { closeMeasure('小节线'); measure += 1; beatInMeasure = 0; last = null; continue; }
+    if (raw === '-') {
+      if (!last) throw new Error('延长线 - 前面没有音符（不能跨小节线延长）');
+      if (beatInMeasure + 1 > info.beatsPerMeasure + EPS) throw new Error('延长线超出本小节');
+      last.durationBeats += 1; beat += 1; beatInMeasure += 1;
+      continue;
+    }
+    const m = NOTE_TOKEN.exec(raw);
+    if (!m) throw new Error(`无法识别的简谱记号「${raw}」`);
+    const underscores = (m[1].match(/_/g) || []).length;
+    const dots = (m[1].match(/\./g) || []).length;
+    if (dots > 1) throw new Error(`「${raw}」用了多个附点，一期只支持单附点`);
+    const durationBeats = (1 / Math.pow(2, underscores)) * (dots ? 1.5 : 1);
+    const degree = Number(m[2]);
+    const octave = (m[3].match(/'/g) || []).length - (m[3].match(/,/g) || []).length;
+    const rest = degree === 0;
+    const midi = rest ? null : tonic + DEGREE_SEMITONES[degree] + octave * 12;
+    if (!rest && (midi < 0 || midi > 127)) throw new Error(`「${raw}」算出的音高超出 MIDI 范围`);
+    if (beatInMeasure + durationBeats > info.beatsPerMeasure + EPS) throw new Error(`「${raw}」跨小节，请检查本小节拍数`);
+    const event = {
+      id: `n${events.length + 1}`, measure, beat,
+      degree: rest ? null : degree, octave: rest ? null : octave,
+      midi, pitch: midi === null ? null : midiToPitch(midi),
+      durationBeats, slur: null, jianpu: raw,
+    };
+    if (rest) event.rest = true;
+    events.push(event);
+    last = event; beat += durationBeats; beatInMeasure += durationBeats;
+  }
+  if (beatInMeasure > EPS) closeMeasure('乐段结尾');
+  const measures = beatInMeasure > EPS ? measure : measure - 1;
+  if (measures < 1) throw new Error('没有解析到完整小节');
+  if (!events.some((e) => !e.rest)) throw new Error('整段都是休止符');
+  return { events, beats: beat, measures, tonicMidi: tonic };
+}
+
+/**
+ * 歌词自动对齐。只做「顺序分配」，不做语义切分；任何不整齐的地方都写进 alignment 供老师核对。
+ * 输出格式与既有 lesson 的 lyric 字段一致，因此 core.validate 与人声合成都能直接复用。
+ */
+function alignLyrics(text, events, lineId) {
+  const syllables = [...String(text ?? '').replace(/[\s，。！？、,.!?]/g, '')];
+  const singable = events.filter((e) => !e.rest);
+  const warnings = [];
+  let status = 'exact';
+  if (!syllables.length) {
+    singable.forEach((e) => { e.syllable = null; });
+    return { syllables, status: 'hum', warnings: ['本句未填歌词，按模唱处理'] };
+  }
+  if (syllables.length === singable.length) {
+    singable.forEach((e, i) => {
+      e.syllable = syllables[i];
+      e.lyric = { lineId, index: i, syllable: syllables[i] };
+    });
+  } else if (syllables.length < singable.length) {
+    // 字少音多 → 末字拖腔（一字多音）
+    const last = syllables.length - 1;
+    singable.forEach((e, i) => {
+      const index = Math.min(i, last);
+      const melisma = i > last;
+      e.syllable = syllables[index];
+      e.melisma = melisma;
+      e.lyric = { lineId, index, syllable: syllables[index], ...(melisma ? { melisma: true } : {}) };
+    });
+    status = 'melisma';
+    warnings.push(`本句 ${syllables.length} 个字对应 ${singable.length} 个音，末字「${syllables[last]}」按拖腔跨 ${singable.length - last} 个音，请核对是否与原唱一致`);
+  } else {
+    // 字多音少 → 末音承载多个字（一音多字），用数组保持既有 schema 的顺序校验
+    const head = singable.length - 1;
+    singable.forEach((e, i) => {
+      if (i < head) {
+        e.syllable = syllables[i];
+        e.lyric = { lineId, index: i, syllable: syllables[i] };
+      } else {
+        const rest = syllables.slice(head);
+        e.syllable = rest.join('');
+        e.lyric = rest.map((s, k) => ({ lineId, index: head + k, syllable: s }));
+      }
+    });
+    status = 'multi-syllable';
+    warnings.push(`本句 ${syllables.length} 个字对应 ${singable.length} 个音，末尾 ${syllables.length - head} 个字挤在同一个音上，建议老师按课本拆分或调整谱面`);
+  }
+  return { syllables, status, warnings };
+}
+
+/** 一句的「音调」画像：起点、终点、音域、走向、逐音轮廓。 */
+function pitchProfile(notes) {
+  const pitched = notes.filter((n) => !n.rest);
+  if (!pitched.length) return null;
+  const midis = pitched.map((n) => n.midi);
+  const low = Math.min(...midis), high = Math.max(...midis);
+  const first = pitched[0].midi, last = pitched.at(-1).midi;
+  return {
+    lowest: { midi: low, pitch: midiToPitch(low), degree: pitched.find((n) => n.midi === low).degree },
+    highest: { midi: high, pitch: midiToPitch(high), degree: pitched.find((n) => n.midi === high).degree },
+    rangeSemitones: high - low,
+    start: { midi: first, pitch: midiToPitch(first) },
+    end: { midi: last, pitch: midiToPitch(last) },
+    direction: last > first ? '上行' : last < first ? '下行' : '回到起音',
+    contour: pitched.map((n) => ({ pitch: n.pitch, degree: n.degree, beats: n.durationBeats })),
+  };
+}
+
+/** 把曲库里的一条原始记录构建成可直接上课的对象。 */
+function buildSong(raw) {
+  if (raw.status !== 'score-ready') {
+    return {
+      ...raw, built: false, phrases: [], lesson: null,
+      accuracy: { scoreStatus: raw.notation?.status || 'pending', reason: raw.notation?.reason || '未登记谱面' },
+    };
+  }
+  const meter = raw.meter, key = raw.key || 'C', bpm = raw.bpm || 88;
+  const info = core.meterInfo(meter);
+  if (!info) throw new Error(`${raw.title}：不支持的拍号`);
+  const lines = [];
+  const phrases = [];
+  const allEvents = [];
+  let globalBeat = 0;
+
+  (raw.phrases || []).forEach((phrase, phraseIndex) => {
+    const parsed = parseScore(phrase.score, meter, key);
+    const lineId = `l${phraseIndex + 1}`;
+    const aligned = alignLyrics(phrase.text, parsed.events, lineId);
+    lines.push({ id: lineId, text: aligned.syllables.join(''), syllables: aligned.syllables, provenance: `曲库条目 ${raw.id} 第 ${phraseIndex + 1} 句` });
+    const notes = parsed.events.map((e) => {
+      const global = { ...e, beat: e.beat + globalBeat, measure: Math.floor((e.beat + globalBeat) / info.beatsPerMeasure) + 1 };
+      allEvents.push(global);
+      return global;
+    });
+    const theoryHits = theory.detectTheory(notes, { meter, tags: raw.tags, countIn: 0 });
+    const tips = theory.buildTips(notes, phrase, { mode: phrase.mode });
+    const breaks = theory.buildBreaks(notes, phraseIndex, raw.phrases.length);
+    phrases.push({
+      id: `p${phraseIndex + 1}`, index: phraseIndex,
+      text: phrase.text, syllables: aligned.syllables, mode: phrase.mode || 'lyric',
+      jianpu: phrase.score,
+      startNote: allEvents.length - notes.length, endNote: allEvents.length - 1,
+      startBeat: globalBeat, beats: parsed.beats, measures: parsed.measures,
+      seconds: round(parsed.beats * 60 / bpm),
+      notes,
+      pitch: pitchProfile(notes),
+      tips, breaks,
+      theory: theoryHits,
+      theoryIds: theoryHits.map((t) => t.id),
+      alignment: { status: aligned.status, warnings: aligned.warnings },
+    });
+    globalBeat += parsed.beats;
+  });
+
+  if (!allEvents.length) throw new Error(`${raw.title}：没有可教学的音符`);
+  const midis = allEvents.filter((e) => !e.rest).map((e) => e.midi);
+  const lesson = {
+    id: `library-${raw.id}`, version: '1.0.0', title: raw.title,
+    status: 'library-score',
+    source: {
+      sourceType: 'local-catalog', sourceId: SOURCE_ID,
+      title: raw.notation?.source || '本机曲库谱面',
+      key, tonicMidi: 60 + (KEY_TO_PC[key] ?? 0), meter,
+      rights: '个人本机教学使用；谱面状态与来源见 catalog.notation，未标注核对完成的内容不得作为定论。',
+    },
+    teaching: {
+      key, tonicMidi: 60 + (KEY_TO_PC[key] ?? 0), transposeSemitones: 0,
+      meter, bpm, slowBpm: Math.max(30, Math.round(bpm * 0.75)),
+      tuningA4Hz: 440, temperament: '12-TET',
+      measures: Math.round(globalBeat / info.beatsPerMeasure), beats: globalBeat,
+      pitchRange: [Math.min(...midis), Math.max(...midis)],
+      description: `${raw.title} · ${phrases.length} 句 · ${allEvents.length} 音 · ${meter[0]}/${meter[1]} · 1=${key}`,
+    },
+    events: allEvents,
+    lyrics: { language: 'zh', sourceId: SOURCE_ID, lines, provenance: '曲库逐句歌词，自动对齐结果见 phrases[].alignment' },
+    audio: {
+      renderer: 'library-additive-v1', sampleRate: 44100, channels: 1, bitDepth: 16,
+      gateRatio: 0.92, tailSeconds: 0.25, reference: null,
+      provenance: '伴奏与范唱均由本机逐音合成，是电子音示范，不是真人演唱录音。',
+    },
+  };
+  core.validate(lesson);
+  const totalSeconds = round(globalBeat * 60 / bpm);
+  return {
+    ...raw, built: true, lesson, phrases,
+    seconds: totalSeconds,
+    preview: { seconds: Math.min(PREVIEW_SECONDS, totalSeconds), note: totalSeconds < PREVIEW_SECONDS ? '全曲不足 10 秒，试听为完整一遍' : '取开头 10 秒供老师确认曲目' },
+    accuracy: {
+      scoreStatus: raw.notation?.reviewStatus || 'needs-teacher-review',
+      scoreSource: raw.notation?.source || null,
+      notationNote: raw.notation?.note || null,
+      alignmentIssues: phrases.filter((p) => p.alignment.status !== 'exact').map((p) => ({ phrase: p.id, status: p.alignment.status, warnings: p.alignment.warnings })),
+      backgroundNeedsReview: (raw.background?.facts || []).filter((f) => f.status !== 'verified').map((f) => f.text),
+      declaration: '谱面为通行唱本的教学调规整版，上课前请老师逐句核对；教学提示由谱面规则推导，不代表对演唱者发声状态的判断。',
+    },
+  };
+}
+
+/** 中文检索：曲名 / 别名 / 首字母 / 年级 / 类别 / 标签，返回可解释的命中理由。 */
+function searchSongs(catalog, query = '', opts = {}) {
+  const q = String(query ?? '').trim().toLowerCase();
+  const out = [];
+  for (const song of catalog.songs || []) {
+    if (opts.grade && !(song.grades || []).includes(opts.grade)) continue;
+    if (opts.onlyReady && song.status !== 'score-ready') continue;
+    const title = song.title.toLowerCase();
+    const aliases = (song.aliases || []).map((a) => String(a).toLowerCase());
+    const initials = String(song.initials || '').toLowerCase();
+    const haystack = [title, ...aliases, initials, String(song.category || ''), (song.tags || []).join(' '), (song.grades || []).join(' ')].join(' ').toLowerCase();
+    let score = 0;
+    const why = [];
+    if (q) {
+      if (title === q || aliases.includes(q)) { score += 120; why.push('曲名完全匹配'); }
+      else if (title.includes(q)) { score += 70; why.push('曲名包含关键词'); }
+      else if (aliases.some((a) => a.includes(q))) { score += 50; why.push('别名命中'); }
+      else if (initials.includes(q.replace(/\s/g, ''))) { score += 35; why.push('拼音首字母命中'); }
+      else {
+        // 按去重字符算命中率：多字查询要求过半命中，避免「小星星」把别名里含「星」的无关曲目带进来。
+        const chars = [...new Set([...q].filter((c) => c.trim()))];
+        const hit = chars.filter((c) => haystack.includes(c));
+        if (!hit.length || (chars.length > 1 && hit.length / chars.length < 0.6)) continue;
+        score += Math.round((hit.length / chars.length) * 28);
+        why.push(`关键词命中 ${hit.length}/${chars.length} 字`);
+      }
+      if ((song.grades || []).some((g) => q.includes(g))) { score += 12; why.push('年级相关'); }
+    }
+    if (song.status === 'score-ready') { score += 8; why.push('已内置可核对谱面'); }
+    else why.push('背景故事已备好 · 可以先讲再唱');
+    if (opts.grade) { score += 5; why.push(`${opts.grade}适用`); }
+    out.push({ id: song.id, title: song.title, status: song.status, score, why, grades: song.grades, category: song.category, aliases: song.aliases });
+  }
+  return out.sort((a, b) => b.score - a.score || a.title.localeCompare(b.title, 'zh'));
+}
+
+/** 曲库完整性校验：构建脚本与测试共用，任何一首谱面不合法都会让整包失败。 */
+function validateCatalog(catalog) {
+  const errors = [];
+  const seen = new Set();
+  let ready = 0, reference = 0;
+  for (const song of catalog.songs || []) {
+    if (!song.id || !song.title) { errors.push('存在缺 id 或曲名的条目'); continue; }
+    if (seen.has(song.id)) errors.push(`${song.title}：id 重复 ${song.id}`);
+    seen.add(song.id);
+    if (!Array.isArray(song.grades) || !song.grades.length) errors.push(`${song.title}：未标注适用年级`);
+    if (!song.background?.summary) errors.push(`${song.title}：缺少背景简介`);
+    for (const fact of song.background?.facts || []) {
+      if (!['verified', 'needs-review'].includes(fact.status)) errors.push(`${song.title}：背景条目「${fact.text}」缺少合法的 status`);
+    }
+    if (song.status === 'score-ready') {
+      ready += 1;
+      if (!Array.isArray(song.phrases) || !song.phrases.length) { errors.push(`${song.title}：标记为可上课但没有 phrases`); continue; }
+      song.phrases.forEach((p, i) => {
+        if (!p.text || !p.score) errors.push(`${song.title}：第 ${i + 1} 句缺歌词或简谱`);
+      });
+      try { buildSong(song); } catch (e) { errors.push(`${song.title}：谱面构建失败 —— ${e.message}`); }
+    } else if (song.status === 'reference-only') {
+      reference += 1;
+      // 资料级只登记元数据：可以完全没有 notation；若保留了旧标记，必须是 pending 并写明原因。
+      if (song.notation && song.notation.status !== 'pending') errors.push(`${song.title}：旧 notation 标记必须是 pending`);
+      if (song.notation && !song.notation.reason) errors.push(`${song.title}：旧 notation 标记要写明原因`);
+      if (song.phrases?.length) errors.push(`${song.title}：资料级曲目不应携带未核对谱面`);
+    } else errors.push(`${song.title}：未知 status ${song.status}`);
+  }
+  return { ok: errors.length === 0, errors, total: (catalog.songs || []).length, ready, reference };
+}
+
+/* ------------------------------------------------------------------
+ * 课堂环节拆解（教案）：回答「这节课的各个部分需要干什么」
+ *
+ * 与逐句拆解同一套原则：全部由已核对的曲目数据确定性推导——句数、音符数、
+ * BPM、预备拍秒数、背景条数、休止/换气标记、乐理知识点；不引用任何外部教材
+ * 页码或课标条款，不编造教学研究结论。时长按「一课时 40 分钟」做可调整估算，
+ * 页面会明确标注这是估算值而不是规定值。
+ * ------------------------------------------------------------------ */
+const CLASS_MINUTES = 40;
+
+function theoryTitle(id) {
+  const item = theory.BY_ID.get(id);
+  return item ? item.title : String(id);
+}
+
+function buildLessonPlan(song) {
+  if (!song || typeof song !== 'object') throw new Error('buildLessonPlan 需要曲目数据');
+  const phrases = Array.isArray(song.phrases) ? song.phrases : [];
+  const built = song.built === true && phrases.length > 0;
+  const n = phrases.length;
+  const bpm = Number(song.bpm) || 88;
+  const meter = Array.isArray(song.meter) ? song.meter.join('/') : '4/4';
+  const seconds = Number(song.seconds) || 0;
+  const events = song.lesson && Array.isArray(song.lesson.events) ? song.lesson.events : [];
+  const facts = song.background && Array.isArray(song.background.facts) ? song.background.facts : [];
+  const story = (song.background && song.background.story) || null;
+  const storyParagraphs = story && Array.isArray(story.paragraphs) ? story.paragraphs : [];
+  const storyAsk = story && Array.isArray(story.ask) ? story.ask : [];
+  const storyProps = story && Array.isArray(story.props) ? story.props : [];
+  const verified = facts.filter((f) => f && f.status === 'verified').length;
+  const theoryIds = [...new Set(phrases.flatMap((p) => (Array.isArray(p.theoryIds) ? p.theoryIds : [])))];
+  const restCount = phrases.reduce((sum, p) => sum + (Array.isArray(p.notes) ? p.notes.filter((x) => x && x.rest).length : 0), 0);
+  // 欣赏课（器乐/管弦乐）不教唱，改成「听主题、分段听、听辨游戏」；唱歌课才走分句带唱
+  const appreciation = !built && /欣赏/.test(song.category || '');
+  const breakCount = phrases.reduce((sum, p) => sum + (Array.isArray(p.breaks) ? p.breaks.length : 0), 0);
+  const countInSeconds = Number((4 * 60 / bpm).toFixed(1));
+
+  const mk = (id, name, minutes, goal, teacher, student, here, basis, status, ids) => ({
+    id, name, minutes, goal, teacher, student, here, basis,
+    status: status || 'ready', theoryIds: ids || [],
+    note: '',
+  });
+
+  const stages = [
+    mk('open', '导入 · 试听确认', 2, '确认目标曲目，先建立整首歌的整体印象',
+      [`报出歌名、拍号 ${meter}、教学调 1=${song.key || 'C'}、速度 ${bpm} BPM`,
+        `播放 ${PREVIEW_SECONDS} 秒试听，请学生听完后确认是不是这一首，并说说快慢与情绪`],
+      ['安静听完试听片段，用手跟着打拍子', '说出一个自己听到的问题'],
+      '第 1 步「找歌确认」→ 输入歌名 → 试听 → 点「就是这首」',
+      `试听片段 ${PREVIEW_SECONDS} 秒；检索按曲名／别名／拼音首字母／年级匹配`, 'ready', []),
+
+    mk('about', '认识这首歌 · 讲背景故事', 3, '用一个故事把歌带进课堂：知道它从哪里来、为什么会被唱',
+      storyParagraphs.length
+        ? [`照「背景故事」讲稿讲 2–3 分钟（共 ${storyParagraphs.length} 段，可直接照着说）`,
+          `讲完抛出 ${storyAsk.length} 个问题，让孩子先猜一猜，再听旋律找答案`,
+          storyProps.length ? `拿出准备好的教具：${storyProps.join('、')}` : '用一张图片或一件小道具，把年代变成看得见的东西',
+          `背景资料另附 ${facts.length} 条（${verified} 条可复核），讲到哪条就用哪条，不确定的说法宁可不讲`]
+        : [`按页面逐条讲背景资料（共 ${facts.length} 条，其中 ${verified} 条可复核）`,
+          '没有把握的说法宁可不讲，把注意力放在旋律本身'],
+      ['听故事，说出一个与歌曲年代、地方或用途有关的词', '回答故事里的问题，带着这个印象再听一次旋律'],
+      '第 2 步「认识这首歌」→ 背景故事 + 教学资料卡片',
+      storyParagraphs.length
+        ? `背景故事 ${storyParagraphs.length} 段 / 提问 ${storyAsk.length} 个 / 资料 ${facts.length} 条`
+        : `背景条目 ${facts.length} 条，每条都有出处说明`, 'ready', []),
+
+    mk('phrase', built ? '逐句学唱 · 音调 / 注意事项 / 停顿 / 休止 / 乐理' : appreciation ? '听主题 · 分段听' : '逐句学唱 · 分句 / 带读 / 跟唱',
+      Math.max(4, n * 2 || 10),
+      built
+        ? `把 ${n} 句分别唱准：先解决音高与节奏，再连成完整乐句`
+        : appreciation ? '记住主题旋律，听出段落与音色的变化' : '把歌词分成 4–8 句，一句一句唱顺，再连成整段',
+      built
+        ? [`按句讲起音、收音、音域与旋律走向（全曲共 ${events.length} 个音）`,
+          restCount
+            ? `指出 ${restCount} 处休止与 ${breakCount} 处停顿／换气；休止时心里继续数拍，到下一拍准确进入`
+            : `全曲没有休止符；标出的 ${breakCount} 处换气要提前吸气，句子之间不要拖断`,
+          `展开本句乐理点（全曲 ${theoryIds.length} 类：${theoryIds.slice(0, 4).map(theoryTitle).join('、') || '暂无'}），照卡片里的课堂动作带做一遍`]
+        : appreciation
+          ? ['先完整听一遍，不讲解，让大家记住一个最喜欢的片段',
+            seconds > 0
+              ? `再分段听：这首曲子约 ${seconds} 秒，按段落分成 3–4 段，每段 30–60 秒`
+              : '再分段听：按教材版本把曲子分成 3–4 段，每段 30–60 秒',
+            '每段听完问一句：这一段是快还是慢？是强还是弱？主奏乐器像什么声音？']
+          : ['按课本歌词分成 4–8 句，一句一句教，不要一次教一整段',
+            '每句先完整听一遍课本配套录音，再带读歌词：老师一句、学生一句',
+            '带唱：老师唱一句、学生跟一句；唱顺了再把两句连起来',
+            '重点放在节奏、咬字和情绪，不逐音纠音'],
+      built
+        ? ['每句先听范唱，再模唱 2–3 遍，手打拍子', '在标记的换气处吸气，长音唱满时值不提前收']
+        : appreciation
+          ? ['听的时候用手比划高低或快慢', '说出一个听到的乐器或情绪词']
+          : ['听一句、跟读一句、再跟唱一句', '唱的时候手打拍子，句尾一起收'],
+      built ? '第 3 步「逐句学」→ 每句卡片、逐音条与乐理展开' : '上课演示第 3 步「一句一句教」→ 分句带读、跟唱',
+      built
+        ? `${n} 句 / ${events.length} 音 / 休止 ${restCount} 处 / 停顿换气 ${breakCount} 处 / 乐理点 ${theoryIds.length} 类`
+        : '按课本歌词分句；每句先听录音再带读，最后跟唱',
+      built ? 'ready' : 'pending', theoryIds),
+
+    mk('listen', '听范唱 · 预备拍 · 统一进入', 4, '统一速度与起音位置，听清伴奏与人声的关系',
+      built
+        ? [`先放「带人声完整版」建立整体印象，再放「纯伴奏」让学生自己填词`,
+          `把前置预备拍设为 4 拍：按 ${bpm} BPM 约 ${countInSeconds} 秒，听完最后一拍吸气再开口`,
+          '难点句改用「慢速范唱」，熟练后回到原速']
+        : appreciation
+          ? ['把主题旋律用「啦」哼出来，让学生跟着哼两句',
+            '再听一遍，听到主题出现时举手',
+            '对比两个段落：同样是主题，第二次听和第一次听有什么不一样？']
+          : [`放课本配套录音或你弹单音带唱；先给 4 拍预备，按 ${bpm} BPM 约 ${countInSeconds} 秒`,
+            '第一遍小声跟，第二遍只给伴奏或只打拍子',
+            '哪一句散，就停下来单独唱两遍'],
+      ['听预备拍时默数、身体跟着律动', '最后一拍吸好气，准点进入第一句'],
+      '上课演示第 4 步「跟着范唱唱」→ 4 拍预备 / 完整范唱 / 纯伴奏',
+      `BPM ${bpm}；4 拍预备约 ${countInSeconds} 秒；全曲约 ${seconds} 秒`,
+      built ? 'ready' : 'pending', ['countin']),
+
+    mk('score', built ? '逐句演唱 · 评分与纠正' : '连起来唱 · 整齐度', Math.max(4, n * 2 || 8), built ? '每句拿到可定位的反馈，并当场复唱一次' : '把句子连成整段，听齐唱是不是整齐',
+      built
+        ? ['一次只唱一句：单人清唱、安静环境、关闭伴奏',
+          '看评分报告里的「第几个音／哪个字／目标音→实测音／偏高偏低多少音分／起音偏早偏晚」',
+          '按报告给出的阶梯音、节拍、拖腔练习做一遍，再录一次复唱对比']
+        : appreciation
+          ? ['听两小段，判断哪一段是主题，哪一段是别的段落',
+            '听一段，选出听到的主奏乐器或情绪',
+            '再听一次，看能不能跟着主题轻轻打拍子']
+          : ['两句两句连：先唱 1–2 句，再唱 3–4 句，最后连成一段',
+            '听三件事：起音是不是一起、句尾是不是一起收、换气是不是一起',
+            '最容易散的那一句，单独再来两遍'],
+      built
+        ? ['对着目标 vs 实测音高曲线，找出自己偏高的那几个音', '按改进方向重唱，争取比上一遍更接近目标']
+        : appreciation
+          ? ['说出自己选的那一段和理由', '跟着主题轻轻打拍子']
+          : ['跟着老师的手势一起开口、一起收', '唱完说说哪一句最顺、哪一句还要练'],
+      built ? '第 4 步右侧「唱一遍」→ 开始录音 → 评分报告' : '上课演示第 5 步「连起来唱」→ 纯伴奏整段',
+      built
+        ? '16 kHz 单声道清唱；自相关基频＋清晰度阈值；35 音分阈值；八度等价折算；静音、噪声、多人或音段数不符一律不评分'
+        : '按齐唱整齐度判断，不做逐音评分',
+      built ? 'ready' : 'pending', ['leap', 'longnote', 'breath']),
+
+    mk('game', '完整演唱 · 趣味收尾', 4, '把句子连回整首歌，用可视化的即时鼓励收尾',
+      ['开「开始整首」卡拉OK，逐字高亮带着全班唱完',
+        '用星星、连击、徽章做即时鼓励；唱完让最后一个字变成小鸟飞走',
+        '一起回看「本次课堂记录」，指出下一节课要练的那一句'],
+      ['完整唱一遍，眼睛跟着逐字高亮', '说说自己哪一句唱得最好、哪一句还想再练'],
+      '第 5 步「趣味舞台」→ 开始整首 / 让最后一个字飞走 / 课堂记录',
+      `全曲 ${n} 句；逐字高亮按谱面时值驱动；课堂记录来自本机本轮评分`,
+      built ? 'ready' : 'pending', ['phrase']),
+  ];
+  stages.forEach((s, i) => { s.order = i + 1; });
+  stages.forEach((s) => {
+    s.mode = (s.id === 'open' || s.id === 'about') ? 'any' : (built ? 'score' : 'script');
+  });
+  const aboutStage = stages.find((s) => s.id === 'about');
+  if (aboutStage && storyParagraphs.length) {
+    aboutStage.story = {
+      title: story.title || '这首歌的故事',
+      paragraphs: storyParagraphs.slice(),
+      ask: storyAsk.slice(),
+      props: storyProps.slice(),
+      status: story.status || 'verified',
+      basis: story.basis || '',
+    };
+  }
+
+  const sum = stages.reduce((t, s) => t + s.minutes, 0);
+  const splitAdvice = sum > CLASS_MINUTES
+    ? `按每句 2 分钟推算约 ${sum} 分钟，超过一课时 ${CLASS_MINUTES} 分钟。建议分 2 课时：`
+      + '第 1 课时完成环节 1–3（导入、背景、逐句学唱），第 2 课时完成环节 4–6（范唱、评分纠正、完整演唱）；'
+      + '或把逐句练习与复唱压缩到每句 1 分钟。'
+    : '';
+
+  return {
+    version: 'lesson-plan-1.0.0',
+    title: song.title || '',
+    classMinutes: CLASS_MINUTES,
+    estimatedMinutes: sum,
+    spareMinutes: Math.max(0, CLASS_MINUTES - sum),
+    splitAdvice,
+    methodNote: '顺序按唱歌教学常用的「整体感知 → 分句模唱 → 完整表现 → 即时反馈 → 趣味巩固」编排：'
+      + '先听全曲建立整体印象，再逐句解决音高与节奏，最后回到完整演唱；每句唱完立刻给可定位的反馈，'
+      + '避免把错误练熟。所有时长均为可按班级情况调整的估算值，不是课程标准规定值。',
+    basis: {
+      phraseCount: n, noteCount: events.length, bpm, meter, seconds,
+      countInBeats: 4, countInSeconds, previewSeconds: PREVIEW_SECONDS,
+      facts: facts.length, verifiedFacts: verified,
+      rests: restCount, breaks: breakCount, theoryIds,
+      notationReady: built,
+      lessonKind: appreciation ? 'appreciation' : 'singing',
+    },
+    accuracy: [
+      built ? '这节课的句子和音符，是按已经核对过的曲谱整理出来的。'
+        : appreciation
+          ? '这是欣赏课：以听和说为主，不逐句教唱；也不会临时编一份曲谱来教。'
+          : '这首歌按句教唱：没有逐个音的曲谱，就不一个音一个音地纠；先用课本录音把句子唱顺。',
+      '范唱是电脑合成的声音，不是真人录音。',
+      '录音评分只说明这一次唱得和参考差多少，不代表孩子的音乐水平。',
+    ],
+    stages,
+    story: aboutStage && aboutStage.story ? aboutStage.story : null,
+  };
+}
+
+/** 生成可复制的纯文本教案，方便老师贴进备课笔记。 */
+function lessonPlanText(plan, song) {
+  if (!plan) return '';
+  const lines = [
+    `${song?.title || plan.title} · 课堂环节拆解（本机生成，可自行调整）`,
+    `一课时按 ${plan.classMinutes} 分钟估算；以下合计约 ${plan.estimatedMinutes} 分钟`
+      + (plan.spareMinutes ? `，余 ${plan.spareMinutes} 分钟用于反复练习与机动` : ''),
+    ...(plan.splitAdvice ? ['课时建议：' + plan.splitAdvice] : []),
+    '',
+  ];
+  for (const s of plan.stages) {
+    lines.push(`${s.order}. ${s.name}｜约 ${s.minutes} 分钟${s.status === 'pending' ? '｜按句教' : ''}`);
+    lines.push(`   目标：${s.goal}`);
+    s.teacher.forEach((t) => lines.push(`   老师：${t}`));
+    s.student.forEach((t) => lines.push(`   学生：${t}`));
+    lines.push(`   页面：${s.here}`);
+    if (s.note) lines.push(`   注意：${s.note}`);
+    if (s.story) {
+      lines.push(`   故事讲稿 · ${s.story.title}`);
+      s.story.paragraphs.forEach((t) => lines.push(`     ${t}`));
+      if (s.story.ask.length) lines.push(`   提问：${s.story.ask.join(' / ')}`);
+      if (s.story.props.length) lines.push(`   教具：${s.story.props.join('、')}`);
+    }
+    lines.push('');
+  }
+  lines.push('教学顺序说明：' + plan.methodNote);
+  lines.push('准确性说明：');
+  plan.accuracy.forEach((a) => lines.push('  · ' + a));
+  return lines.join('\n');
+}
+
+function buildCatalogData(catalog) {
+  const checked = validateCatalog(catalog);
+  if (!checked.ok) throw new Error('曲库校验未通过：\n' + checked.errors.join('\n'));
+  return {
+    version: catalog.version, scope: catalog.scope, updated: catalog.updated,
+    rightsNote: catalog.rightsNote, accuracyPolicy: catalog.accuracyPolicy,
+    previewSeconds: PREVIEW_SECONDS,
+    stats: { total: checked.total, ready: checked.ready, reference: checked.reference },
+    songs: catalog.songs.map((raw) => buildSong(raw)),
+  };
+}
+
+module.exports = {
+  parseScore, alignLyrics, pitchProfile, buildSong, searchSongs, validateCatalog, buildCatalogData,
+  buildLessonPlan, lessonPlanText,
+  PREVIEW_SECONDS, SOURCE_ID, NOTE_TOKEN, CLASS_MINUTES,
+  LIBRARY_VERSION: 'song-library-1.0.0',
+};
+
+  };
 
   __modules["xml.cjs"] = function (module, exports, require) {
 'use strict';
@@ -2239,6 +2948,31 @@ const SYLLABLE_VOICE = {
   '耳': { vowel: 'e', onset: 'er' }, '尾': { vowel: 'ei', onset: 'w' },
   '巴': { vowel: 'a', onset: 'b' }, '真': { vowel: 'en', onset: 'zh' }, '奇': { vowel: 'i', onset: 'q' },
   '怪': { vowel: 'uai', onset: 'g' },
+  // 曲库扩充曲目的歌词字（元音按最接近的单元音/二合元音归类，起音沿用声母类别）
+  '闪': { vowel: 'a', onset: 'sh' }, '亮': { vowel: 'ia', onset: 'l' }, '晶': { vowel: 'i', onset: 'j' },
+  '满': { vowel: 'a', onset: 'm' }, '天': { vowel: 'ia', onset: 't' }, '都': { vowel: 'ou', onset: 'd' },
+  '是': { vowel: 'i', onset: 'sh' }, '小': { vowel: 'ao', onset: 'x' }, '挂': { vowel: 'ua', onset: 'g' },
+  '在': { vowel: 'a', onset: 'z' }, '上': { vowel: 'a', onset: 'sh' }, '放': { vowel: 'a', onset: 'f' },
+  '光': { vowel: 'ua', onset: 'g' }, '明': { vowel: 'i', onset: 'm' }, '像': { vowel: 'ia', onset: 'x' },
+  '许': { vowel: 'u', onset: 'x' }, '多': { vowel: 'uo', onset: 'd' }, '眼': { vowel: 'ia', onset: 'y' },
+  '睛': { vowel: 'i', onset: 'j' }, '欢': { vowel: 'ua', onset: 'h' }, '乐': { vowel: 'e', onset: 'l' },
+  '女': { vowel: 'u', onset: 'n' }, '神': { vowel: 'en', onset: 'sh' }, '圣': { vowel: 'en', onset: 'sh' },
+  '洁': { vowel: 'e', onset: 'j' }, '灿': { vowel: 'a', onset: 'c' }, '烂': { vowel: 'a', onset: 'l' },
+  '芒': { vowel: 'a', onset: 'm' }, '照': { vowel: 'ao', onset: 'zh' }, '大': { vowel: 'a', onset: 'd' },
+  '地': { vowel: 'i', onset: 'd' }, '叮': { vowel: 'i', onset: 'd' }, '当': { vowel: 'a', onset: 'd' },
+  '铃': { vowel: 'i', onset: 'l' }, '儿': { vowel: 'e', onset: 'er' }, '啦': { vowel: 'a', onset: 'l' },
+  '怎': { vowel: 'en', onset: 'z' }, '能': { vowel: 'en', onset: 'n' }, '忘': { vowel: 'a', onset: 'w' },
+  '记': { vowel: 'i', onset: 'j' }, '旧': { vowel: 'ou', onset: 'j' }, '日': { vowel: 'i', onset: 'r' },
+  '朋': { vowel: 'en', onset: 'p' }, '心': { vowel: 'i', onset: 'x' }, '中': { vowel: 'o', onset: 'zh' },
+  '不': { vowel: 'u', onset: 'b' }, '怀': { vowel: 'uai', onset: 'h' }, '想': { vowel: 'ia', onset: 'x' },
+  '岂': { vowel: 'i', onset: 'q' }, '相': { vowel: 'ia', onset: 'x' }, '谊': { vowel: 'i', onset: 'y' },
+  '久': { vowel: 'ou', onset: 'j' }, '长': { vowel: 'a', onset: 'ch' }, '新': { vowel: 'i', onset: 'x' },
+  '年': { vowel: 'ia', onset: 'n' }, '呀': { vowel: 'ia', onset: 'y' }, '祝': { vowel: 'u', onset: 'zh' },
+  '福': { vowel: 'u', onset: 'f' }, '家': { vowel: 'ia', onset: 'j' }, '我': { vowel: 'uo', onset: 'w' },
+  '们': { vowel: 'en', onset: 'm' }, '唱': { vowel: 'a', onset: 'ch' }, '歌': { vowel: 'e', onset: 'g' },
+  '跳': { vowel: 'ao', onset: 't' }, '舞': { vowel: 'u', onset: 'w' }, '哆': { vowel: 'uo', onset: 'd' },
+  '来': { vowel: 'a', onset: 'l' }, '咪': { vowel: 'i', onset: 'm' }, '发': { vowel: 'a', onset: 'f' },
+  '梭': { vowel: 'uo', onset: 's' }, '拉': { vowel: 'a', onset: 'l' }, '西': { vowel: 'i', onset: 'x' },
 };
 /** 二合元音的滑动路径：从第一个元音的共振峰滑到第二个。 */
 const VOWEL_GLIDES = { ao: ['a', 'o'], uo: ['u', 'o'], ei: ['e', 'i'], ua: ['u', 'a'], ia: ['i', 'a'], uai: ['u', 'a'], ou: ['o', 'u'], en: ['e', 'neutral'] };
@@ -2357,6 +3091,327 @@ const variantsOf = lesson => [
 ];
 
 module.exports = { renderWav, renderVocalWav, variantsOf, harmonicWeights, FORMANTS, SYLLABLE_VOICE, VOWEL_GLIDES, VOWEL_LOUDNESS, VOCAL_VERSION };
+
+  };
+
+  __modules["voice-synth.cjs"] = function (module, exports, require) {
+'use strict';
+/**
+ * 人声范唱合成（source-filter 模型）—— 让「带人声」听起来真的是人在唱
+ *
+ * 为什么要有这一份：
+ *   早先的参考音用的是「基频 + 少量谐波」的加法合成，而且为了保证测频稳定把高次谐波
+ *   压到基频的 45% 以下 —— 结果听起来像电子琴的单音，不像人声。人声之所以是人声，
+ *   靠的是**声门脉冲的富谐波**被**声道共振峰**塑形：同样的音高，元音不同、共振峰不同，
+ *   听起来就是不同的字。所以这里换成声门源 + 共振峰滤波的两段式合成。
+ *
+ * 做法（每一步都能对上声学常识）：
+ *   1. 声门源：一个周期内按谐波叠加出带 1/k^tilt 衰减的脉冲串（tilt 越大声音越厚）；
+ *   2. 声道：F1–F5 五个共振峰按高斯包络给谐波加权，共振峰位置随元音变化；
+ *   3. 自然人声的三处「不完美」：抖噪（jitter ≈0.3%）、幅度起伏（shimmer）、
+ *      延迟起振的颤音（约 5Hz、±20 音分）；
+ *   4. 辅音：塞音先闭塞再爆破、擦音给带通噪声、鼻音先出低频鼻音、边音/半元音软起音；
+ *   5. 二合元音在音内做共振峰滑动（a→o、u→o、i→a …）。
+ *
+ * 全部确定性：伪随机都用固定哈希，同一份数据重复构建逐字节一致。
+ * 这是**电脑合成的人声范唱**，不是真人录音；页面照实标注，不假装是真人。
+ */
+
+const core = require('../public/lesson-core.js');
+const { SYLLABLE_VOICE, VOWEL_GLIDES, FORMANTS, VOWEL_LOUDNESS } = require('./audio-render.cjs');
+
+const VOICE_VERSION = 'voice-source-filter-1.0.0';
+
+/**
+ * 三档音色。formantScale 是声道长度差异的近似：孩子声道短、共振峰整体偏高；
+ * 成年男声偏低。tilt 控制声门频谱斜率（越大越厚），breath 是气声比例。
+ */
+const VOICES = {
+  child: { id: 'child', label: '清亮童声', formantScale: 1.16, tilt: 1.0, breath: 0.05, vibCents: 20, vibRate: 5.6 },
+  female: { id: 'female', label: '温柔女声', formantScale: 1.05, tilt: 1.12, breath: 0.065, vibCents: 26, vibRate: 5.15 },
+  male: { id: 'male', label: '温暖男声', formantScale: 0.87, tilt: 1.28, breath: 0.08, vibCents: 15, vibRate: 4.7 },
+  gentle: { id: 'gentle', label: '轻柔', formantScale: 1.02, tilt: 1.62, breath: 0.13, vibCents: 13, vibRate: 4.4 },
+};
+const DEFAULT_VOICE = 'child';
+
+/** 固定共振峰（F4/F5 与元音关系不大，主要给「临场感」）。 */
+const FIXED_FORMANTS = [3400, 4600];
+const FORMANT_GAINS = [1, 0.62, 0.34, 0.14, 0.07];
+const FORMANT_BW = [130, 220, 260, 300, 340];
+
+/** 每个元音的共振峰（Hz），与 audio-render 的元音表保持同一套。 */
+function formantSet(vowel, scale) {
+  const base = FORMANTS[vowel] || FORMANTS.neutral;
+  const list = [base[0], base[1], base[2], FIXED_FORMANTS[0], FIXED_FORMANTS[1]];
+  const bw = FORMANT_BW.map((b) => b * (0.9 + 0.1 * scale));
+  return { f: list.map((v) => v * scale), bw, g: FORMANT_GAINS };
+}
+
+const TAU = Math.PI * 2;
+/** 确定性伪随机（0–1）。 */
+const hash01 = (n) => {
+  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453123;
+  return x - Math.floor(x);
+};
+
+/**
+ * 生成一个周期的波表。表的第 i 个样本对应相位 2πi/size。
+ * 谐波幅度 = 共振峰包络 / k^tilt，相位做轻度随机化（避免所有谐波同相造成过尖的脉冲感）。
+ */
+function buildTable(f0, formants, sr, voice, size = 1024, seed = 1) {
+  const kMax = Math.min(72, Math.floor(sr * 0.45 / f0));
+  const amps = new Float64Array(kMax + 1);
+  const phases = new Float64Array(kMax + 1);
+  for (let k = 1; k <= kMax; k += 1) {
+    const f = k * f0;
+    let env = 0.10;
+    for (let i = 0; i < formants.f.length; i += 1) {
+      const d = (f - formants.f[i]) / formants.bw[i];
+      env += formants.g[i] * Math.exp(-0.5 * d * d);
+    }
+    amps[k] = env / Math.pow(k, voice.tilt);
+    phases[k] = hash01(seed * 97 + k * 13.7) * Math.PI * 1.1;
+  }
+  const table = new Float32Array(size);
+  let sumSq = 0;
+  for (let i = 0; i < size; i += 1) {
+    const theta = (TAU * i) / size;
+    let v = 0;
+    for (let k = 1; k <= kMax; k += 1) v += amps[k] * Math.sin(k * theta + phases[k]);
+    table[i] = v;
+    sumSq += v * v;
+  }
+  const rms = Math.sqrt(sumSq / size) || 1;
+  for (let i = 0; i < size; i += 1) table[i] /= rms;
+  return table;
+}
+
+/** 波表缓存：同一元音 + 同一音高 + 同一音色只算一次（一首歌里同音反复很常见）。 */
+const tableCache = new Map();
+function cachedTable(f0, vowel, sr, voice) {
+  const key = `${voice.id}|${vowel}|${f0.toFixed(1)}|${sr}`;
+  let table = tableCache.get(key);
+  if (!table) {
+    table = buildTable(f0, formantSet(vowel, voice.formantScale), sr, voice, 1024, 11 + vowel.length * 7);
+    tableCache.set(key, table);
+  }
+  return table;
+}
+
+/** 辅音类别：决定起音方式与时值。 */
+const ONSET_KIND = {
+  b: 'plosive', d: 'plosive', g: 'plosive', p: 'plosive', t: 'plosive', k: 'plosive',
+  z: 'affricate', zh: 'affricate', j: 'affricate', c: 'affricate', ch: 'affricate', q: 'affricate',
+  f: 'fricative', h: 'fricative', s: 'fricative', sh: 'fricative', x: 'fricative',
+  m: 'nasal', n: 'nasal',
+  l: 'liquid', r: 'liquid',
+  y: 'glide', w: 'glide', er: 'glide',
+};
+const ONSET_SECONDS = {
+  plosive: [0.035, 0.012], affricate: [0.055, 0.05], fricative: [0.06, 0.06],
+  nasal: [0.045, 0], liquid: [0.02, 0], glide: [0.015, 0],
+};
+
+/** 一阶低通/高通，用来给辅音噪声塑形（够用且便宜）。 */
+function lowpass(buf, sr, hz) {
+  const a = Math.exp((-TAU * hz) / sr);
+  let y = 0;
+  for (let i = 0; i < buf.length; i += 1) { y = buf[i] * (1 - a) + y * a; buf[i] = y; }
+  return buf;
+}
+
+/** 在 out 的 start 秒处叠加一段辅音噪声。 */
+function addConsonant(out, sr, start, kind, amp, seed) {
+  const [gap, burst] = ONSET_SECONDS[kind];
+  const total = gap + burst;
+  const from = Math.round(start * sr);
+  const len = Math.round(total * sr);
+  const noise = new Float32Array(Math.max(0, len));
+  for (let i = 0; i < noise.length; i += 1) noise[i] = hash01(seed * 7.3 + i * 1.17) * 2 - 1;
+  if (kind === 'fricative') lowpass(noise, sr, 4200);
+  else if (kind === 'affricate') lowpass(noise, sr, 3000);
+  else lowpass(noise, sr, 1400);
+  const gapLen = Math.round(gap * sr);
+  for (let i = 0; i < noise.length && from + i < out.length; i += 1) {
+    if (i < gapLen) continue;                       // 闭塞段：先静一下
+    const t = (i - gapLen) / sr;
+    const env = Math.min(1, t / 0.004) * Math.max(0, 1 - t / Math.max(0.008, burst));
+    out[from + i] += amp * env * noise[i];
+  }
+}
+
+/** 鼻音先导：低频浊音，给 m / n 一个「嗯」的起头。 */
+function addNasalHum(out, sr, start, f0, amp) {
+  const len = Math.round(0.045 * sr);
+  const from = Math.round(start * sr);
+  let phase = 0;
+  for (let i = 0; i < len && from + i < out.length; i += 1) {
+    const t = i / sr;
+    const env = Math.min(1, t / 0.01) * Math.max(0, 1 - t / 0.045);
+    phase += (TAU * f0) / sr;
+    out[from + i] += amp * env * (Math.sin(phase) + 0.35 * Math.sin(2 * phase));
+  }
+}
+
+/** 读表：phase 为累计周期数（可为小数），线性插值。 */
+function readTable(table, phase) {
+  const n = table.length;
+  const x = (phase % 1 + 1) % 1 * n;
+  const i0 = x | 0;
+  const i1 = (i0 + 1) % n;
+  const frac = x - i0;
+  return table[i0] * (1 - frac) + table[i1] * frac;
+}
+
+/**
+ * 唱一层：把每个音符写进 out。
+ * layer 用来做「两个人一起唱」的轻微错位（detune 音分、gain 音量、seed 随机种子）。
+ */
+function singLayer(out, lesson, bpm, countIn, voice, layer) {
+  const sr = lesson.audio.sampleRate || 44100;
+  const gate = lesson.audio.gateRatio || 0.94;
+  const detune = Math.pow(2, (layer.detune || 0) / 1200);
+  let lastVowel = 'neutral';
+  let prevHz = null;
+  let seed = layer.seed || 17;
+  for (const note of core.timedEvents(lesson, bpm, countIn)) {
+    if (note.hz === null) continue;
+    const lyrics = note.lyric ? [].concat(note.lyric) : [];
+    const melisma = lyrics.some((l) => l && l.melisma);
+    const syllable = (lyrics.find((l) => l && !l.melisma) || {}).syllable || null;
+    const map = syllable && SYLLABLE_VOICE[syllable] ? SYLLABLE_VOICE[syllable] : null;
+    const carry = melisma || !syllable;
+    const vowelName = carry ? lastVowel : (map ? map.vowel : 'neutral');
+    const glide = carry ? null : (VOWEL_GLIDES[vowelName] || null);
+    const fromVowel = glide ? glide[0] : vowelName;
+    const toVowel = glide ? glide[1] : vowelName;
+    if (!carry) lastVowel = VOWEL_GLIDES[vowelName] ? VOWEL_GLIDES[vowelName][1] : vowelName;
+
+    const start = note.startSeconds;
+    const dur = Math.max(0.06, note.durationSeconds * gate);
+    const hz = note.hz * detune;
+    const onsetKind = map && !carry ? ONSET_KIND[map.onset] : null;
+    // 辅音占用音头：先出辅音，再进元音；整体不越过音符结束。
+    const onsetLen = onsetKind ? ONSET_SECONDS[onsetKind][0] + ONSET_SECONDS[onsetKind][1] : 0;
+    const onsetUse = Math.min(onsetLen, dur * 0.45);
+    const voicedStart = start + onsetUse;
+    const voicedDur = Math.max(0.04, dur - onsetUse);
+
+    seed += 1;
+    if (onsetKind && !carry && layer.consonants !== false) {
+      if (onsetKind === 'nasal') addNasalHum(out, sr, start, hz, 0.16 * layer.gain);
+      else addConsonant(out, sr, start, onsetKind, (onsetKind === 'plosive' ? 0.2 : 0.13) * layer.gain, seed);
+    }
+
+    const tFrom = cachedTable(hz, fromVowel, sr, voice);
+    const tTo = glide ? cachedTable(hz, toVowel, sr, voice) : null;
+
+    // 连唱时从上一个音滑过来一点点（人不会每个音都重新起音）
+    const porta = prevHz && Math.abs(prevHz - hz) > 20 && start > 0 ? 0.045 : 0;
+    const vibStart = voicedDur * 0.42;
+    const vibRamp = Math.min(0.16, voicedDur * 0.3);
+    const depth = voice.vibCents / 1200;
+    const attack = onsetKind === 'nasal' ? 0.05 : onsetKind === 'liquid' || onsetKind === 'glide' ? 0.03 : 0.02;
+
+    let phase = 0;
+    let jitterState = 0.5;
+    const from = Math.round(voicedStart * sr);
+    const len = Math.round(voicedDur * sr);
+    const loud = VOWEL_LOUDNESS[fromVowel] ?? 0.9;
+    const amp = 0.30 * loud * layer.gain;
+
+    for (let i = 0; i < len && from + i < out.length; i += 1) {
+      const t = i / sr;
+      const p = t / voicedDur;             // 0–1 音内进度
+      // 起音 / 收尾包络：收尾比起音长，听感更自然
+      const a = Math.min(1, t / attack);
+      const r = Math.min(1, (voicedDur - t) / 0.07);
+      const env = Math.max(0, a * r);
+      // 抖噪：每 12ms 换一次慢速随机值，±0.35%
+      if ((i & 511) === 0) jitterState = hash01(seed * 31 + i * 0.031) * 2 - 1;
+      const jitter = 1 + 0.0035 * jitterState;
+      const vib = 1 + depth * smoothstep((t - vibStart) / vibRamp) * Math.sin(TAU * voice.vibRate * t + layer.seed);
+      // 连唱滑音：音头短暂停留在上一个音高，再滑到本音（只在音高有变化时）
+      const bend = porta ? 1 + (prevHz / hz - 1) * Math.max(0, 1 - t / porta) : 1;
+      phase += (hz * jitter * vib * bend) / sr;
+      const morph = glide ? smoothstep((p - 0.35) / 0.45) : 0;
+      let v = tTo
+        ? readTable(tFrom, phase) * (1 - morph) + readTable(tTo, phase) * morph
+        : readTable(tFrom, phase);
+      // 气声：少量白噪声，让长音不呆板
+      if (voice.breath > 0) v += voice.breath * (hash01(seed * 53 + i * 0.77) * 2 - 1);
+      out[from + i] += amp * env * v;
+    }
+    prevHz = hz;
+  }
+  return out;
+}
+
+/**
+ * 合成一首歌的人声范唱。
+ * @param {object} lesson 逐音数据（与电子音参考同一份）
+ * @param {number} bpm
+ * @param {number} countIn 前置预备拍
+ * @param {object} opts { voice: 'child'|'female'|'male', ensemble?: boolean }
+ */
+function renderSingingWav(lesson, bpm, countIn = 0, opts = {}) {
+  if (!(bpm >= 30 && bpm <= 240)) throw new Error('速度需在 30–240 BPM');
+  const sr = lesson.audio.sampleRate || 44100;
+  const voice = VOICES[opts.voice] || VOICES[DEFAULT_VOICE];
+  const tail = lesson.audio.tailSeconds || 0.25;
+  const total = ((lesson.teaching.beats + countIn) * 60) / bpm + tail;
+  const out = new Float64Array(Math.round(total * sr));
+
+  // 主唱 + 一路轻微错位的衬唱：真人齐唱不会完全重合，这一层让声音有厚度、不像单音合成器。
+  singLayer(out, lesson, bpm, countIn, voice, { detune: 0, gain: 1, seed: 17 });
+  if (opts.ensemble !== false) {
+    singLayer(out, lesson, bpm, countIn, voice, { detune: 7, gain: 0.34, seed: 211, consonants: false });
+  }
+
+  for (let b = 0; b < countIn; b += 1) {
+    const start = (b * 60) / bpm, hz = b === 0 ? 1000 : 700;
+    const from = Math.round(start * sr), len = Math.round(0.06 * sr);
+    for (let i = 0; i < len && from + i < out.length; i += 1) {
+      const t = i / sr;
+      out[from + i] += 0.1 * Math.min(1, t / 0.004) * Math.max(0, 1 - t / 0.06) * Math.sin(TAU * hz * t);
+    }
+  }
+
+  // 留足余量：削顶会听起来像破音，宁可整体压一点。
+  let peak = 0;
+  for (let i = 0; i < out.length; i += 1) peak = Math.max(peak, Math.abs(out[i]));
+  if (peak > 0.88) { const k = 0.88 / peak; for (let i = 0; i < out.length; i += 1) out[i] *= k; }
+
+  return toWav(out, sr);
+}
+
+function smoothstep(x) {
+  const c = Math.max(0, Math.min(1, x));
+  return c * c * (3 - 2 * c);
+}
+
+/** Float64 采样 → 单声道 16-bit PCM WAV。 */
+function toWav(samples, sampleRate) {
+  const buffer = Buffer.alloc(44 + samples.length * 2);
+  buffer.write('RIFF'); buffer.writeUInt32LE(buffer.length - 8, 4);
+  buffer.write('WAVEfmt ', 8); buffer.writeUInt32LE(16, 16);
+  buffer.writeUInt16LE(1, 20); buffer.writeUInt16LE(1, 22);
+  buffer.writeUInt32LE(sampleRate, 24); buffer.writeUInt32LE(sampleRate * 2, 28);
+  buffer.writeUInt16LE(2, 32); buffer.writeUInt16LE(16, 34);
+  buffer.write('data', 36); buffer.writeUInt32LE(samples.length * 2, 40);
+  for (let i = 0; i < samples.length; i += 1) {
+    buffer.writeInt16LE(Math.round(Math.max(-1, Math.min(1, samples[i])) * 32767), 44 + i * 2);
+  }
+  return buffer;
+}
+
+/** 给前端用的音色清单。 */
+const voiceList = () => Object.values(VOICES).map((v) => ({ id: v.id, label: v.label }));
+
+module.exports = {
+  renderSingingWav, buildTable, formantSet, voiceList, VOICES, DEFAULT_VOICE,
+  VOICE_VERSION, ONSET_KIND,
+};
 
   };
 
@@ -2750,10 +3805,799 @@ module.exports = {
 
   };
 
+  __modules["song-render.cjs"] = function (module, exports, require) {
+'use strict';
+/**
+ * 多版本音频合成：纯伴奏 / 带人声完整版 / 10 秒试听 / 任意预备拍
+ *
+ * 全部由 lesson 的逐音数据确定性合成，不引入第三方录音，个人本机使用无版权依赖。
+ * 产物是电子音示范，页面必须如实标注「不是真人范唱」。
+ *
+ * 伴奏和弦按小节里的旋律音级挑选（I / IV / V / vi 里最匹配的一个），
+ * 避免给旋律配一个明显冲突的和弦；选法与结果可在 chordPlan() 里逐小节核对。
+ */
+
+const core = require('../public/lesson-core.js');
+const voiceSynth = require('./voice-synth.cjs');
+
+const DEGREE_SEMITONES = [0, 2, 4, 5, 7, 9, 11];
+const CHORDS = [
+  { name: 'I', degrees: [1, 3, 5], semitones: [0, 4, 7] },
+  { name: 'IV', degrees: [4, 6, 1], semitones: [5, 9, 12] },
+  { name: 'V', degrees: [5, 7, 2], semitones: [7, 11, 14] },
+  { name: 'vi', degrees: [6, 1, 3], semitones: [9, 12, 16] },
+];
+
+const round = (v, d = 3) => Number(v.toFixed(d));
+const midiToHz = (midi) => 440 * Math.pow(2, (midi - 69) / 12);
+
+function toWav(samples, sampleRate) {
+  const buffer = Buffer.alloc(44 + samples.length * 2);
+  buffer.write('RIFF'); buffer.writeUInt32LE(buffer.length - 8, 4);
+  buffer.write('WAVEfmt ', 8); buffer.writeUInt32LE(16, 16);
+  buffer.writeUInt16LE(1, 20); buffer.writeUInt16LE(1, 22);
+  buffer.writeUInt32LE(sampleRate, 24); buffer.writeUInt32LE(sampleRate * 2, 28);
+  buffer.writeUInt16LE(2, 32); buffer.writeUInt16LE(16, 34);
+  buffer.write('data', 36); buffer.writeUInt32LE(samples.length * 2, 40);
+  for (let i = 0; i < samples.length; i += 1) {
+    buffer.writeInt16LE(Math.round(Math.max(-1, Math.min(1, samples[i])) * 32767), 44 + i * 2);
+  }
+  return buffer;
+}
+
+function fromWav(buffer) {
+  if (buffer.length < 44 || buffer.toString('ascii', 0, 4) !== 'RIFF') throw new Error('需要 WAV 数据');
+  const rate = buffer.readUInt32LE(24);
+  let data = null;
+  for (let p = 12; p + 8 <= buffer.length;) {
+    const n = buffer.readUInt32LE(p + 4), end = p + 8 + n;
+    if (end > buffer.length) break;
+    if (buffer.toString('ascii', p, p + 4) === 'data') data = buffer.subarray(p + 8, end);
+    p = end + (n % 2);
+  }
+  if (!data) throw new Error('WAV 缺少 data 块');
+  const out = new Float64Array(Math.floor(data.length / 2));
+  for (let i = 0; i < out.length; i += 1) out[i] = data.readInt16LE(i * 2) / 32768;
+  return { samples: out, sampleRate: rate };
+}
+
+/** 每小节根据旋律音级选一个最贴合的和弦，结果可逐小节核对。 */
+function chordPlan(lesson) {
+  const tonic = lesson.teaching.tonicMidi ?? 60;
+  const perMeasure = core.meterInfo(lesson.teaching.meter)?.beatsPerMeasure || 4;
+  const measures = lesson.teaching.measures || 1;
+  const plan = [];
+  for (let m = 1; m <= measures; m += 1) {
+    const notes = lesson.events.filter((e) => e.measure === m && !e.rest);
+    const degrees = notes.map((e) => ((e.midi - tonic) % 12 + 12) % 12);
+    let best = CHORDS[0], bestScore = -Infinity;
+    for (const chord of CHORDS) {
+      const tones = chord.semitones.map((s) => s % 12);
+      const score = degrees.reduce((sum, d) => sum + (tones.includes(d) ? 1 : -0.25), 0);
+      if (score > bestScore) { bestScore = score; best = chord; }
+    }
+    plan.push({ measure: m, chord: best.name, rootMidi: tonic + best.semitones[0], tones: best.semitones.map((s) => tonic + s), score: round(bestScore, 2) });
+  }
+  return { tonicMidi: tonic, beatsPerMeasure: perMeasure, plan };
+}
+
+/**
+ * 纯伴奏：分解和弦织体 + 每小节低音，无旋律、无人声。
+ * countIn > 0 时先给预备拍（第一拍高音提示，其余为节拍点击）。
+ */
+function renderAccompaniment(lesson, bpm, countIn = 0) {
+  if (!(bpm >= 30 && bpm <= 240)) throw new Error('速度需在 30–240 BPM');
+  const sr = lesson.audio.sampleRate || 44100;
+  const beatSeconds = 60 / bpm;
+  const beats = lesson.teaching.beats + countIn;
+  const samples = new Float64Array(Math.round((beats * beatSeconds + (lesson.audio.tailSeconds || 0.25)) * sr));
+  const chords = chordPlan(lesson);
+
+  const tone = (midi, start, duration, amp, timbre = 'soft') => {
+    const hz = midiToHz(midi), offset = Math.round(start * sr), length = Math.round(duration * sr);
+    for (let i = 0; i < length && offset + i < samples.length; i += 1) {
+      const t = i / sr;
+      const attack = Math.min(1, t / 0.012);
+      const release = Math.min(1, (duration - t) / 0.08);
+      const env = Math.max(0, attack * release) * (0.7 + 0.3 * Math.exp(-2.2 * t));
+      const wave = timbre === 'bass'
+        ? Math.sin(2 * Math.PI * hz * t) + 0.18 * Math.sin(4 * Math.PI * hz * t)
+        : Math.sin(2 * Math.PI * hz * t) + 0.3 * Math.sin(4 * Math.PI * hz * t) + 0.1 * Math.sin(6 * Math.PI * hz * t);
+      samples[offset + i] += amp * env * wave;
+    }
+  };
+  const click = (hz, start) => {
+    const offset = Math.round(start * sr), length = Math.round(0.07 * sr);
+    for (let i = 0; i < length && offset + i < samples.length; i += 1) {
+      const t = i / sr;
+      const env = Math.min(1, t / 0.003) * Math.max(0, 1 - t / 0.07);
+      samples[offset + i] += 0.16 * env * Math.sin(2 * Math.PI * hz * t);
+    }
+  };
+
+  for (let b = 0; b < countIn; b += 1) click(b === 0 ? 1000 : 700, b * beatSeconds);
+
+  for (const item of chords.plan) {
+    const barStart = (countIn + (item.measure - 1) * chords.beatsPerMeasure) * beatSeconds;
+    tone(item.rootMidi - 12, barStart, beatSeconds * 0.9, 0.075, 'bass');
+    for (let beat = 0; beat < chords.beatsPerMeasure; beat += 1) {
+      const toneMidi = item.tones[beat % item.tones.length] - (beat % 2 === 1 ? 12 : 0);
+      tone(toneMidi, barStart + beat * beatSeconds, beatSeconds * 0.82, 0.045);
+    }
+  }
+  return toWav(samples, sr);
+}
+
+/** 带人声的完整音频 = 纯伴奏 + 人声范唱（声门源＋共振峰，见 voice-synth.cjs）。 */
+function renderFull(lesson, bpm, countIn = 0, opts = {}) {
+  const acc = fromWav(renderAccompaniment(lesson, bpm, countIn));
+  const vocal = fromWav(voiceSynth.renderSingingWav(lesson, bpm, countIn, opts));
+  const length = Math.max(acc.samples.length, vocal.samples.length);
+  const mixed = new Float64Array(length);
+  let peak = 0;
+  for (let i = 0; i < length; i += 1) {
+    mixed[i] = (acc.samples[i] || 0) * 0.78 + (vocal.samples[i] || 0) * 1.35;
+    peak = Math.max(peak, Math.abs(mixed[i]));
+  }
+  if (peak > 0.95) { const k = 0.95 / peak; for (let i = 0; i < length; i += 1) mixed[i] *= k; }
+  return toWav(mixed, acc.sampleRate);
+}
+
+/** 10 秒试听：从完整版的开头截取，供老师确认是不是目标曲目。 */
+function renderPreview(lesson, bpm, seconds = 10, fullBuffer = null) {
+  const full = fromWav(fullBuffer || renderFull(lesson, bpm, 0));
+  const count = Math.min(full.samples.length, Math.round(seconds * full.sampleRate));
+  const out = new Float64Array(count);
+  const fade = Math.min(Math.round(0.12 * full.sampleRate), Math.floor(count / 2));
+  for (let i = 0; i < count; i += 1) {
+    const tail = i > count - fade ? (count - i) / fade : 1;
+    out[i] = full.samples[i] * tail;
+  }
+  return toWav(out, full.sampleRate);
+}
+
+/** 预备拍时长（秒）：给前端显示「4 拍预备 = x 秒」。 */
+const countInSeconds = (bpm, countIn) => round(countIn * 60 / bpm, 2);
+
+/** 一次生成一首歌的全部音频变体（构建脚本用）。 */
+function renderSongVariants(lesson, opts = {}) {
+  const bpm = opts.bpm || lesson.teaching.bpm;
+  const voice = opts.voice || voiceSynth.DEFAULT_VOICE;
+  const full = renderFull(lesson, bpm, 0, { voice });
+  return {
+    accompaniment: renderAccompaniment(lesson, bpm, 0),
+    accompanimentCountIn: renderAccompaniment(lesson, bpm, opts.countIn ?? 4),
+    full,
+    preview: renderPreview(lesson, bpm, opts.previewSeconds ?? 10, full),
+    slow: renderFull(lesson, lesson.teaching.slowBpm || Math.round(bpm * 0.75), 0, { voice }),
+  };
+}
+
+module.exports = {
+  toWav, fromWav, chordPlan, renderAccompaniment, renderFull, renderPreview,
+  renderSongVariants, countInSeconds, CHORDS, RENDER_VERSION: 'song-render-1.1.0',
+};
+
+  };
+
+  __modules["song-scoring.cjs"] = function (module, exports, require) {
+'use strict';
+/**
+ * 逐句演唱评分：问题定位 + 改进方向
+ *
+ * 关键设计：现有 analyze() 要求「录音音段数 == 参考音数」，一次只能测一个乐句。
+ * 因此这里为每一句构造一份独立的子 lesson（拍号/调号/BPM 不变，只取该句的音符与歌词），
+ * 学生唱哪一句就按哪一句对齐 —— 不要求学生一次唱完整首，也不拿整曲参考去硬套半句录音。
+ *
+ * 评分公式、阈值、置信度、局限全部写进结果对象，页面可展开核对；
+ * 无效录音（静音、噪声、多人、削波、音段数不符）不产生分数，只给重录建议。
+ * 声学偏差不推断气息、心理或唱法原因（沿用项目既有声明）。
+ */
+
+const audioAnalysis = require('./audio-analysis.cjs');
+const coaching = require('./coaching.cjs');
+
+const PITCH_TOLERANCE_CENTS = 35;   // 约 1/3 半音，与既有 decide() 阈值一致
+const ONSET_TOLERANCE_SECONDS = 0.12;
+const WEIGHTS = { pitch: 0.55, onset: 0.30, tempo: 0.15 };
+const clamp = (v, a = 0, b = 100) => Math.max(a, Math.min(b, v));
+const round1 = (v) => Number(v.toFixed(1));
+
+const PITCH_NAME = (midi) => ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][((Math.round(midi) % 12) + 12) % 12] + (Math.floor(Math.round(midi) / 12) - 1);
+
+/** 把一句摘成可独立测量的 lesson（beat 归零、小节重排、歌词只留本句）。 */
+function phraseLesson(song, phraseIndex) {
+  const phrase = song.phrases?.[phraseIndex];
+  if (!phrase || !song.lesson) throw new Error('没有这一句的谱面数据');
+  const base = song.lesson;
+  const perMeasure = base.teaching.meter[0] * 4 / base.teaching.meter[1];
+  const notes = phrase.notes.map((n) => {
+    const beat = n.beat - phrase.startBeat;
+    return { ...n, beat, measure: Math.floor(beat / perMeasure) + 1 };
+  });
+  const midis = notes.filter((n) => !n.rest).map((n) => n.midi);
+  const lineId = `l${phraseIndex + 1}`;
+  return {
+    ...base,
+    id: `${base.id}-p${phraseIndex + 1}`,
+    teaching: {
+      ...base.teaching,
+      beats: phrase.beats, measures: phrase.measures,
+      pitchRange: [Math.min(...midis), Math.max(...midis)],
+    },
+    events: notes,
+    lyrics: {
+      language: 'zh', sourceId: base.lyrics?.sourceId || 'src-personal-local',
+      lines: (base.lyrics?.lines || []).filter((l) => l.id === lineId),
+      provenance: '逐句测量用的单行歌词',
+    },
+  };
+}
+
+/** 句级评分。pcm 为 16kHz 单声道 Float32/Float64 采样。 */
+function scorePhrase(pcm, song, phraseIndex, opts = {}) {
+  const phrase = song.phrases?.[phraseIndex];
+  if (!phrase) return { valid: false, score: null, reason: '没有这一句' };
+  const ref = phraseLesson(song, phraseIndex);
+  const analysis = audioAnalysis.analyze(pcm, 'single', ref);
+  const base = {
+    songId: song.id, songTitle: song.title,
+    phraseIndex, phraseId: phrase.id, phraseText: phrase.text,
+    noteCount: phrase.notes.length,
+    reference: { key: ref.teaching.key, meter: ref.teaching.meter, bpm: ref.teaching.bpm, pitchRange: ref.teaching.pitchRange },
+    tuning: { a4Hz: 440, temperament: '12-TET', toleranceCents: PITCH_TOLERANCE_CENTS, onsetToleranceSeconds: ONSET_TOLERANCE_SECONDS },
+    calibration: '参考音高取自本机曲库谱面（A4=440Hz、十二平均律 12-TET）；测量为 16kHz 单声道清唱，用归一化自相关逐帧求基频、按基频中位数与参考逐音对齐，音分阈值 35（约 1/3 半音），整体低/高八度按八度等价折算并如实标注。',
+    declaration: '分数是本次录音相对参考谱面的声学吻合度，不是声乐水平或学习成果评价；不推断气息、心理或唱法原因。',
+  };
+  if (!analysis.valid) {
+    return {
+      ...base, valid: false, score: null, grade: null,
+      reason: analysis.invalidReasons.join('；'),
+      invalidReasons: analysis.invalidReasons,
+      hints: analysis.invalidReasons.map((reason) => {
+        if (reason.includes('音段')) return '对着「范唱」逐音跟唱；遇到连续相同的音要重新起一次音头。';
+        if (reason.includes('静音') || reason.includes('削波')) return '检查麦克风权限与输入音量，在安静环境里重录。';
+        if (reason.includes('周期性')) return '请单人清唱、关闭伴奏，避免多人同时发声。';
+        return '按提示调整后重录一次。';
+      }),
+      segmentation: analysis.segmentation || null,
+      quality: analysis.quality || null,
+    };
+  }
+
+  const notes = analysis.notes;
+  const meanAbsCents = analysis.pitch.meanAbsoluteCents;
+  const meanOnset = analysis.rhythm.meanOnsetErrorSeconds;
+  const tempoOff = Math.abs(analysis.rhythm.tempoRatio - 1);
+  const parts = {
+    pitch: { weight: WEIGHTS.pitch, raw: meanAbsCents, score: round1(clamp(100 - meanAbsCents * 0.6)), formula: '100 − 平均绝对音分偏差 × 0.6' },
+    onset: { weight: WEIGHTS.onset, raw: round1(meanOnset), score: round1(clamp(100 - meanOnset * 250)), formula: '100 − 平均起音误差(秒) × 250' },
+    tempo: { weight: WEIGHTS.tempo, raw: round1(tempoOff), score: round1(clamp(100 - tempoOff * 200)), formula: '100 − |速度比 − 1| × 200' },
+  };
+  const score = round1(parts.pitch.score * WEIGHTS.pitch + parts.onset.score * WEIGHTS.onset + parts.tempo.score * WEIGHTS.tempo);
+  const grade = score >= 90 ? 3 : score >= 75 ? 2 : score >= 60 ? 1 : 0;
+
+  /* 问题定位：把每个偏差音映射回「第几个字 / 哪个音 / 简谱记号」。 */
+  const problems = [];
+  notes.forEach((n, i) => {
+    const note = phrase.notes[i];
+    if (!note) return;
+    const syllable = note.syllable || '(休止/拖腔)';
+    const confidenceLow = n.confidence < 0.86 || n.octaveArtifacts > 0;
+    if (Math.abs(n.cents) > PITCH_TOLERANCE_CENTS) {
+      problems.push({
+        kind: 'pitch', noteIndex: i, position: `第 ${i + 1} 个音（${syllable}）`,
+        syllable, jianpu: note.jianpu, targetPitch: PITCH_NAME(n.expectedMidi),
+        measuredPitch: PITCH_NAME(n.comparedMidi), cents: n.cents,
+        direction: n.cents > 0 ? '偏高' : '偏低',
+        confidence: n.confidence, reliability: confidenceLow ? 'low' : 'reliable',
+        detail: `目标 ${PITCH_NAME(n.expectedMidi)}，实测 ${PITCH_NAME(n.comparedMidi)}，${n.cents > 0 ? '偏高' : '偏低'} ${Math.abs(n.cents)} 音分${confidenceLow ? '（该音测量置信度偏低，建议复测确认）' : ''}`,
+      });
+    }
+    if (Math.abs(n.tempoAdjustedOnsetErrorSeconds) > ONSET_TOLERANCE_SECONDS) {
+      const late = n.tempoAdjustedOnsetErrorSeconds > 0;
+      problems.push({
+        kind: 'onset', noteIndex: i, position: `第 ${i + 1} 个音（${syllable}）`,
+        syllable, jianpu: note.jianpu, seconds: n.tempoAdjustedOnsetErrorSeconds,
+        direction: late ? '偏晚' : '偏早',
+        detail: `这个音起得${late ? '偏晚' : '偏早'} ${Math.abs(n.tempoAdjustedOnsetErrorSeconds).toFixed(2)} 秒（已扣除整体速度与起唱延迟）`,
+      });
+    }
+  });
+
+  /* 改进方向：诊断规则来自既有 coaching.cjs（只读测量字段），再补上本句的具体位置。 */
+  let rule = null;
+  try { rule = coaching.buildCoaching({ analysis, history: opts.history || [] }); } catch { rule = null; }
+  const suggestions = [];
+  const pitchProblems = problems.filter((p) => p.kind === 'pitch');
+  const onsetProblems = problems.filter((p) => p.kind === 'onset');
+  if (pitchProblems.length) {
+    const worst = [...pitchProblems].sort((a, b) => Math.abs(b.cents) - Math.abs(a.cents))[0];
+    suggestions.push({
+      title: '阶梯音对比练习', basedOn: '音准偏差',
+      targetNotes: pitchProblems.map((p) => p.noteIndex),
+      steps: [
+        `先只听第 ${worst.noteIndex + 1} 个音「${worst.syllable}」的目标音 ${worst.targetPitch}，用「啦」模唱三遍。`,
+        `再把它的前一个音与目标音连起来唱，确认跳进时一步到位。`,
+        `最后回到整句「${phrase.text}」，保持刚才的音高感觉。`,
+      ],
+      reason: `本句有 ${pitchProblems.length} 个音超过 ${PITCH_TOLERANCE_CENTS} 音分阈值，最大偏差在${worst.position}。`,
+    });
+  }
+  if (onsetProblems.length || tempoOff > 0.1) {
+    suggestions.push({
+      title: '节拍与起音练习', basedOn: '起音时间 / 速度比',
+      targetNotes: onsetProblems.map((p) => p.noteIndex),
+      steps: [
+        `打开 ${ref.teaching.bpm} BPM 的预备拍，先只拍手不打乱速度。`,
+        `跟着「纯伴奏」用「啦」把整句唱一遍，注意每个字落在拍点上。`,
+        `再录一次，对比起音误差有没有缩小。`,
+      ],
+      reason: onsetProblems.length ? `有 ${onsetProblems.length} 个音起音偏差超过 ${ONSET_TOLERANCE_SECONDS} 秒。` : `整体速度比参考${analysis.rhythm.direction}（${analysis.rhythm.tempoRatio}）。`,
+    });
+  }
+  if (phrase.theoryIds.includes('melisma')) {
+    suggestions.push({
+      title: '拖腔慢练', basedOn: '谱面含一字多音',
+      targetNotes: phrase.notes.map((n, i) => (n.melisma ? i : -1)).filter((i) => i >= 0),
+      steps: ['把拖腔的每个音拆开，一个音一个音唱准音高。', '口型保持不变，只换音高，再连成一条线。'],
+      reason: '本句谱面含一字多音，容易出现中间音含糊。',
+    });
+  }
+  if (!suggestions.length) {
+    suggestions.push({
+      title: '原句巩固', basedOn: '本次测量在阈值内',
+      targetNotes: [],
+      steps: ['保持当前唱法再唱一遍，注意句末长音唱满时值。', '可以换到下一句，或试试带伴奏的完整演唱。'],
+      reason: `平均绝对音分偏差 ${meanAbsCents}，起音误差 ${meanOnset} 秒，均在当前阈值内。`,
+    });
+  }
+  if (rule?.training) {
+    suggestions.push({ title: `规则建议 · ${rule.training.title || '训练策略'}`, basedOn: '既有诊断规则', targetNotes: [], steps: (rule.feedback?.steps || rule.feedback?.lines || []).slice(0, 3), reason: '由既有 coaching 规则链按测量字段生成，与上面的句级建议可对照查看。' });
+  }
+
+  return {
+    ...base, valid: true, score, grade,
+    parts, formula: '总分 = 音准分×0.55 + 起音分×0.30 + 速度分×0.15（各分项公式见 parts）',
+    summary: {
+      meanAbsoluteCents: meanAbsCents,
+      medianSignedCents: analysis.pitch.medianSignedCents,
+      tempoRatio: analysis.rhythm.tempoRatio,
+      meanOnsetErrorSeconds: meanOnset,
+      octaveShift: analysis.octaveShift,
+      pitchComparison: analysis.pitchComparison,
+      confidence: analysis.confidence,
+    },
+    problems, suggestions,
+    curve: {
+      target: phrase.notes.map((n) => ({ t: Number(((n.beat - phrase.startBeat) * 60 / ref.teaching.bpm).toFixed(2)), midi: n.midi, pitch: n.pitch, syllable: n.syllable })),
+      actual: notes.map((n) => ({ t: n.startSeconds, midi: n.comparedMidi, cents: n.cents, confidence: n.confidence })),
+    },
+    segmentation: analysis.segmentation,
+    decision: analysis.decision || null,
+  };
+}
+
+/** 多句汇总：只汇总有效样本，不把无效句按 0 分计入平均。 */
+function summarizeSession(results) {
+  const valid = results.filter((r) => r && r.valid);
+  const invalid = results.filter((r) => r && !r.valid);
+  if (!valid.length) return { sampleSize: 0, note: '本次没有有效录音，不生成汇总分数。', invalidCount: invalid.length };
+  const avg = (key) => Number((valid.reduce((s, r) => s + r[key], 0) / valid.length).toFixed(1));
+  return {
+    sampleSize: valid.length, invalidCount: invalid.length,
+    averageScore: avg('score'),
+    stars: valid.reduce((s, r) => s + r.grade, 0), maxStars: valid.length * 3,
+    best: valid.reduce((a, b) => (b.score > a.score ? b : a)),
+    needsWork: [...valid].sort((a, b) => a.score - b.score).slice(0, 2),
+    note: `只汇总 ${valid.length} 句有效录音；${invalid.length} 句无效录音不计入分数，需重录。`,
+  };
+}
+
+module.exports = {
+  phraseLesson, scorePhrase, summarizeSession,
+  PITCH_TOLERANCE_CENTS, ONSET_TOLERANCE_SECONDS, WEIGHTS, SCORING_VERSION: 'scoring-1.0.0',
+};
+
+  };
+
+  __modules["audio-decompose.cjs"] = function (module, exports, require) {
+'use strict';
+/**
+ * 自定义上传音频 → 全流程自动拆解
+ *
+ * 输入：16kHz 单声道 Float32 PCM（由页面用 Web Audio 解码并重采样）。
+ * 输出：与内置曲目同构的 song 对象（lesson + 逐句教学数据），可直接进入检索之外的全部教学流程。
+ *
+ * 诚实边界（对应「内容准确性保障」）：
+ *  · 不做语音识别，因此不生成歌词；页面给老师一个输入框自己填，填完才做逐字对齐。
+ *  · 调性、速度、拍号、分句都是**推测**，逐项给置信度并标「需老师核对」；
+ *  · 带伴奏、多人、强混响的录音会明显降低置信度，结果里如实写明并建议重录清唱；
+ *  · 所有教学提示仍由谱面规则推导，不由模型编造。
+ *
+ * 纯计算模块，可原样打包进浏览器，在 file:// 下也能完成拆解。
+ */
+
+const core = require('../public/lesson-core.js');
+const theory = require('./theory.cjs');
+const library = require('./song-library.cjs');
+
+const SR = 16000, HOP = 160, WIN = 640;
+const MIN_LAG = 20, MAX_LAG = 160;   // 100–800 Hz
+const PC = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const SCALE = [0, 2, 4, 5, 7, 9, 11];
+const COMMON_BPM = [56, 60, 63, 66, 69, 72, 76, 80, 84, 88, 92, 96, 100, 104, 108, 112, 116, 120, 126, 132, 138, 144, 152, 160];
+const GRID = [0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4];
+
+const median = (a) => { const b = [...a].sort((x, y) => x - y); return b.length ? b[Math.floor(b.length / 2)] : 0; };
+const round = (v, d = 2) => Number(v.toFixed(d));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const midiToPitch = (m) => PC[((m % 12) + 12) % 12] + (Math.floor(m / 12) - 1);
+
+/** 归一化自相关 + 峰值清晰度门槛；返回 {hz, midi, confidence} 或 null。 */
+function pitchAt(x, start) {
+  const c = new Float64Array(MAX_LAG + 2);
+  for (let lag = MIN_LAG - 1; lag <= MAX_LAG + 1; lag += 1) {
+    let xy = 0, xx = 0, yy = 0;
+    for (let j = 0; j < WIN; j += 1) {
+      const a = x[start + j] || 0, b = x[start + j + lag] || 0;
+      xy += a * b; xx += a * a; yy += b * b;
+    }
+    c[lag] = 2 * xy / (xx + yy + 1e-15);
+  }
+  let best = 0;
+  for (let lag = MIN_LAG; lag <= MAX_LAG; lag += 1) {
+    if (c[lag] > c[lag - 1] && c[lag] >= c[lag + 1]) best = Math.max(best, c[lag]);
+  }
+  if (best < 0.85) return null;
+  for (let lag = MIN_LAG; lag <= MAX_LAG; lag += 1) {
+    if (c[lag] >= Math.max(0.85, best * 0.98) && c[lag] > c[lag - 1] && c[lag] >= c[lag + 1]) {
+      const shift = 0.5 * (c[lag - 1] - c[lag + 1]) / (c[lag - 1] - 2 * c[lag] + c[lag + 1] || 1);
+      const hz = SR / (lag + shift);
+      return { hz, midi: 69 + 12 * Math.log2(hz / 440), confidence: round(c[lag], 3) };
+    }
+  }
+  return null;
+}
+
+/** 中值滤波去掉孤立八度跳帧（不影响真实的大跳）。 */
+function smoothMidis(raw) {
+  return raw.map((v, i) => {
+    const win = raw.slice(Math.max(0, i - 2), Math.min(raw.length, i + 3));
+    const m = median(win);
+    return Math.abs(v - m) >= 11 ? m : v;
+  });
+}
+
+function frameAnalysis(x) {
+  const energies = [], frames = [];
+  for (let i = 0; i + HOP <= x.length; i += HOP) {
+    let e = 0;
+    for (let j = 0; j < HOP; j += 1) e += x[i + j] ** 2;
+    energies.push(Math.sqrt(e / HOP));
+  }
+  const peak = Math.max(...energies, 1e-9);
+  const threshold = Math.max(0.004, peak * 0.12);
+  let active = 0, voiced = 0;
+  for (let i = 0; i < energies.length; i += 1) {
+    if (energies[i] < threshold) { frames.push(null); continue; }
+    active += 1;
+    const p = pitchAt(x, Math.max(0, i * HOP - 160));
+    if (p) { voiced += 1; frames.push(p); } else frames.push(null);
+  }
+  return { frames, energies, threshold, voicedRatio: active ? voiced / active : 0 };
+}
+
+/** 连续 voiced 帧 → 音段；音高稳定地跳变、或能量回落后重新起音，都切开。 */
+function segmentFrames(frameData) {
+  const { frames, energies, threshold } = frameData;
+  const groups = [];
+  let group = [], gaps = [];
+  const close = (gapSeconds) => {
+    if (group.length >= 4) {
+      const raw = smoothMidis(group.map((g) => g.p.midi));
+      const midi = median(raw);
+      groups.push({
+        start: group[0].i * 0.01,
+        end: (group.at(-1).i + 1) * 0.01,
+        midi, confidence: round(median(group.map((g) => g.p.confidence)), 3),
+        spread: round(median(raw.map((v) => Math.abs(v - midi))), 2),
+      });
+      gaps.push(gapSeconds);
+    }
+    group = [];
+  };
+  let silentFrom = null, lastIndex = -1;
+  for (let i = 0; i < frames.length; i += 1) {
+    const p = frames[i];
+    if (!p) {
+      if (silentFrom === null) silentFrom = i;
+      close((i - lastIndex) * 0.01);
+      continue;
+    }
+    const gap = silentFrom === null ? 0 : (i - silentFrom) * 0.01;
+    silentFrom = null;
+    const restarted = group.length >= 5 && energies[i] / Math.max(energies[i - 1], 1e-9) >= 1.6 && energies[i - 1] < threshold * 2.2;
+    const jumped = group.length >= 4 && Math.abs(p.midi - median(group.slice(-5).map((g) => g.p.midi))) > 0.8
+      && frames[i + 1] && frames[i + 2]
+      && Math.abs(frames[i + 1].midi - p.midi) < 0.4 && Math.abs(frames[i + 2].midi - p.midi) < 0.4;
+    if (restarted || jumped) close(gap);
+    group.push({ p, i });
+    lastIndex = i;
+  }
+  close((frames.length - lastIndex) * 0.01);
+  // 过短的「幽灵音段」并回前一个较长的音段
+  const merged = [];
+  for (const g of groups) {
+    const prev = merged.at(-1);
+    if (g.end - g.start < 0.18 && prev) {
+      prev.end = g.end;
+      prev.midi = median([prev.midi, g.midi, g.midi]);
+    } else merged.push({ ...g });
+  }
+  return { segments: merged.map((g) => ({ ...g, duration: round(g.end - g.start, 3) })), gaps };
+}
+
+/** 由时值中位数推测 BPM 并吸附到常用速度；时值量化到 1/4 拍网格。 */
+function estimateTempo(segments) {
+  const durations = segments.map((s) => s.duration).filter((d) => d > 0.12);
+  const base = median(durations) || 0.5;
+  const rawBpm = 60 / base;
+  const bpm = COMMON_BPM.reduce((a, b) => (Math.abs(b - rawBpm) < Math.abs(a - rawBpm) ? b : a), COMMON_BPM[0]);
+  const beatSeconds = 60 / bpm;
+  let residual = 0;
+  const beats = segments.map((s) => {
+    const raw = s.duration / beatSeconds;
+    const q = GRID.reduce((a, b) => (Math.abs(b - raw) < Math.abs(a - raw) ? b : a), GRID[0]);
+    residual += Math.abs(q - raw);
+    return q;
+  });
+  return { bpm, beatSeconds, beats, residual: round(residual / Math.max(1, segments.length), 3), rawBpm: round(rawBpm, 1) };
+}
+
+/** 由音级分布推测主音（优先五声音阶覆盖度），结果始终标注为推测。 */
+function estimateKey(midis) {
+  const histogram = new Array(12).fill(0);
+  midis.forEach((m) => { histogram[((Math.round(m) % 12) + 12) % 12] += 1; });
+  let best = 0, bestScore = -Infinity, second = -Infinity;
+  for (let root = 0; root < 12; root += 1) {
+    const score = [0, 2, 4, 7, 9].reduce((s, iv) => s + histogram[(root + iv) % 12], 0);
+    if (score > bestScore) { second = bestScore; bestScore = score; best = root; }
+    else if (score > second) second = score;
+  }
+  const total = midis.length || 1;
+  return {
+    key: PC[best], tonicMidi: 60 + best,
+    fit: round(bestScore / total, 2),
+    ambiguous: bestScore - second <= Math.max(1, total * 0.08),
+    histogram,
+  };
+}
+
+const degreeOf = (midi, tonic) => {
+  const rel = ((Math.round(midi) - tonic) % 12 + 12) % 12;
+  let degree = 1, distance = 99;
+  SCALE.forEach((s, i) => { const d = Math.min(Math.abs(rel - s), 12 - Math.abs(rel - s)); if (d < distance) { distance = d; degree = i + 1; } });
+  return { degree, altered: distance > 0 };
+};
+
+/** 主流程。opts: { name, grade, meter, sampleRate } */
+function decompose(pcm, opts = {}) {
+  const steps = [];
+  const push = (id, label, detail, status = 'ok') => steps.push({ id, label, detail, status });
+  const x = Float32Array.from(pcm || []);
+  const warnings = [];
+
+  // 1 质量检查
+  let sq = 0, peak = 0, clip = 0;
+  for (const v of x) { sq += v * v; peak = Math.max(peak, Math.abs(v)); if (Math.abs(v) > 0.985) clip += 1; }
+  const rms = Math.sqrt(sq / Math.max(1, x.length));
+  const seconds = round(x.length / SR);
+  push('quality', '录音质量检查', `${seconds} 秒，RMS ${round(20 * Math.log10(rms + 1e-12), 1)} dB，削波比例 ${round(clip / Math.max(1, x.length), 4)}`);
+  if (x.length < SR || seconds > 90) return { ok: false, reason: '音频须为 1–90 秒（16kHz 单声道）', steps };
+  if (rms < 0.003) return { ok: false, reason: '几乎是静音，无法拆解，请换一段有清唱的音频', steps };
+  if (clip / x.length > 0.01) warnings.push('削波比例偏高，音高与时值可能受影响');
+
+  // 2 基频
+  const frameData = frameAnalysis(x);
+  push('pitch', '基频提取', `逐 10ms 帧归一化自相关，有效发声帧中 ${round(frameData.voicedRatio * 100, 1)}% 检测到稳定周期（清晰度阈值 0.85）`);
+  if (frameData.voicedRatio < 0.5) warnings.push('周期性偏低：可能带伴奏、多人声或混响较重，拆解置信度下降');
+
+  // 3 音段
+  const { segments } = segmentFrames(frameData);
+  push('segment', '音符切分', `识别到 ${segments.length} 个音段（音高跳变 + 重新起音 + 静音断开，过短音段已并回）`);
+  if (segments.length < 2) return { ok: false, reason: '只识别到不足 2 个音段，无法形成教学乐句；建议上传单人清唱', steps };
+
+  // 4 音高量化
+  const midis = segments.map((s) => Math.round(s.midi));
+  const confidencePitch = round(median(segments.map((s) => s.confidence)), 3);
+  const unstable = segments.filter((s) => s.spread > 0.6).length;
+  if (unstable) warnings.push(`${unstable} 个音段内部音高波动较大，可能含滑音或颤音，量化结果需核对`);
+  push('quantize', '音高量化', `${midis.length} 个音量化到十二平均律，基频置信度中位数 ${confidencePitch}`);
+
+  // 5 速度与时值
+  const tempo = estimateTempo(segments);
+  push('tempo', '速度与拍号推测', `推测 ${tempo.bpm} BPM（原始估计 ${tempo.rawBpm}），时值量化到 1/4 拍网格，平均残差 ${tempo.residual} 拍`);
+  if (tempo.residual > 0.28) warnings.push('时值与网格偏差较大，可能存在自由节奏或速度不稳，建议按课本速度重新设定');
+  const meter = Array.isArray(opts.meter) ? opts.meter : [4, 4];
+  const perMeasure = core.meterInfo(meter)?.beatsPerMeasure || 4;
+
+  // 6 调性
+  const keyInfo = estimateKey(midis);
+  push('key', '调性推测', `推测 1=${keyInfo.key}（五声音阶贴合度 ${keyInfo.fit}${keyInfo.ambiguous ? '，候选调性接近，可信度较低' : ''}）`);
+  if (keyInfo.ambiguous) warnings.push('主音判断不唯一，请老师按课本确认调号');
+  push('key', '调性需人工确认', '自动推测的调号只用于生成简谱显示，改变调号不会改变实际测得的音高', 'review');
+
+  // 7 分句
+  const phrasesRaw = [];
+  let current = [];
+  let beatsInPhrase = 0;
+  segments.forEach((s, i) => {
+    const beats = tempo.beats[i];
+    const gap = i > 0 ? round(segments[i].start - segments[i - 1].end, 3) : 0;
+    const shouldSplit = current.length && (gap >= 0.3 || beatsInPhrase + beats > perMeasure * 2 || current.length >= 12);
+    if (shouldSplit) { phrasesRaw.push({ items: current }); current = []; beatsInPhrase = 0; }
+    current.push({ seg: s, beats, gap });
+    beatsInPhrase += beats;
+  });
+  if (current.length) phrasesRaw.push({ items: current });
+  push('phrase', '自动分句', `按静音间隔 ≥0.3 秒、每 ${perMeasure * 2} 拍或 12 个音切分，得到 ${phrasesRaw.length} 句`);
+
+  // 8 组装 lesson 与逐句教学拆解（拍数按小节规整，末尾补休止）
+  const allEvents = [];
+  const phraseViews = [];
+  let globalBeat = 0;
+  const bpm = tempo.bpm;
+  phrasesRaw.forEach((p, pi) => {
+    const startBeat = globalBeat;
+    const notes = [];
+    for (const item of p.items) {
+      let beat = globalBeat;
+      let duration = item.beats;
+      const inBar = beat % perMeasure;
+      if (inBar + duration > perMeasure + 1e-9) {
+        duration = Math.max(0.25, perMeasure - inBar);
+        warnings.push(`第 ${pi + 1} 句有音符跨小节，已按小节边界缩短时值，请老师核对`);
+      }
+      const { degree, altered } = degreeOf(item.seg.midi, keyInfo.tonicMidi);
+      const octave = Math.floor((Math.round(item.seg.midi) - keyInfo.tonicMidi) / 12);
+      const e = {
+        id: `n${allEvents.length + 1}`, measure: Math.floor(beat / perMeasure) + 1, beat,
+        degree, octave, midi: Math.round(item.seg.midi), pitch: midiToPitch(Math.round(item.seg.midi)),
+        durationBeats: duration, jianpu: `${degree}${octave > 0 ? "'".repeat(octave) : octave < 0 ? ','.repeat(-octave) : ''}`,
+        syllable: null, confidence: item.seg.confidence, sourceSeconds: [item.seg.start, item.seg.end],
+        slur: null,
+      };
+      if (altered) e.altered = true;
+      notes.push(e); allEvents.push(e);
+      globalBeat = round(globalBeat + duration, 3);
+    }
+    const theoryHits = theory.detectTheory(notes, { meter });
+    const tips = theory.buildTips(notes, { mode: 'hum' }, {});
+    const breaks = theory.buildBreaks(notes, pi, phrasesRaw.length);
+    phraseViews.push({
+      id: `p${pi + 1}`, index: pi, text: '', syllables: [], mode: 'needs-lyrics',
+      jianpu: notes.map((n) => n.jianpu).join(' '),
+      startNote: allEvents.length - notes.length, endNote: allEvents.length - 1,
+      startBeat, beats: round(notes.reduce((s, n) => s + n.durationBeats, 0), 3),
+      seconds: round(notes.reduce((s, n) => s + n.durationBeats, 0) * 60 / bpm),
+      notes, pitch: library.pitchProfile(notes), tips, breaks,
+      theory: theoryHits, theoryIds: theoryHits.map((t) => t.id),
+      alignment: { status: 'needs-lyrics', warnings: ['本句未做语音识别，歌词需老师填写后才会逐字对齐'] },
+    });
+  });
+
+  // 末尾补休止，把总拍数补齐到整小节（保证谱面可播放、可测量）
+  const targetBeats = Math.ceil(globalBeat / perMeasure) * perMeasure;
+  if (targetBeats - globalBeat > 1e-9) {
+    const e = {
+      id: `n${allEvents.length + 1}`, measure: Math.floor(globalBeat / perMeasure) + 1, beat: globalBeat,
+      degree: null, octave: null, midi: null, pitch: null,
+      durationBeats: round(targetBeats - globalBeat, 3), jianpu: '0', rest: true, syllable: null, slur: null,
+    };
+    allEvents.push(e);
+    const last = phraseViews.at(-1);
+    last.notes.push(e); last.endNote = allEvents.length - 1;
+    last.beats = round(last.beats + e.durationBeats, 3);
+    globalBeat = targetBeats;
+    push('regularize', '拍数规整', `末尾补一个 ${e.durationBeats} 拍休止符，使总拍数成为整小节`);
+  }
+
+  const pitched = allEvents.filter((e) => !e.rest);
+  const lesson = {
+    id: `upload-${Date.now().toString(36)}`, version: '1.0.0',
+    title: opts.name || '我上传的曲目', status: 'auto-decomposed',
+    source: {
+      sourceType: 'user-upload', sourceId: 'src-personal-local',
+      title: '本机上传音频的自动拆解结果',
+      key: keyInfo.key, tonicMidi: keyInfo.tonicMidi, meter,
+      rights: '个人本机教学使用；拆解结果为算法推测，未经人工核对。',
+    },
+    teaching: {
+      key: keyInfo.key, tonicMidi: keyInfo.tonicMidi, transposeSemitones: 0,
+      meter, bpm, slowBpm: Math.max(30, Math.round(bpm * 0.75)),
+      tuningA4Hz: 440, temperament: '12-TET',
+      measures: Math.round(globalBeat / perMeasure), beats: globalBeat,
+      pitchRange: [Math.min(...pitched.map((e) => e.midi)), Math.max(...pitched.map((e) => e.midi))],
+      description: `由上传音频自动拆解：${segments.length} 个音 · ${phraseViews.length} 句 · 推测 1=${keyInfo.key}, ${bpm} BPM`,
+    },
+    events: allEvents,
+    audio: {
+      renderer: 'library-additive-v1', sampleRate: 44100, channels: 1, bitDepth: 16,
+      gateRatio: 0.92, tailSeconds: 0.25, reference: null,
+      provenance: '伴奏与范唱由拆解出的音符合成，是电子音示范，不是上传音频的原声。',
+    },
+  };
+
+  push('lesson', '生成教学拆解', `${allEvents.length} 个音、${phraseViews.length} 句；音调、注意事项、停顿/休止、乐理知识点全部由谱面规则推导`);
+  push('review', '待老师核对', '调号、速度、分句、逐音时值与歌词均为推测或未填，请在页面上逐句确认后再用于评分', 'review');
+
+  const confidence = round(clamp(
+    0.4 * frameData.voicedRatio + 0.25 * confidencePitch + 0.2 * (1 - clamp(tempo.residual, 0, 1))
+    + 0.15 * (1 - clamp(unstable / Math.max(1, segments.length), 0, 1)),
+    0, 1), 2);
+  const level = confidence >= 0.78 ? 'high' : confidence >= 0.58 ? 'medium' : 'low';
+
+  const song = {
+    id: lesson.id, title: lesson.title,
+    aliases: [], grades: opts.grade ? [opts.grade] : ['自定义'], category: '本机上传 · 自动拆解',
+    tags: ['自动拆解', '待核对'], status: 'score-ready', built: true,
+    key: keyInfo.key, meter, bpm,
+    background: {
+      summary: '这首曲目由本机上传的音频自动拆解得到，作者与创作背景未提供（不做网络检索、不编造）。',
+      credits: '未提供',
+      facts: [{ text: '资料由老师本机上传，系统不做外部检索，因此不生成作者与创作背景', status: 'verified', basis: '本机上传' }],
+    },
+    notation: { source: '上传音频自动拆解', reviewStatus: 'auto-decomposed', note: '调号与谱面均为推测' },
+    lesson, phrases: phraseViews,
+    seconds: round(globalBeat * 60 / bpm),
+    preview: { seconds: Math.min(10, round(globalBeat * 60 / bpm)), note: '试听由拆解结果合成' },
+    accuracy: {
+      scoreStatus: 'auto-decomposed', needsReview: true,
+      confidence, level, warnings,
+      alignmentIssues: phraseViews.map((p) => ({ phrase: p.id, status: 'needs-lyrics', warnings: p.alignment.warnings })),
+      declaration: '自动拆解结果未经人工核对：调性/速度/分句为推测，未做语音识别因此不生成歌词；请老师逐句填词并核对谱面后再上课。',
+    },
+    decompose: { steps, stepsVersion: 'decompose-1.0.0', segments: segments.length, voicedRatio: round(frameData.voicedRatio, 3), tempo, key: keyInfo, seconds },
+  };
+  return { ok: true, song, steps, confidence, warnings };
+}
+
+/** 老师填好一句歌词后，重新做逐字对齐（复用曲库的同一套规则，不另写一份）。 */
+function applyLyrics(song, phraseIndex, text) {
+  const phrase = song.phrases?.[phraseIndex];
+  if (!phrase) throw new Error('没有这一句');
+  const events = phrase.notes;
+  const res = library.alignLyrics(text, events, `u${phraseIndex + 1}`);
+  phrase.text = text; phrase.syllables = res.syllables;
+  phrase.mode = res.syllables.length ? 'lyric' : 'hum';
+  phrase.alignment = { status: res.status, warnings: res.warnings };
+  // 歌词写入 lesson，供人声范唱使用；逐音测量不依赖歌词，故不影响评分
+  song.lesson.lyrics = {
+    language: 'zh', sourceId: 'src-personal-local',
+    lines: song.phrases.filter((p) => p.syllables?.length).map((p, i) => ({
+      id: `u${i + 1}`, text: p.syllables.join(''), syllables: p.syllables, provenance: '老师填写',
+    })),
+  };
+  return phrase;
+}
+
+module.exports = { decompose, applyLyrics, pitchAt, frameAnalysis, segmentFrames, estimateTempo, estimateKey, DECOMPOSE_VERSION: 'decompose-1.0.0' };
+
+  };
+
   /* 惰性求值：模块解析推到第一次真正用到时，这样脚本加载顺序变了也不会炸。
      __require 自带缓存，取过一次之后 getter 就是一次查表。 */
   root.ShanyinVendor = {
     __sources: [
+      {
+        "file": "server/theory.cjs",
+        "sha256": "c7b304c9d1304fc84319c633773189fe818b6797556328f9cc8b5a015a44e266"
+      },
+      {
+        "file": "server/song-library.cjs",
+        "sha256": "56001351afcf2e78144bb1ec16a90db45ebe72822168347c6eb45333b9badc3d"
+      },
       {
         "file": "server/importers/xml.cjs",
         "sha256": "1fe3f88a93ebbdc79b9a83f14bf23a582ed4e9177cade30a70c31e7867a44cfd"
@@ -2792,7 +4636,11 @@ module.exports = {
       },
       {
         "file": "server/audio-render.cjs",
-        "sha256": "c19f1069f7d561ad32691c64bf79a318c0b093c17c11c7db49754be7b966907b"
+        "sha256": "b812bb980950024b1a68cdc00b54638e9a9f87f4d199c67b43827055551df315"
+      },
+      {
+        "file": "server/voice-synth.cjs",
+        "sha256": "0e7eceb677fcdb80447338f61076b4ba3d551f804a3466c5d836316a34cdb0f5"
       },
       {
         "file": "server/report-builder.cjs",
@@ -2801,6 +4649,18 @@ module.exports = {
       {
         "file": "server/import-pipeline.cjs",
         "sha256": "22d47ca3253c6236ebf0e270511f8aa3045713af8159f93853bd31648f875a0c"
+      },
+      {
+        "file": "server/song-render.cjs",
+        "sha256": "d05c5a8ac2320249dc8aa9c620380c0c0cf96c94d1be381797d46caf5b8e8367"
+      },
+      {
+        "file": "server/song-scoring.cjs",
+        "sha256": "531bbe60d1e7546876dfdc3bc0e5f968da0ef5aa429ed75c24a6aa07fdd6a043"
+      },
+      {
+        "file": "server/audio-decompose.cjs",
+        "sha256": "135fa3837a4935305950e3e2a8d5d9cc87a1032b2e42c0711f4fa7accc953a54"
       }
     ],
     sha256Hex: __sha256Hex,
@@ -2813,5 +4673,12 @@ module.exports = {
     get importPipeline() { return __require('import-pipeline.cjs'); },
     get audioRender() { return __require('audio-render.cjs'); },
     get jianpu() { return __require('jianpu.cjs'); },
+    /* AI 音乐课堂：曲库检索 / 逐句拆解 / 多版本音频 / 句级评分 / 上传音频拆解 */
+    get theory() { return __require('theory.cjs'); },
+    get songLibrary() { return __require('song-library.cjs'); },
+    get songRender() { return __require('song-render.cjs'); },
+    get voiceSynth() { return __require('voice-synth.cjs'); },
+    get songScoring() { return __require('song-scoring.cjs'); },
+    get audioDecompose() { return __require('audio-decompose.cjs'); },
   };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

@@ -44,7 +44,7 @@
   }
   function paintBadge(cached) {
     const el = ensureBadge();
-    el.innerHTML = `📴 <b>离线模式</b><span>${cached ? '外壳与参考音频已缓存，可以上课；录音测量与登录需要连回本机服务。' : '已缓存的页面可以继续用；还没缓存过的内容这次打不开。'}</span>`;
+    el.innerHTML = `📴 <b>离线模式</b><span>${cached ? '外壳与参考音频已缓存，可以上课；录音测量需要连回本机服务。' : '已缓存的页面可以继续用；还没缓存过的内容这次打不开。'}</span>`;
     el.hidden = false;
   }
   function hideBadge() { badge?.remove(); badge = null; }
